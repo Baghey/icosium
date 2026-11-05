@@ -240,3 +240,20 @@ Supabase et LiveKit « En ligne ».
   sur le réseau privé. Il faut accepter, sinon le téléphone ne trouve pas l'ordinateur.
 - Les Easter eggs ne sont pas recopiés dans `docs/ICOSIUM.md` (ils doivent rester secrets) ;
   la liste reste dans le document d'origine, pour l'étape 8.
+
+## Domino plus fluide, mode paysage et vrais sons (5 novembre 2026, soir)
+
+Ce qui marche :
+- Vrais sons de dominos (pierre posée en 4 variantes, pierre claquée en fin de manche), générés avec ElevenLabs,
+  découpés et au même volume (`apps/web/public/sfx`, 4 à 5 Ko chacun). La synthèse reste en secours.
+- Mode paysage sur téléphone : la table est tournée dans la largeur, les joueurs et les boutons sur les côtés.
+  Sur Android, l'écran passe en plein écran et se verrouille en paysage dès l'entrée en partie (ou au premier toucher).
+  Sur iPhone, un conseil « Tourne ton téléphone » s'affiche. Un bouton permet de revenir en portrait (choix retenu).
+- Choix du bout par deux gros boutons « Sur le 3 / Sur le 5 » au-dessus de la main.
+- Le message « Attends ton tour » s'efface tout seul et dès que le jeu avance.
+- La caméra cadre exactement la chaîne (chaque coin est projeté à l'écran) : plus de pierre coupée en haut.
+- Les panneaux du bas (fin de manche, scores) ont un fond plein.
+
+Testé : partie à 4 joueurs humains dans 4 navigateurs (un en paysage, trois en portrait), aucune fuite de main ni de pioche.
+
+Reste : son du mélange (à récupérer depuis le PC du propriétaire), test réel à plusieurs téléphones.

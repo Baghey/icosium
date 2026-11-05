@@ -29,6 +29,8 @@ type Props = {
   reducedMotion: boolean;
   /** Bouts où je peux jouer (mon tour) : un halo doré les signale. */
   glowEnds: End[];
+  /** Téléphone en paysage : la table est tournée pour que sa longueur suive l'écran. */
+  landscape?: boolean;
 };
 
 // ---------- matériaux partagés ----------
@@ -316,35 +318,80 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
 
 const TILT = THREE.MathUtils.degToRad(28); // angle de la caméra depuis la verticale
 
+/** Place la caméra à `dist` de la table, en visant le point (0, 0, z). */
+function aim(cam: THREE.PerspectiveCamera, dist: number, z: number) {
+  cam.position.set(0, Math.cos(TILT) * dist, Math.sin(TILT) * dist + z);
+  cam.lookAt(0, 0, z);
+  cam.updateMatrixWorld(true);
+}
+
+/** Marges à l'écran (en fraction de demi-écran) : en haut, on laisse la place aux joueurs posés sur la table. */
+type Margins = { x: number; top: number; bottom: number };
+
+/** Tous ces points sont-ils visibles, avec la marge ? (calcul exact, perspective comprise) */
+function fits(cam: THREE.PerspectiveCamera, pts: THREE.Vector3[], m: Margins): boolean {
+  const v = new THREE.Vector3();
+  for (const p of pts) {
+    v.copy(p).project(cam);
+    if (Math.abs(v.x) > 1 - m.x || v.y > 1 - m.top || v.y < -1 + m.bottom) return false;
+  }
+  return true;
+}
+
+/** La plus petite distance où tous les points tiennent à l'écran (recherche par dichotomie). */
+function fitDistance(cam: THREE.PerspectiveCamera, pts: THREE.Vector3[], z: number, m: Margins): number {
+  let lo = 2;
+  let hi = 90;
+  for (let i = 0; i < 22; i++) {
+    const mid = (lo + hi) / 2;
+    aim(cam, mid, z);
+    if (fits(cam, pts, m)) hi = mid;
+    else lo = mid;
+  }
+  return hi;
+}
+
+/** Les 8 coins d'une boîte posée sur la table (repère local), tournés autour de la verticale. */
+function corners(minX: number, maxX: number, minZ: number, maxZ: number, height: number, rotY: number, scale = 1): THREE.Vector3[] {
+  const out: THREE.Vector3[] = [];
+  const rot = new THREE.Matrix4().makeRotationY(rotY);
+  for (const x of [minX, maxX])
+    for (const z of [minZ, maxZ])
+      for (const y of [0, height]) out.push(new THREE.Vector3(x * scale, y * scale, z * scale).applyMatrix4(rot));
+  return out;
+}
+
 /**
  * La caméra suit la chaîne : au début elle s'approche (les pierres sont bien lisibles), puis elle
- * recule en douceur (~200 ms) pour que toute la chaîne tienne à l'écran, sans jamais aller plus loin
- * que la table entière.
+ * recule en douceur (~200 ms) pour que toute la chaîne tienne à l'écran. Le cadrage est calculé
+ * exactement (chaque coin de la chaîne est projeté à l'écran) : aucune pierre ne sort du cadre.
  */
-function CameraRig({ bounds }: { bounds: Bounds }) {
+function CameraRig({ bounds, tableRot, chainRot, margins }: { bounds: Bounds; tableRot: number; chainRot: number; margins: Margins }) {
   const { camera, size } = useThree();
   const current = useRef<{ dist: number; z: number } | null>(null);
   const target = useMemo(() => {
-    const cam = camera as THREE.PerspectiveCamera;
-    const aspect = size.width / Math.max(size.height, 1);
-    const tanH = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
-    // Toute la table (plus une marge : la perspective élargit le bord proche).
-    const tableHalfW = FELT_W / 2 + RIM + 1.6;
-    const tableDist = Math.max(tableHalfW / (tanH * aspect), ((FELT_D / 2 + RIM + 0.8) * Math.cos(TILT)) / tanH);
-    // La chaîne, avec une marge d'une pierre et demie.
-    // La chaîne est tournée d'un quart de tour : ses « z » vont en largeur, ses « x » en profondeur.
-    const S = CHAIN_SCALE;
-    const halfW = Math.max(Math.abs(bounds.minZ), Math.abs(bounds.maxZ)) * S + 1.6;
-    const halfD = ((bounds.maxX - bounds.minX) / 2) * S + 1.6;
-    const need = Math.max(halfW / (tanH * aspect), (halfD * Math.cos(TILT)) / tanH);
-    // Au plus près : environ les deux tiers de la table.
-    const dist = Math.min(tableDist, Math.max(need, tableDist * 0.6));
-    // De près, on vise le milieu de la chaîne ; de loin, le milieu de la table.
-    const centerZ = THREE.MathUtils.clamp((-(bounds.minX + bounds.maxX) / 2) * S, -2.5, 2.5);
-    const far = (dist - tableDist * 0.6) / (tableDist * 0.4);
-    const z = centerZ + (0.6 - centerZ) * THREE.MathUtils.clamp(far, 0, 1);
+    const cam = (camera as THREE.PerspectiveCamera).clone();
+    cam.aspect = size.width / Math.max(size.height, 1);
+    cam.updateProjectionMatrix();
+    const tableHalfW = FELT_W / 2 + RIM;
+    const tableHalfD = FELT_D / 2 + RIM;
+    const table = corners(-tableHalfW, tableHalfW, -tableHalfD, tableHalfD, 0.3, tableRot);
+    const tableDist = fitDistance(cam, table, 0.4, { x: 0.02, top: margins.top * 0.5, bottom: 0.02 });
+    const chain = corners(bounds.minX - 0.6, bounds.maxX + 0.6, bounds.minZ - 0.6, bounds.maxZ + 0.6, TILE_H, chainRot, CHAIN_SCALE);
+    // On vise le milieu de la chaîne (en profondeur), sans trop s'écarter du centre.
+    const zs = chain.map((p) => p.z);
+    const centerZ = THREE.MathUtils.clamp((Math.min(...zs) + Math.max(...zs)) / 2, -3, 3);
+    const chainDist = fitDistance(cam, chain, centerZ, margins);
+    // Au plus près : environ les deux tiers de la table ; au plus loin, la table entière (sauf si la chaîne demande plus).
+    let dist = Math.max(chainDist, tableDist * 0.6);
+    if (dist > tableDist) dist = Math.max(tableDist, chainDist);
+    const far = THREE.MathUtils.clamp((dist - tableDist * 0.6) / (tableDist * 0.4), 0, 1);
+    const z = centerZ + (0.4 - centerZ) * far;
+    // En se recentrant, la chaîne pourrait déborder : on recule juste ce qu'il faut.
+    aim(cam, dist, z);
+    if (!fits(cam, chain, margins)) dist = fitDistance(cam, chain, z, margins);
     return { dist, z };
-  }, [camera, size.width, size.height, bounds]);
+  }, [camera, size.width, size.height, bounds, tableRot, chainRot, margins]);
   useFrame((_, dt) => {
     const cam = camera as THREE.PerspectiveCamera;
     const cur = current.current ?? { ...target };
@@ -352,8 +399,7 @@ function CameraRig({ bounds }: { bounds: Bounds }) {
     cur.dist += (target.dist - cur.dist) * k;
     cur.z += (target.z - cur.z) * k;
     current.current = cur;
-    cam.position.set(0, Math.cos(TILT) * cur.dist, Math.sin(TILT) * cur.dist + cur.z);
-    cam.lookAt(0, 0, cur.z);
+    aim(cam, cur.dist, cur.z);
   });
   useEffect(() => {
     (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
@@ -363,14 +409,21 @@ function CameraRig({ bounds }: { bounds: Bounds }) {
 
 // ---------- la scène ----------
 
-function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds }: Props) {
+const PORTRAIT_MARGINS: Margins = { x: 0.05, top: 0.06, bottom: 0.06 };
+const LANDSCAPE_MARGINS: Margins = { x: 0.04, top: 0.3, bottom: 0.12 };
+
+function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false }: Props) {
+  // Portrait : la table est en long et la chaîne tournée d'un quart de tour pour suivre sa longueur.
+  // Paysage : on tourne la table ; la chaîne court alors dans la largeur de l'écran.
+  const tableRot = landscape ? Math.PI / 2 : 0;
+  const chainRot = landscape ? 0 : Math.PI / 2;
   const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
   const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig bounds={bounds} />
+      <CameraRig bounds={bounds} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       <ambientLight intensity={0.35} color="#ffe2b8" />
       <spotLight
         position={[1.5, 16, 3]}
@@ -386,10 +439,12 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
         <Lightformer form="rect" intensity={0.6} color="#2f8f63" position={[0, -2, 0]} rotation-x={-Math.PI / 2} scale={[12, 12, 1]} />
       </Environment>
 
-      <Table />
+      <group rotation={[0, tableRot, 0]}>
+        <Table />
+      </group>
 
       {/* La chaîne, un peu plus petite et tournée d'un quart de tour : ses rangées suivent la longueur du feutre. */}
-      <group scale={[CHAIN_SCALE, CHAIN_SCALE, CHAIN_SCALE]} rotation={[0, Math.PI / 2, 0]}>
+      <group scale={[CHAIN_SCALE, CHAIN_SCALE, CHAIN_SCALE]} rotation={[0, chainRot, 0]}>
         {tiles.map((p) => (
           <Domino key={`${p.tile}`} p={p} fresh={p.tile === freshTile} reducedMotion={reducedMotion} />
         ))}

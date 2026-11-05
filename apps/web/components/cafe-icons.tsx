@@ -211,3 +211,13 @@ export function ChatIcon({ className }: P) {
     </svg>
   );
 }
+
+/** Un téléphone qui pivote (passer en paysage / en portrait). */
+export function RotateIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="9" width="12" height="12" rx="2" transform="rotate(-90 9 15)" />
+      <path d="M14 3a7 7 0 0 1 7 7M21 10l-2.2-1.6M21 10l1.4-2.4" />
+    </svg>
+  );
+}

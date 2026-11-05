@@ -226,7 +226,10 @@
     "keep": "Garder",
     "penaltyChip": "Sans points cette manche",
     "roundReplay": "Personne ne marque : la manche est rejouée et le double-six ouvre.",
-    "penalized": "Donne gardée : les points vont à l'équipe adverse."
+    "penalized": "Donne gardée : les points vont à l'équipe adverse.",
+    "playOn": "Sur le {n}",
+    "rotate": "Tourner l'écran",
+    "rotateHint": "Tourne ton téléphone pour plus de place"
   },
   "social": {
     "title": "Amis",

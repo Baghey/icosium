@@ -15,7 +15,8 @@ import { Sheet } from "@/components/sheet";
 import { Avatar, PlayerBadge, type PlayerInfo, tableAvatars } from "./player-badge";
 import { SoundToggle } from "./sound-toggle";
 import { DominoBack, DominoTile } from "./tile";
-import { Emblem, HourglassIcon, TrophyIcon, UsersIcon } from "@/components/cafe-icons";
+import { Emblem, HourglassIcon, RotateIcon, TrophyIcon, UsersIcon } from "@/components/cafe-icons";
+import { useGameOrientation } from "@/lib/orientation";
 import { useVoice } from "@/lib/voice-context";
 
 type Props = {
@@ -118,6 +119,8 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   useEffect(() => {
     if (view.eventSeq === lastSeq.current) return;
     lastSeq.current = view.eventSeq;
+    // Le jeu a avancé : un ancien message (« Attends ton tour »…) n'a plus de sens.
+    setError(null);
     const next: Record<number, string> = {};
     for (const e of view.events) {
       if (e.type === "play") {
@@ -140,6 +143,12 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
     setSelected(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.eventSeq, view.events, view.phase, view.turn, mySeat, t]);
+
+  useEffect(() => {
+    if (!error) return;
+    const id = window.setTimeout(() => setError(null), 2600);
+    return () => window.clearTimeout(id);
+  }, [error]);
 
   useEffect(() => {
     if (!notice) return;
@@ -204,6 +213,8 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
 
   const { peers } = useVoice();
   const webgl = useWebGL();
+  const orientation = useGameOrientation();
+  const landscape = orientation.landscape;
   const reducedMotion = useReducedMotion();
   const avatars = useMemo(() => tableAvatars(seats.map(seatKey)), [seats]);
   const info = (seat: number): PlayerInfo => {
@@ -228,6 +239,15 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
     };
   };
 
+  const firstLink = view.chain[0];
+  const lastLink = view.chain[view.chain.length - 1];
+  const endChoice =
+    selected && targets.length === 2 && firstLink && lastLink
+      ? ([
+          { end: "left" as const, value: firstLink.left },
+          { end: "right" as const, value: lastLink.right },
+        ] as const)
+      : null;
   const hint = error ? t(error) : myTurn ? (view.mustOpenWith ? t("domino.mustOpen", { tile: view.mustOpenWith }) : selected ? t("domino.pickEnd") : null) : null;
   const secs = remainingMs === null ? null : Math.max(0, Math.ceil(remainingMs / 1000));
   const clock = secs === null ? null : `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
@@ -244,132 +264,237 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
             ? t("domino.thinking", { name: nameOf(view.turn) ?? "…" })
             : t("domino.turnOf", { name: nameOf(view.turn) ?? "…" });
 
-  return (
-    <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
-      <div className="mx-auto flex h-full max-w-xl flex-col">
-        {/* En-tête : emblème, joueurs et score, son */}
-        <header className="flex items-center gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
-          <Link href="/play" aria-label={t("domino.leave")} className="flex size-touch shrink-0 items-center justify-center">
-            <Emblem className="size-9 drop-shadow-[0_2px_6px_rgba(216,167,72,0.35)]" />
-          </Link>
-          <button
-            type="button"
-            onClick={() => setShowScores(true)}
-            className="cafe-panel mx-auto flex min-h-touch items-center gap-2.5 rounded-full px-3.5 text-sm font-semibold"
-            aria-label={t("domino.scores")}
-          >
-            <UsersIcon className="size-4 text-cafe-muted" />
-            <span className="text-cafe-muted">{seats.length}/{players}</span>
-            <span className="h-4 w-px bg-gold/40" aria-hidden="true" />
-            <TrophyIcon className="size-4 text-gold" />
-            <span className="text-gold-light">{usScore}</span>
-            <span className="text-cafe-muted">·</span>
-            <span>{themScore}</span>
-            <span className="text-xs font-normal text-cafe-muted">/ {view.options.targetScore}</span>
-          </button>
-          <SoundToggle tone="cafe" />
-        </header>
+  // ---------- les morceaux de l'écran (réutilisés en portrait et en paysage) ----------
 
-        {/* Le chrono doré */}
-        <div className="flex justify-center pt-2" aria-live="polite">
-          <div className={`cafe-panel flex items-center gap-2 rounded-2xl px-4 py-1 ${myTurn ? "border-gold" : ""}`}>
-            <HourglassIcon className={`size-4 ${myTurn ? "text-gold-light" : "text-cafe-muted"}`} />
-            <span className="max-w-40 truncate text-sm font-medium">{turnLabel}</span>
-            {clock && view.phase === "playing" && !botTurn && (
-              <span className={`text-gilded text-lg font-bold tabular-nums ${secs !== null && secs <= 5 ? "animate-pulse" : ""}`}>{clock}</span>
+  const emblem = (
+    <Link href="/play" aria-label={t("domino.leave")} className="flex size-touch shrink-0 items-center justify-center">
+      <Emblem className="size-9 drop-shadow-[0_2px_6px_rgba(216,167,72,0.35)]" />
+    </Link>
+  );
+
+  const scoreButton = (
+    <button
+      type="button"
+      onClick={() => setShowScores(true)}
+      className={`cafe-panel flex min-h-touch items-center gap-2.5 rounded-full px-3.5 text-sm font-semibold ${landscape ? "" : "mx-auto"}`}
+      aria-label={t("domino.scores")}
+    >
+      {!landscape && (
+        <>
+          <UsersIcon className="size-4 text-cafe-muted" />
+          <span className="text-cafe-muted">{seats.length}/{players}</span>
+          <span className="h-4 w-px bg-gold/40" aria-hidden="true" />
+        </>
+      )}
+      <TrophyIcon className="size-4 text-gold" />
+      <span className="text-gold-light">{usScore}</span>
+      <span className="text-cafe-muted">·</span>
+      <span>{themScore}</span>
+      <span className="text-xs font-normal text-cafe-muted">/ {view.options.targetScore}</span>
+    </button>
+  );
+
+  const turnChip = (
+    <div className={`cafe-panel flex items-center gap-2 rounded-2xl px-4 py-1 ${myTurn ? "border-gold" : ""}`} aria-live="polite">
+      <HourglassIcon className={`size-4 ${myTurn ? "text-gold-light" : "text-cafe-muted"}`} />
+      <span className="max-w-40 truncate text-sm font-medium">{turnLabel}</span>
+      {clock && view.phase === "playing" && !botTurn && (
+        <span className={`text-gilded text-lg font-bold tabular-nums ${secs !== null && secs <= 5 ? "animate-pulse" : ""}`}>{clock}</span>
+      )}
+    </div>
+  );
+
+  const rotateButton = orientation.phone && (
+    <button
+      type="button"
+      onClick={orientation.toggle}
+      aria-label={t("domino.rotate")}
+      className="cafe-panel flex size-12 shrink-0 items-center justify-center rounded-full text-cafe-muted transition-colors duration-200 active:text-gold-light"
+    >
+      <RotateIcon className="size-5" />
+    </button>
+  );
+
+  const badge = (seat: number, size: number) => <PlayerBadge p={info(seat)} size={size} />;
+  const seatAt = (pos: "left" | "top" | "right") => around.find((a) => a.pos === pos)?.seat;
+  const topSeat = seatAt("top");
+  const leftSeat = seatAt("left");
+  const rightSeat = seatAt("right");
+
+  const table = (
+    <>
+      {webgl ? (
+        <div className="absolute inset-0">
+          <Table3D
+            chain={view.chain}
+            chainStart={view.chainStart ?? 0}
+            targets={targets}
+            onPick={(end) => selected && void doPlay(selected, end)}
+            freshTile={freshTile}
+            shuffleKey={`${view.round}`}
+            players={players}
+            reducedMotion={reducedMotion}
+            glowEnds={selected ? [] : moves.map((m) => m.end)}
+            landscape={landscape}
+          />
+        </div>
+      ) : (
+        <div className="table-photo relative h-full">
+          <img src="/assets/rosette.webp" alt="" aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 w-[72%] max-w-72 -translate-x-1/2 -translate-y-1/2 opacity-35" />
+          <div className="absolute -inset-x-6 -top-3 -bottom-10 flex items-center justify-center">
+            {view.chain.length === 0 && !selected ? (
+              <p className="text-gilded text-center text-lg font-semibold">{t("domino.round", { n: view.round })}</p>
+            ) : (
+              <DominoChain chain={view.chain} targets={targets} onPick={(end) => selected && void doPlay(selected, end)} pickLabel={t("domino.playHere")} freshTile={freshTile} />
             )}
           </div>
-        </div>
-
-        {/* Les autres joueurs, en rangée au-dessus de la table : rien ne cache le jeu */}
-        <div className={`relative z-10 grid items-start px-2 pt-2 ${players === 4 ? "grid-cols-3" : "grid-cols-1"}`}>
-          {around.map(({ seat, pos }) => (
-            <div
-              key={pos}
-              className={`flex ${pos === "left" ? "justify-start pt-3" : pos === "right" ? "justify-end pt-3" : "justify-center"}`}
-            >
-              <PlayerBadge p={info(seat)} size={pos === "top" ? 50 : 46} />
-            </div>
-          ))}
-        </div>
-
-        {/* La table */}
-        <div className="relative min-h-0 flex-1 px-2 pb-1">
-          {webgl ? (
-            <div className="absolute inset-0">
-              <Table3D
-                chain={view.chain}
-                chainStart={view.chainStart ?? 0}
-                targets={targets}
-                onPick={(end) => selected && void doPlay(selected, end)}
-                freshTile={freshTile}
-                shuffleKey={`${view.round}`}
-                players={players}
-                reducedMotion={reducedMotion}
-                glowEnds={selected ? [] : moves.map((m) => m.end)}
-              />
-            </div>
-          ) : (
-          <div className="table-photo relative h-full">
-            <img src="/assets/rosette.webp" alt="" aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 w-[72%] max-w-72 -translate-x-1/2 -translate-y-1/2 opacity-35" />
-            <div className="absolute -inset-x-6 -top-3 -bottom-10 flex items-center justify-center">
-              {view.chain.length === 0 && !selected ? (
-                <p className="text-gilded text-center text-lg font-semibold">{t("domino.round", { n: view.round })}</p>
-              ) : (
-                <DominoChain chain={view.chain} targets={targets} onPick={(end) => selected && void doPlay(selected, end)} pickLabel={t("domino.playHere")} freshTile={freshTile} />
-              )}
-            </div>
-            {players === 2 && (
-              <span className="absolute -bottom-9 end-0 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs text-cafe-text">
-                <DominoBack size={6} /> {t("domino.boneyard", { n: view.boneyardCount })}
-              </span>
-            )}
-          </div>
-          )}
-          {notice && (
-            <p
-              key={notice}
-              role="status"
-              className="animate-bubble cafe-panel absolute inset-x-6 top-2 z-20 mx-auto max-w-sm rounded-2xl border-gold/60 px-4 py-2 text-center text-sm font-semibold text-gold-light"
-            >
-              {notice}
-            </p>
-          )}
-          {view.penaltyTeam !== null && view.penaltyTeam !== undefined && view.phase === "playing" && (
-            <span className="absolute end-3 bottom-2 z-10 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-[#e9a68f] ring-1 ring-[#e9826a]/50">
-              {view.penaltyTeam === (players === 2 ? mySeat : teamOf(mySeat)) ? t("domino.us") : t("domino.them")} · {t("domino.penaltyChip")}
+          {players === 2 && (
+            <span className="absolute -bottom-9 end-0 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs text-cafe-text">
+              <DominoBack size={6} /> {t("domino.boneyard", { n: view.boneyardCount })}
             </span>
           )}
         </div>
+      )}
+      {notice && (
+        <p
+          key={notice}
+          role="status"
+          className="animate-bubble cafe-panel absolute inset-x-6 top-2 z-20 mx-auto max-w-sm rounded-2xl border-gold/60 px-4 py-2 text-center text-sm font-semibold text-gold-light"
+        >
+          {notice}
+        </p>
+      )}
+      {orientation.showHint && !notice && (
+        <p className="animate-bubble cafe-panel pointer-events-none absolute inset-x-6 bottom-2 z-20 mx-auto flex max-w-xs items-center justify-center gap-2 rounded-2xl px-3 py-1.5 text-xs font-semibold text-gold-light">
+          <RotateIcon className="size-4 shrink-0" />
+          {t("domino.rotateHint")}
+        </p>
+      )}
+      {view.penaltyTeam !== null && view.penaltyTeam !== undefined && view.phase === "playing" && (
+        <span className="absolute end-3 bottom-2 z-10 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-[#e9a68f] ring-1 ring-[#e9826a]/50">
+          {view.penaltyTeam === (players === 2 ? mySeat : teamOf(mySeat)) ? t("domino.us") : t("domino.them")} · {t("domino.penaltyChip")}
+        </span>
+      )}
+    </>
+  );
 
-        {/* Ma main, dans un plateau sombre bordé d'or */}
-        <section className="relative px-3 pt-5">
-          <div className="absolute start-5 top-0 z-10 flex items-center gap-2">
-            <Avatar p={info(mySeat)} size={40} />
-            <div className="cafe-panel rounded-xl px-2.5 py-0.5 leading-tight">
-              <p className="text-gilded text-xs font-bold">{t("domino.you")}</p>
-              <p className="text-[11px] text-cafe-muted">{t("domino.pts", { n: usScore })}</p>
-            </div>
-          </div>
-          {hint && (
-            <p className={`absolute end-5 top-1 z-10 max-w-[45%] truncate rounded-full px-2.5 py-0.5 text-xs font-semibold ${error ? "bg-danger text-white" : "bg-gold text-cafe-0"}`}>
-              {hint}
-            </p>
-          )}
-          <div className={`cafe-panel rounded-[1.5rem] px-1 pt-5 transition-[border-color,box-shadow] duration-200 ${myTurn ? "border-gold shadow-[0_0_24px_rgba(216,167,72,0.35)]" : ""}`}>
-            <DominoHand tiles={hand} playable={playable} selected={selected} myTurn={myTurn} pending={pending} onTap={onTapTile} />
-          </div>
-        </section>
+  const prompt = endChoice ? (
+    // Deux bouts possibles : on choisit par le chiffre, plus simple que de viser la table.
+    <div className="flex gap-2" role="group" aria-label={t("domino.pickEnd")}>
+      {endChoice.map(({ end, value }) => (
+        <button
+          key={end}
+          type="button"
+          disabled={pending}
+          onClick={() => selected && void doPlay(selected, end)}
+          aria-label={`${t("domino.playHere")} · ${t("domino.playOn", { n: value })}`}
+          className="gold-button animate-pop flex min-h-touch items-center rounded-full px-4 text-sm font-bold shadow-[0_4px_14px_rgba(0,0,0,0.45)] transition-transform duration-150 active:scale-95"
+        >
+          {t("domino.playOn", { n: value })}
+        </button>
+      ))}
+    </div>
+  ) : hint ? (
+    <p
+      role={error ? "alert" : undefined}
+      className={`max-w-full truncate rounded-full px-2.5 py-0.5 text-xs font-semibold ${error ? "animate-bubble bg-danger text-white" : "bg-gold text-cafe-0"}`}
+    >
+      {hint}
+    </p>
+  ) : null;
 
-        {/* La barre du bas : son, micro, scores */}
-        <nav className="flex items-center justify-center gap-5 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-          <button type="button" onClick={() => setShowScores(true)} aria-label={t("domino.scores")} className="cafe-panel flex size-12 items-center justify-center rounded-full text-cafe-muted">
-            <TrophyIcon className="size-5" />
-          </button>
-          <MicButton tone="cafe" />
-          <SoundToggle tone="cafe" boxed />
-        </nav>
+  const handPanel = (
+    <div className={`cafe-panel rounded-[1.5rem] px-1 transition-[border-color,box-shadow] duration-200 ${landscape ? "pt-2" : "pt-5"} ${myTurn ? "border-gold shadow-[0_0_24px_rgba(216,167,72,0.35)]" : ""}`}>
+      <DominoHand tiles={hand} playable={playable} selected={selected} myTurn={myTurn} pending={pending} onTap={onTapTile} compact={landscape} />
+    </div>
+  );
+
+  const me = (
+    <div className="flex items-center gap-2">
+      <Avatar p={info(mySeat)} size={40} />
+      <div className="cafe-panel rounded-xl px-2.5 py-0.5 leading-tight">
+        <p className="text-gilded text-xs font-bold">{t("domino.you")}</p>
+        <p className="text-[11px] text-cafe-muted">{t("domino.pts", { n: usScore })}</p>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
+      {landscape ? (
+        // ---------- Paysage : la table au centre, les joueurs et les boutons sur les côtés ----------
+        <div className="flex h-full gap-1 ps-[max(0.25rem,env(safe-area-inset-left))] pe-[max(0.25rem,env(safe-area-inset-right))]">
+          <aside className="flex w-28 shrink-0 flex-col items-center justify-between py-2">
+            {emblem}
+            {leftSeat !== undefined ? badge(leftSeat, 44) : <span />}
+            {me}
+          </aside>
+
+          <main className="flex min-w-0 flex-1 flex-col">
+            <div className="relative min-h-0 flex-1">
+              {table}
+              <div className="pointer-events-none absolute inset-x-0 top-1 z-10 flex items-start justify-between gap-2 px-1">
+                <div className="pointer-events-auto">{turnChip}</div>
+                {topSeat !== undefined && <div className="pointer-events-auto">{badge(topSeat, 40)}</div>}
+                <div className="pointer-events-auto">{scoreButton}</div>
+              </div>
+              {prompt && <div className="absolute inset-x-0 bottom-1 z-10 flex justify-center px-2">{prompt}</div>}
+            </div>
+            <section className="px-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">{handPanel}</section>
+          </main>
+
+          <aside className="flex w-28 shrink-0 flex-col items-center justify-between py-2">
+            <div className="flex gap-1">
+              <SoundToggle tone="cafe" />
+              {rotateButton}
+            </div>
+            {rightSeat !== undefined ? badge(rightSeat, 44) : <span />}
+            <MicButton tone="cafe" />
+          </aside>
+        </div>
+      ) : (
+        // ---------- Portrait ----------
+        <div className="mx-auto flex h-full max-w-xl flex-col">
+          {/* En-tête : emblème, joueurs et score, son */}
+          <header className="flex items-center gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
+            {emblem}
+            {scoreButton}
+            <SoundToggle tone="cafe" />
+          </header>
+
+          {/* Le chrono doré */}
+          <div className="flex justify-center pt-2">{turnChip}</div>
+
+          {/* Les autres joueurs, en rangée au-dessus de la table : rien ne cache le jeu */}
+          <div className={`relative z-10 grid items-start px-2 pt-2 ${players === 4 ? "grid-cols-3" : "grid-cols-1"}`}>
+            {around.map(({ seat, pos }) => (
+              <div key={pos} className={`flex ${pos === "left" ? "justify-start pt-3" : pos === "right" ? "justify-end pt-3" : "justify-center"}`}>
+                {badge(seat, pos === "top" ? 50 : 46)}
+              </div>
+            ))}
+          </div>
+
+          {/* La table */}
+          <div className="relative min-h-0 flex-1 px-2 pb-1">{table}</div>
+
+          {/* Ma main, dans un plateau sombre bordé d'or */}
+          <section className="relative px-3 pt-5">
+            <div className="absolute start-5 top-0 z-10">{me}</div>
+            {prompt && <div className={`absolute end-4 z-10 flex max-w-[55%] justify-end ${endChoice ? "-top-2" : "top-1"}`}>{prompt}</div>}
+            {handPanel}
+          </section>
+
+          {/* La barre du bas : scores, micro, son, rotation */}
+          <nav className="flex items-center justify-center gap-5 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <button type="button" onClick={() => setShowScores(true)} aria-label={t("domino.scores")} className="cafe-panel flex size-12 items-center justify-center rounded-full text-cafe-muted">
+              <TrophyIcon className="size-5" />
+            </button>
+            <MicButton tone="cafe" />
+            <SoundToggle tone="cafe" boxed />
+            {rotateButton}
+          </nav>
+        </div>
+      )}
 
       {(view.phase === "roundOver" || view.phase === "gameOver") && view.lastResult && (
         <RoundSheet view={view} seats={seats} mySeat={mySeat} serverNow={serverNow} onNext={nextRound} />

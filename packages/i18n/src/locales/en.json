@@ -226,7 +226,10 @@
     "keep": "Keep",
     "penaltyChip": "No points this round",
     "roundReplay": "Nobody scores: the round is replayed and the double-six opens.",
-    "penalized": "Hand kept: the points go to the other team."
+    "penalized": "Hand kept: the points go to the other team.",
+    "playOn": "On the {n}",
+    "rotate": "Rotate screen",
+    "rotateHint": "Turn your phone sideways for more room"
   },
   "social": {
     "title": "Friends",

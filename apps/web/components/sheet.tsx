@@ -17,6 +17,8 @@ export function Sheet({ children, onClose, label }: { children: ReactNode; onClo
         aria-modal="true"
         aria-label={label}
         className="animate-sheet cafe-panel max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-t-[1.75rem] border-b-0 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-cafe-text"
+        // Fond plein : rien de la table ne doit transparaître derrière le panneau.
+        style={{ background: "linear-gradient(180deg, #2a1d13, #120b06)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <span aria-hidden="true" className="mx-auto -mt-2 mb-3 block h-1 w-10 rounded-full bg-gold/35" />
