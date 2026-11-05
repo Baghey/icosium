@@ -1,7 +1,8 @@
 import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
-/** Langues prévues. Seul l'anglais est livré au lancement ; fr et ar s'ajoutent ici. */
-export const LOCALES = ["en"] as const;
+/** Langues livrées. L'arabe s'ajoutera ici (le sens droite-à-gauche est déjà prévu). */
+export const LOCALES = ["en", "fr"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 
@@ -14,7 +15,20 @@ export function directionOf(locale: string): "ltr" | "rtl" {
 
 export type Messages = typeof en;
 
-const CATALOG: Record<Locale, Messages> = { en };
+const CATALOG: Record<Locale, Messages> = { en, fr };
+
+export function isLocale(value: string | null | undefined): value is Locale {
+  return (LOCALES as readonly string[]).includes(value ?? "");
+}
+
+/** Choisit la langue à partir des langues préférées du navigateur (ex. ["fr-DZ", "ar"]). */
+export function pickLocale(preferred: readonly string[]): Locale {
+  for (const tag of preferred) {
+    const base = tag.toLowerCase().split("-")[0];
+    if (isLocale(base)) return base;
+  }
+  return DEFAULT_LOCALE;
+}
 
 /** Toutes les clés possibles, sous la forme "voice.micOn". */
 type Leaves<T, P extends string = ""> = {

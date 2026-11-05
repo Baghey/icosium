@@ -1,0 +1,95 @@
+{
+  "app": {
+    "name": "ICOSIUM",
+    "tagline": "Le café du coin, en ligne."
+  },
+  "nav": {
+    "home": "Café",
+    "voice": "Salon vocal",
+    "profile": "Profil",
+    "main": "Navigation principale"
+  },
+  "home": {
+    "greeting": "Salut, {name}",
+    "intro": "Les jeux arrivent à la prochaine étape. En attendant, essaie le salon vocal avec tes amis.",
+    "openVoice": "Ouvrir le salon vocal",
+    "status": "État des serveurs",
+    "statusChecking": "Vérification…",
+    "statusOk": "En ligne",
+    "statusDown": "Injoignable",
+    "service": {
+      "accounts": "Comptes (Nakama)",
+      "games": "Serveur de jeu (Colyseus)",
+      "voice": "Vocal (LiveKit)"
+    }
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "signUp": "Créer un compte",
+    "guest": "Invité",
+    "email": "Email",
+    "password": "Mot de passe",
+    "passwordHint": "Au moins 8 caractères.",
+    "username": "Pseudo",
+    "usernameHint": "3 à 20 lettres, chiffres ou tirets bas.",
+    "birthdate": "Date de naissance",
+    "birthdateHint": "ICOSIUM est réservé aux 16 ans et plus.",
+    "guestIntro": "Essaie ICOSIUM en un appui. Ton compte invité reste sur cet appareil.",
+    "guestAge": "J'ai 16 ans ou plus",
+    "continueAsGuest": "Continuer en invité",
+    "submitSignIn": "Se connecter",
+    "submitSignUp": "Créer mon compte",
+    "working": "Un instant…",
+    "signOut": "Se déconnecter",
+    "error": {
+      "tooYoung": "Il faut avoir au moins 16 ans pour rejoindre ICOSIUM.",
+      "invalidBirthdate": "Indique une date de naissance valide.",
+      "badCredentials": "Email ou mot de passe incorrect.",
+      "emailTaken": "Un compte existe déjà avec cet email.",
+      "usernameTaken": "Ce pseudo est déjà pris.",
+      "invalidUsername": "Le pseudo contient 3 à 20 lettres, chiffres ou tirets bas.",
+      "weakPassword": "Ton mot de passe doit faire au moins 8 caractères.",
+      "ageNotConfirmed": "Confirme que tu as 16 ans ou plus.",
+      "network": "Impossible de joindre ICOSIUM pour l'instant. Vérifie ta connexion et réessaie.",
+      "unknown": "Un problème est survenu. Réessaie."
+    }
+  },
+  "voice": {
+    "title": "Salon vocal",
+    "intro": "Jusqu'à 4 personnes. Tout le monde arrive micro coupé.",
+    "join": "Rejoindre le salon vocal",
+    "joining": "Connexion…",
+    "leave": "Quitter",
+    "micOn": "Micro ouvert",
+    "micOff": "Micro coupé",
+    "micHint": "Appuie pour ouvrir ou couper ton micro. Maintiens pour parler.",
+    "pushToTalk": "Tu parles…",
+    "emptySeat": "Chaise libre",
+    "you": "Toi",
+    "speaking": "Parle",
+    "inRoom": "Dans le salon vocal",
+    "nobodySpeaking": "Personne ne parle",
+    "isSpeaking": "{name} parle",
+    "reconnecting": "Reconnexion…",
+    "full": "Ce salon vocal est complet (4 personnes).",
+    "micDenied": "ICOSIUM n'a pas accès à ton micro. Autorise-le dans les réglages du navigateur.",
+    "error": "Impossible de rejoindre le salon vocal. Réessaie.",
+    "back": "Retour au salon"
+  },
+  "profile": {
+    "title": "Profil",
+    "username": "Pseudo",
+    "account": "Type de compte",
+    "guestAccount": "Invité",
+    "emailAccount": "Email",
+    "navigateHint": "Change de page pendant le vocal : la barre vocale reste en haut."
+  },
+  "common": {
+    "loading": "Chargement…",
+    "language": "Langue"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français"
+  }
+}

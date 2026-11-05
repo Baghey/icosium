@@ -87,5 +87,9 @@
   "common": {
     "loading": "Loading…",
     "language": "Language"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français"
   }
 }
