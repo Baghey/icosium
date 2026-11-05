@@ -16,7 +16,7 @@ import { Avatar, PlayerBadge, type PlayerInfo, tableAvatars } from "./player-bad
 import { SoundToggle } from "./sound-toggle";
 import { DominoBack, DominoTile } from "./tile";
 import { Emblem, HourglassIcon, RotateIcon, TrophyIcon, UsersIcon } from "@/components/cafe-icons";
-import { useGameOrientation } from "@/lib/orientation";
+import { useGameOrientation, useLandscapeLayout } from "@/lib/orientation";
 import { useVoice } from "@/lib/voice-context";
 
 type Props = {
@@ -126,7 +126,11 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
       if (e.type === "play") {
         playClack(e.closing);
         setFreshTile(e.tile);
-      } else if (e.type === "pass") next[e.seat] = t("domino.pass");
+      } else if (e.type === "pass") {
+        next[e.seat] = t("domino.pass");
+        // Le serveur fait passer tout seul celui qui n'a rien à jouer : on le dit clairement.
+        if (e.seat === mySeat) setNotice(t("domino.youPass"));
+      }
       else if (e.type === "draw") next[e.seat] = t("domino.drew", { n: e.count });
       else if (e.type === "redeal") {
         const who = e.seat === mySeat ? t("domino.you") : (nameOf(e.seat) ?? "…");
@@ -216,7 +220,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const orientation = useGameOrientation();
   const landscape = orientation.landscape;
   const reducedMotion = useReducedMotion();
-  const avatars = useMemo(() => tableAvatars(seats.map(seatKey)), [seats]);
+  const avatars = useMemo(() => tableAvatars(seats.map((s) => ({ key: seatKey(s), botName: s.userId ? null : s.username }))), [seats]);
   const info = (seat: number): PlayerInfo => {
     const s = seats.find((x) => x.seat === seat);
     const peer = s?.userId ? peers.find((x) => x.identity === s.userId) : undefined;
@@ -459,7 +463,8 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
           <header className="flex items-center gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
             {emblem}
             {scoreButton}
-            <SoundToggle tone="cafe" />
+            {/* Le score s'ouvre en touchant la pastille ; le son et le micro sont en bas. */}
+            <span className="size-touch shrink-0" aria-hidden="true" />
           </header>
 
           {/* Le chrono doré */}
@@ -486,12 +491,9 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
 
           {/* La barre du bas : scores, micro, son, rotation */}
           <nav className="flex items-center justify-center gap-5 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-            <button type="button" onClick={() => setShowScores(true)} aria-label={t("domino.scores")} className="cafe-panel flex size-12 items-center justify-center rounded-full text-cafe-muted">
-              <TrophyIcon className="size-5" />
-            </button>
-            <MicButton tone="cafe" />
             <SoundToggle tone="cafe" boxed />
-            {rotateButton}
+            <MicButton tone="cafe" />
+            {rotateButton || <span className="size-12" aria-hidden="true" />}
           </nav>
         </div>
       )}
@@ -585,14 +587,24 @@ function DeclareSheet({
 
 function RoundSheet({ view, seats, mySeat, serverNow, onNext }: { view: DominoView; seats: SeatInfo[]; mySeat: number; serverNow: number; onNext: () => Promise<void> }) {
   const { t } = useI18n();
+  const [starting, setStarting] = useState(false);
+  // Téléphone en paysage : le résultat à gauche, les mains à droite, tout tient sans défiler.
+  const wide = useLandscapeLayout();
   const r = view.lastResult;
   if (!r) return null;
+  const start = async () => {
+    setStarting(true);
+    await onNext();
+    setStarting(false);
+  };
   const players = view.options.players;
   const myTeam = teamOf(mySeat);
   const nameOf = (seat: number) => seats.find((s) => s.seat === seat)?.username ?? "…";
   const title =
     r.reason === "closed" && r.closedBy !== null
-      ? t("domino.roundClosed", { name: r.closedBy === mySeat ? t("domino.you") : nameOf(r.closedBy) })
+      ? r.closedBy === mySeat
+        ? t("domino.roundClosedYou")
+        : t("domino.roundClosed", { name: nameOf(r.closedBy) })
       : r.winnerTeam === null
         ? t("domino.roundDraw")
         : t("domino.roundBlocked");
@@ -601,7 +613,9 @@ function RoundSheet({ view, seats, mySeat, serverNow, onNext }: { view: DominoVi
   const won = gameOver && view.winnerTeam === myTeam;
 
   return (
-    <Sheet>
+    <Sheet wide={wide}>
+      <div className={`grid ${wide ? "grid-cols-[1fr_1.15fr] items-center gap-x-8" : "grid-cols-1"}`}>
+      <div>
       {gameOver ? (
         <div className="mb-4 flex flex-col items-center gap-1 text-center">
           <span className={`animate-pop flex size-16 items-center justify-center rounded-full border border-gold/50 bg-black/30 ${won ? "text-gold-light shadow-[0_0_30px_rgba(216,167,72,0.5)]" : "text-cafe-muted"}`} aria-hidden="true">
@@ -633,6 +647,8 @@ function RoundSheet({ view, seats, mySeat, serverNow, onNext }: { view: DominoVi
         </div>
       </div>
 
+      </div>
+      <div className={wide ? "col-start-2 row-span-2 row-start-1" : ""}>
       <p className="mb-2 text-xs font-semibold text-cafe-muted">{t("domino.remaining")}</p>
       <ul className="mb-5 flex flex-col gap-2">
         {r.hands.map((tiles, seat) => (
@@ -641,23 +657,32 @@ function RoundSheet({ view, seats, mySeat, serverNow, onNext }: { view: DominoVi
             <span dir="ltr" className="flex flex-1 flex-wrap gap-1">
               {tiles.map((tile) => {
                 const [a, b] = tile.split("-").map(Number) as [number, number];
-                return <DominoTile key={tile} a={a} b={b} orientation="horizontal" size={14} />;
+                return <DominoTile key={tile} a={a} b={b} orientation="horizontal" size={wide ? 18 : 14} />;
               })}
             </span>
             <span className="w-8 text-end text-sm font-semibold">{r.handValues[seat]}</span>
           </li>
         ))}
       </ul>
+      </div>
+      <div className={wide ? "col-start-1" : ""}>
 
       {gameOver ? (
         <Link href="/" className="flex min-h-14 items-center justify-center rounded-card gold-button text-lg font-bold">
           {t("domino.backHome")}
         </Link>
       ) : (
-        <button type="button" onClick={() => void onNext()} className="flex min-h-14 w-full items-center justify-center rounded-card gold-button text-lg font-bold transition-transform duration-150 active:scale-[0.98]">
-          {secondsLeft !== null ? t("domino.nextRoundIn", { n: secondsLeft }) : t("domino.nextRound")}
+        <button
+          type="button"
+          disabled={starting}
+          onClick={() => void start()}
+          className="flex min-h-14 w-full items-center justify-center rounded-card gold-button text-lg font-bold transition-transform duration-150 active:scale-[0.98] disabled:opacity-70"
+        >
+          {starting ? t("common.loading") : secondsLeft !== null ? t("domino.nextRoundIn", { n: secondsLeft }) : t("domino.nextRound")}
         </button>
       )}
+      </div>
+      </div>
     </Sheet>
   );
 }

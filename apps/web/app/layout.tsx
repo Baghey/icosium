@@ -24,7 +24,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={DEFAULT_LOCALE} dir={directionOf(DEFAULT_LOCALE)}>
+    // Fond sombre posé dès le premier octet : pas de flash blanc avant le chargement du style.
+    <html lang={DEFAULT_LOCALE} dir={directionOf(DEFAULT_LOCALE)} style={{ backgroundColor: "#120c08", colorScheme: "dark" }}>
       <body className="min-h-dvh bg-bg text-ink antialiased">
         <div className="app-backdrop" aria-hidden="true" />
         <Providers>

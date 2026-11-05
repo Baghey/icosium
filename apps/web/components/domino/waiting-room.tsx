@@ -27,7 +27,7 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
   const [botsBusy, setBotsBusy] = useState(false);
   const [inviting, setInviting] = useState(false);
   const players = options.players;
-  const avatars = tableAvatars(seats.map(seatKey));
+  const avatars = tableAvatars(seats.map((s) => ({ key: seatKey(s), botName: s.userId ? null : s.username })));
 
   async function fillBots() {
     setBotsBusy(true);

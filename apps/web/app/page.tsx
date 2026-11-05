@@ -42,6 +42,8 @@ function Home() {
   const online = friends.filter((f) => f.status === "accepted" && presenceOf(f.id));
   const recent = conversations.filter((c) => c.state === "active" && c.lastBody !== null).slice(0, 3);
   const healthy = status ? status.accounts && status.voice : null;
+  // Un invité sans pseudo s'appelle « guest_1a2b3c4d » : on ne l'affiche pas, on l'invite à en choisir un.
+  const isTechnicalName = Boolean(user?.username?.startsWith("guest_"));
 
   async function playSolo() {
     setSolo(true);
@@ -56,7 +58,14 @@ function Home() {
       <header className="animate-rise flex flex-col items-center gap-1 pt-2 text-center">
         <Emblem className="size-16 drop-shadow-[0_0_18px_rgb(216_167_72/0.45)]" />
         <p className="text-gilded text-[0.7rem] font-bold tracking-[0.42em] uppercase">{t("app.name")}</p>
-        <h1 className="text-gilded text-3xl leading-tight font-bold">{t("home.greeting", { name: user?.username ?? "" })}</h1>
+        <h1 className="text-gilded text-3xl leading-tight font-bold">
+          {isTechnicalName ? t("home.greetingGuest") : t("home.greeting", { name: user?.username ?? "" })}
+        </h1>
+        {isTechnicalName && (
+          <Link href="/profile" className="flex min-h-touch items-center text-sm font-semibold text-gold-light underline decoration-gold/40 underline-offset-4">
+            {t("home.pickName")}
+          </Link>
+        )}
         <p className="text-sm text-ink-muted">{t("home.tagline")}</p>
       </header>
 

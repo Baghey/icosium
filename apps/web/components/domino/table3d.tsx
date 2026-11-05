@@ -256,7 +256,15 @@ function Ghost({ x, z, rot, onPick }: { x: number; z: number; rot: number; onPic
 
 // ---------- le mélange ----------
 
-/** 28 dominos face cachée qui tournent au centre, puis partent vers chaque joueur. */
+/**
+ * Le mélange, comme au café : les 28 pierres face cachée tournent à plat au centre (deux mains),
+ * puis chaque joueur tire ses 7 pierres, alignées bien droites devant lui, qui glissent vers lui.
+ * Ce qui reste (la pioche, à deux joueurs) se range en tas au milieu et s'efface.
+ */
+const SWIRL = 1.15; // fin du mélange (s)
+const LINE_UP = 1.55; // les pierres sont alignées devant chaque joueur
+const DONE = 2.05;
+
 function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
   const group = useRef<THREE.Group>(null);
   const start = useRef<number | null>(null);
@@ -264,18 +272,32 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
   const seeds = useMemo(
     () =>
       Array.from({ length: 28 }, (_, i) => ({
-        r: 0.6 + Math.random() * 2.6,
+        r: 0.7 + Math.random() * 1.9,
         a: Math.random() * Math.PI * 2,
-        spin: (Math.random() - 0.5) * 6,
-        speed: 2.2 + Math.random() * 1.6,
-        seat: i % players,
+        spin: (Math.random() - 0.5) * 4,
+        speed: 1.6 + Math.random() * 1.2,
+        // Les 7 premières pierres de chaque joueur ; à deux, le reste est la pioche.
+        seat: i < players * 7 ? i % players : -1,
+        slot: Math.floor(i / players),
       })),
     [players],
   );
+  // 0 = moi (vers le bas de l'écran), puis les autres autour de la table.
   const seatDir = (seat: number) => {
-    // 0 = moi (vers le bas de l'écran), puis dans le sens du jeu.
     const angle = players === 4 ? [Math.PI / 2, 0, -Math.PI / 2, Math.PI][seat] : [Math.PI / 2, -Math.PI / 2][seat];
     return { x: Math.cos(angle ?? 0), z: Math.sin(angle ?? 0) };
+  };
+  const swirlAt = (s: (typeof seeds)[number], t: number, i: number) => {
+    const a = s.a + t * s.speed;
+    const r = s.r * (0.8 + 0.2 * Math.sin(t * 3 + i));
+    return { x: Math.cos(a) * r, z: Math.sin(a) * r, rot: s.a + t * s.spin };
+  };
+  const lineAt = (s: (typeof seeds)[number], i: number) => {
+    if (s.seat < 0) return { x: ((i % 4) - 1.5) * 0.25, z: ((i % 3) - 1) * 0.2, rot: 0.1 * (i % 5) };
+    const d = seatDir(s.seat);
+    const k = s.slot - 3;
+    // Rangée de 7 pierres côte à côte, chacune pointée vers son joueur.
+    return { x: d.x * 3.3 - d.z * k * 1.1, z: d.z * 3.3 + d.x * k * 1.1, rot: Math.atan2(-d.z, d.x) };
   };
   useFrame(({ clock }) => {
     const g = group.current;
@@ -285,22 +307,35 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
     g.children.forEach((child, i) => {
       const s = seeds[i];
       if (!s) return;
-      if (t < 1.3) {
-        // On mélange à plat, en rond, comme avec les deux mains.
-        const a = s.a + t * s.speed;
-        const r = s.r * (0.7 + 0.3 * Math.sin(t * 3 + i));
-        child.position.set(Math.cos(a) * r, TILE_H / 2 + (i % 3) * 0.02, Math.sin(a) * r * 1.2);
-        child.rotation.set(Math.PI, s.a + t * s.spin, 0);
+      let x: number;
+      let z: number;
+      let rot: number;
+      let scale = 1;
+      if (t < SWIRL) {
+        ({ x, z, rot } = swirlAt(s, t, i));
+      } else if (t < LINE_UP) {
+        const k = ease((t - SWIRL) / (LINE_UP - SWIRL));
+        const from = swirlAt(s, SWIRL, i);
+        const to = lineAt(s, i);
+        x = from.x + (to.x - from.x) * k;
+        z = from.z + (to.z - from.z) * k;
+        rot = from.rot + (to.rot - from.rot) * k;
       } else {
-        const k = ease(Math.min(1, (t - 1.3) / 0.55));
-        const d = seatDir(s.seat);
-        child.position.x += (d.x * 7 - child.position.x) * k * 0.25;
-        child.position.z += (d.z * 9 - child.position.z) * k * 0.25;
-        const sc = 1 - k * 0.6;
-        child.scale.set(sc, sc, sc);
+        const k = ease(Math.min(1, (t - LINE_UP) / (DONE - LINE_UP)));
+        ({ x, z, rot } = lineAt(s, i));
+        if (s.seat >= 0) {
+          const d = seatDir(s.seat);
+          x += d.x * 3.2 * k;
+          z += d.z * 3.2 * k;
+        }
+        scale = 1 - k * 0.7;
       }
+      child.position.set(x, TILE_H / 2 + (t < SWIRL ? (i % 3) * 0.015 : 0), z);
+      // Face cachée (retournée) ; l'angle est inversé par le retournement.
+      child.rotation.set(Math.PI, -rot, 0);
+      child.scale.setScalar(scale);
     });
-    if (t > 1.95 && !finished.current) {
+    if (t > DONE && !finished.current) {
       finished.current = true;
       onDone();
     }
@@ -366,7 +401,7 @@ function corners(minX: number, maxX: number, minZ: number, maxZ: number, height:
  * recule en douceur (~200 ms) pour que toute la chaîne tienne à l'écran. Le cadrage est calculé
  * exactement (chaque coin de la chaîne est projeté à l'écran) : aucune pierre ne sort du cadre.
  */
-function CameraRig({ bounds, tableRot, chainRot, margins }: { bounds: Bounds; tableRot: number; chainRot: number; margins: Margins }) {
+function CameraRig({ bounds, tableRot, chainRot, margins, minZoom }: { bounds: Bounds; tableRot: number; chainRot: number; margins: Margins; minZoom: number }) {
   const { camera, size } = useThree();
   const current = useRef<{ dist: number; z: number } | null>(null);
   const target = useMemo(() => {
@@ -383,15 +418,15 @@ function CameraRig({ bounds, tableRot, chainRot, margins }: { bounds: Bounds; ta
     const centerZ = THREE.MathUtils.clamp((Math.min(...zs) + Math.max(...zs)) / 2, -3, 3);
     const chainDist = fitDistance(cam, chain, centerZ, margins);
     // Au plus près : environ les deux tiers de la table ; au plus loin, la table entière (sauf si la chaîne demande plus).
-    let dist = Math.max(chainDist, tableDist * 0.6);
+    let dist = Math.max(chainDist, tableDist * minZoom);
     if (dist > tableDist) dist = Math.max(tableDist, chainDist);
-    const far = THREE.MathUtils.clamp((dist - tableDist * 0.6) / (tableDist * 0.4), 0, 1);
+    const far = THREE.MathUtils.clamp((dist - tableDist * minZoom) / (tableDist * (1 - minZoom) || 1), 0, 1);
     const z = centerZ + (0.4 - centerZ) * far;
     // En se recentrant, la chaîne pourrait déborder : on recule juste ce qu'il faut.
     aim(cam, dist, z);
     if (!fits(cam, chain, margins)) dist = fitDistance(cam, chain, z, margins);
     return { dist, z };
-  }, [camera, size.width, size.height, bounds, tableRot, chainRot, margins]);
+  }, [camera, size.width, size.height, bounds, tableRot, chainRot, margins, minZoom]);
   useFrame((_, dt) => {
     const cam = camera as THREE.PerspectiveCamera;
     const cur = current.current ?? { ...target };
@@ -423,7 +458,7 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig bounds={bounds} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
+      <CameraRig bounds={bounds} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} minZoom={landscape ? 0.72 : 0.6} />
       <ambientLight intensity={0.35} color="#ffe2b8" />
       <spotLight
         position={[1.5, 16, 3]}

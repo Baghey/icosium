@@ -18,14 +18,14 @@ export function AppShell({ children, bare = false }: { children: ReactNode; bare
   }, [ready, user, router]);
 
   if (!ready || !user) {
-    return <p className="p-6 text-center text-ink-muted">{t("common.loading")}</p>;
+    return <p className="p-6 text-center text-cafe-muted">{t("common.loading")}</p>;
   }
 
   if (bare) return <>{children}</>;
 
   return (
     <>
-      <main className="mx-auto max-w-xl px-4 pt-6 pb-28">{children}</main>
+      <main className="mx-auto max-w-xl px-4 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))]">{children}</main>
       <BottomNav />
     </>
   );

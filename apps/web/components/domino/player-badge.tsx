@@ -31,16 +31,28 @@ function hueOf(id: string | null): number {
   return h;
 }
 
-/** Un avatar par personne, toujours le même, et jamais deux fois le même à une table. */
-export function tableAvatars(userIds: string[]): Record<string, string> {
+/** Les avatars d'hommes et de femmes, pour que le visage d'un bot aille avec son prénom. */
+const MALE_AVATARS = [1, 5, 7];
+const FEMALE_AVATARS = [2, 3, 8];
+const FEMALE_BOTS = new Set(["Khalti Nouria", "Lynda", "Yasmina"]);
+
+/**
+ * Un avatar par personne, toujours le même, et jamais deux fois le même à une table.
+ * Les bots reçoivent un visage qui va avec leur prénom (Djamel n'a pas un visage de femme).
+ */
+export function tableAvatars(seats: { key: string; botName?: string | null }[]): Record<string, string> {
   const taken = new Set<number>();
   const out: Record<string, string> = {};
-  for (const id of userIds) {
-    let i = avatarIndex(id);
-    while (taken.has(i) && taken.size < DEFAULT_AVATARS.length) i = (i + 1) % DEFAULT_AVATARS.length;
-    taken.add(i);
-    out[id] = `/assets/avatars/${DEFAULT_AVATARS[i]}.webp`;
-  }
+  const pick = (key: string, pool: number[]) => {
+    const free = pool.filter((n) => !taken.has(n));
+    const list = free.length ? free : pool;
+    const n = list[avatarIndex(key) % list.length] as number;
+    taken.add(n);
+    out[key] = `/assets/avatars/${n}.webp`;
+  };
+  // Les bots d'abord : leur choix est plus contraint.
+  for (const s of seats) if (s.botName) pick(s.key, FEMALE_BOTS.has(s.botName) ? FEMALE_AVATARS : MALE_AVATARS);
+  for (const s of seats) if (!s.botName) pick(s.key, DEFAULT_AVATARS);
   return out;
 }
 

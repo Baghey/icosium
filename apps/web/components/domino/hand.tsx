@@ -34,7 +34,7 @@ export function DominoHand({ tiles, playable, selected, myTurn, pending, onTap, 
     const [a2, b2] = parseTile(y);
     return a1 - a2 || b1 - b2;
   });
-  const size = Math.max(compact ? 24 : 26, Math.min(compact ? 30 : 44, Math.floor((width - 8) / Math.max(sorted.length, 7)) - 6));
+  const size = Math.max(compact ? 24 : 26, Math.min(compact ? 34 : 44, Math.floor((width - 8) / Math.max(sorted.length, 7)) - 6));
   const overlap = sorted.length * (size + 6) > width;
 
   return (

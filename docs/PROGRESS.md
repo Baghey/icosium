@@ -257,3 +257,19 @@ Ce qui marche :
 Testé : partie à 4 joueurs humains dans 4 navigateurs (un en paysage, trois en portrait), aucune fuite de main ni de pioche.
 
 Reste : son du mélange (à récupérer depuis le PC du propriétaire), test réel à plusieurs téléphones.
+
+## Analyse vidéo vérifiée et paysage peaufiné (5 novembre 2026, 20 h)
+
+Corrigé :
+- Le chrono ne remonte plus (le décalage d'horloge garde la meilleure mesure ; une relecture tardive ne le fausse plus).
+- « Tu fermes la manche ! » au lieu de « Toi ferme la manche ! ».
+- Quand tu n'as rien à jouer, le serveur te fait passer tout seul et un message le dit.
+- Les bots ont un visage qui va avec leur prénom.
+- Plus de boutons en double (son, scores) ; un seul bouton « Jouer seul » sur la page Jouer.
+- Invité sans pseudo : « Salut ! » + lien « Choisis ton pseudo ».
+- Fond sombre dès le premier affichage (plus de flash blanc), marge du bas qui tient compte de la barre du téléphone.
+- La table 3D se prépare dès l'arrivée à la table.
+- Paysage : mélange propre (les pierres tournent puis s'alignent devant chaque joueur), table entière visible,
+  fin de manche sur deux colonnes, pierres de la main plus grandes.
+
+Vérifié et déjà correct : sens des pierres et doubles en travers (nouveau test sur 500 parties au hasard).

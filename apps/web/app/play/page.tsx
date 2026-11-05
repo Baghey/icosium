@@ -218,15 +218,6 @@ function Play() {
         >
           {busy === "create" ? t("play.creating") : t("play.create")}
         </button>
-        <button
-          type="button"
-          onClick={() => void create(true)}
-          disabled={busy !== null}
-          className="-mt-2 flex min-h-touch items-center justify-center gap-2 rounded-card border border-gold/30 px-6 font-medium text-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
-        >
-          <BotIcon className="size-5" />
-          {busy === "solo" ? t("play.soloStarting") : t("play.solo")}
-        </button>
       </section>
     </div>
   );

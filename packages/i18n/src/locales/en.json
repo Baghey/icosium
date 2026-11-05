@@ -34,7 +34,9 @@
     "noFriendsOnline": "No friends online right now.",
     "findFriends": "Add friends",
     "seeAll": "See all",
-    "messages": "Messages"
+    "messages": "Messages",
+    "greetingGuest": "Hi there!",
+    "pickName": "Pick your nickname"
   },
   "auth": {
     "signIn": "Sign in",
@@ -229,7 +231,9 @@
     "penalized": "Hand kept: the points go to the other team.",
     "playOn": "On the {n}",
     "rotate": "Rotate screen",
-    "rotateHint": "Turn your phone sideways for more room"
+    "rotateHint": "Turn your phone sideways for more room",
+    "roundClosedYou": "You close the round!",
+    "youPass": "Nothing to play: you pass"
   },
   "social": {
     "title": "Friends",

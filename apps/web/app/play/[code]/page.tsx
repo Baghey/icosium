@@ -32,6 +32,13 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
     if (ready && !user) router.replace(`/login?next=/play/${code}`);
   }, [ready, user, router, code]);
 
+  // On prépare la table 3D (code et textures) dès l'arrivée : quand la partie démarre,
+  // le tapis et le mélange s'affichent tout de suite, pas deux secondes après la main.
+  useEffect(() => {
+    void import("@/components/domino/table3d");
+    for (const src of ["/assets/felt.webp", "/assets/wood.webp", "/assets/rosette.webp"]) new Image().src = src;
+  }, []);
+
   // Le salon vocal de la table : on y entre micro coupé, et on y revient seul après une coupure.
   // Seul avec des bots : pas besoin de salon vocal.
   const seated = table.mySeat !== null && !(table.seats.length > 1 && table.seats.every((s) => s.isBot || s.userId === user?.id));

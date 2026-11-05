@@ -126,4 +126,43 @@ describe("la chaîne sur la table", () => {
       }
     }
   });
+  it("500 parties au hasard : chaque pierre touche sa voisine par le bon chiffre (jamais à l'envers)", () => {
+    // Même convention que three.js : une rotation « rot » autour de la verticale.
+    const halves = (t: Tiles[number]) => {
+      const c = Math.cos(t.rot);
+      const s = Math.sin(t.rot);
+      return [
+        { v: t.a, x: t.x - 0.5 * c, z: t.z + 0.5 * s },
+        { v: t.b, x: t.x + 0.5 * c, z: t.z - 0.5 * s },
+      ];
+    };
+    const d = (a: { x: number; z: number }, b: { x: number; z: number }) => Math.hypot(a.x - b.x, a.z - b.z);
+    for (let seed = 1; seed <= 500; seed++) {
+      const { chain, starts } = randomChain(seed);
+      const { tiles } = layoutChain(chain, starts[starts.length - 1]!, CHAIN_HALF_W);
+      const byIndex = new Map(tiles.map((t) => [t.index, t]));
+      for (let i = 0; i + 1 < chain.length; i++) {
+        const v = chain[i]!.right;
+        const t1 = byIndex.get(i)!;
+        const t2 = byIndex.get(i + 1)!;
+        const near1 = halves(t1).sort((a, b) => d(a, t2) - d(b, t2))[0]!;
+        const near2 = halves(t2).sort((a, b) => d(a, t1) - d(b, t1))[0]!;
+        expect(near1.v, `partie ${seed}, pierres ${t1.tile} / ${t2.tile}`).toBe(v);
+        expect(near2.v, `partie ${seed}, pierres ${t1.tile} / ${t2.tile}`).toBe(v);
+      }
+    }
+  });
+  it("un double posé dans un virage reste en travers", () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const { chain, starts } = randomChain(seed);
+      const { tiles } = layoutChain(chain, starts[starts.length - 1]!, CHAIN_HALF_W);
+      const byIndex = new Map(tiles.map((t) => [t.index, t]));
+      for (const t of tiles.filter((x) => x.double && x.index !== starts[starts.length - 1])) {
+        // Le double est perpendiculaire à la ligne qui le relie à sa voisine côté centre.
+        const towardCenter = t.index > starts[starts.length - 1]! ? byIndex.get(t.index - 1)! : byIndex.get(t.index + 1)!;
+        const alongX = Math.abs(towardCenter.x - t.x) > Math.abs(towardCenter.z - t.z);
+        expect(extent(t), `partie ${seed}, double ${t.tile}`).toEqual(alongX ? { hx: 0.5, hz: 1 } : { hx: 1, hz: 0.5 });
+      }
+    }
+  });
 });

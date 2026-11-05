@@ -34,7 +34,9 @@
     "noFriendsOnline": "Aucun ami en ligne pour l'instant.",
     "findFriends": "Ajouter des amis",
     "seeAll": "Tout voir",
-    "messages": "Messages"
+    "messages": "Messages",
+    "greetingGuest": "Salut !",
+    "pickName": "Choisis ton pseudo"
   },
   "auth": {
     "signIn": "Connexion",
@@ -229,7 +231,9 @@
     "penalized": "Donne gardée : les points vont à l'équipe adverse.",
     "playOn": "Sur le {n}",
     "rotate": "Tourner l'écran",
-    "rotateHint": "Tourne ton téléphone pour plus de place"
+    "rotateHint": "Tourne ton téléphone pour plus de place",
+    "roundClosedYou": "Tu fermes la manche !",
+    "youPass": "Rien à jouer : tu passes ton tour"
   },
   "social": {
     "title": "Amis",
