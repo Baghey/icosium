@@ -135,7 +135,8 @@ function face(a: number, b: number): Face {
   drawGrain(g, W, H);
 
   const pipsOf = (v: number, x0: number) =>
-    (PIPS[v] ?? []).map(([px, py]) => [x0 + (0.04 + px * 0.92) * half, (0.02 + py * 0.96) * H] as const);
+    // Quart de tour : les rangées de trois points suivent la longueur de la pierre, comme sur un vrai domino.
+    (PIPS[v] ?? []).map(([px, py]) => [x0 + (0.04 + py * 0.92) * half, (0.02 + (1 - px) * 0.96) * H] as const);
   const all = [...pipsOf(a, 0), ...pipsOf(b, half)];
 
   for (const [x, y] of all) {
