@@ -159,13 +159,27 @@
 @utility cafe-bg {
   background-color: var(--cafe-0);
   background-image:
-    radial-gradient(60% 40% at 50% 45%, transparent 0%, rgb(0 0 0 / 0.55) 100%),
+    radial-gradient(70% 50% at 50% 50%, rgb(0 0 0 / 0.25) 0%, rgb(0 0 0 / 0.7) 100%),
+    linear-gradient(180deg, rgb(10 6 4 / 0.35), rgb(10 6 4 / 0.6)),
+    url("/assets/cafe-bg.webp"),
     radial-gradient(18% 10% at 14% 9%, rgb(255 178 82 / 0.38), transparent 70%),
     radial-gradient(14% 9% at 86% 14%, rgb(255 190 100 / 0.32), transparent 70%),
     radial-gradient(22% 14% at 92% 62%, rgb(255 160 70 / 0.18), transparent 70%),
     radial-gradient(30% 18% at 6% 70%, rgb(40 90 50 / 0.35), transparent 70%),
     radial-gradient(35% 22% at 95% 92%, rgb(40 90 50 / 0.3), transparent 70%),
     linear-gradient(180deg, #2b1c11 0%, #1a110b 45%, #120c07 100%);
+  background-size: auto, auto, cover, auto, auto, auto, auto, auto, auto, auto;
+  background-position: center;
+}
+
+/* La vraie table (photo du propriétaire), découpée en 9 morceaux : le rebord garde sa forme
+   quelle que soit la taille de l'écran, seul le feutre s'étire. */
+@utility table-photo {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 66px 42px;
+  border-image: url("/assets/table-portrait.webp") 220 140 fill / 66px 42px stretch;
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 0.6));
 }
 
 /* Panneau sombre translucide avec un filet doré : noms, chrono, barre du bas. */

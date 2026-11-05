@@ -7,6 +7,7 @@ import { DominoBack } from "./tile";
 export type PlayerInfo = {
   name: string | null;
   userId: string | null;
+  avatar: string | null;
   /** Points de son équipe. */
   score: number;
   count: number;
@@ -28,6 +29,27 @@ function hueOf(id: string | null): number {
   return h;
 }
 
+/** Avatars par défaut (images du propriétaire), en attendant la photo de chacun. */
+const DEFAULT_AVATARS = [1, 2, 3, 5, 7, 8];
+function avatarIndex(id: string): number {
+  let h = 0;
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h % DEFAULT_AVATARS.length;
+}
+
+/** Un avatar par personne, toujours le même, et jamais deux fois le même à une table. */
+export function tableAvatars(userIds: string[]): Record<string, string> {
+  const taken = new Set<number>();
+  const out: Record<string, string> = {};
+  for (const id of userIds) {
+    let i = avatarIndex(id);
+    while (taken.has(i) && taken.size < DEFAULT_AVATARS.length) i = (i + 1) % DEFAULT_AVATARS.length;
+    taken.add(i);
+    out[id] = `/assets/avatars/${DEFAULT_AVATARS[i]}.webp`;
+  }
+  return out;
+}
+
 /** L'avatar rond : anneau doré quand c'est son tour, vert quand il parle, badge micro. */
 export function Avatar({ p, size }: { p: PlayerInfo; size: number }) {
   const t = useT();
@@ -45,7 +67,12 @@ export function Avatar({ p, size }: { p: PlayerInfo; size: number }) {
           fontSize: size * 0.42,
         }}
       >
-        <span className="text-gilded drop-shadow">{initial}</span>
+        {p.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={p.avatar} alt="" className="size-full object-cover" />
+        ) : (
+          <span className="text-gilded drop-shadow">{initial}</span>
+        )}
       </div>
       {p.active && p.timeLeft !== null && (
         <svg viewBox="0 0 100 100" className="pointer-events-none absolute -inset-[4px] -rotate-90" style={{ width: size + 8, height: size + 8 }} aria-hidden="true">

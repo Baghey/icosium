@@ -1,25 +1,10 @@
 /** Icônes du café (SVG maison), nettes à toutes les tailles. */
 type P = { className?: string };
 
-/** L'emblème d'ICOSIUM : un nœud doré en étoile à huit branches. Provisoire, en attendant le logo. */
+/** L'emblème d'ICOSIUM : le nœud doré à huit branches. */
 export function Emblem({ className }: P) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <defs>
-        <linearGradient id="emblem-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fbe3a2" />
-          <stop offset="0.5" stopColor="#d8a748" />
-          <stop offset="1" stopColor="#8c6120" />
-        </linearGradient>
-      </defs>
-      <g fill="none" stroke="url(#emblem-gold)" strokeWidth="4" strokeLinejoin="round">
-        <rect x="14" y="14" width="36" height="36" rx="3" />
-        <rect x="14" y="14" width="36" height="36" rx="3" transform="rotate(45 32 32)" />
-        <circle cx="32" cy="32" r="8" />
-      </g>
-      <circle cx="32" cy="32" r="3" fill="url(#emblem-gold)" />
-    </svg>
-  );
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/assets/emblem.webp" alt="" aria-hidden="true" className={className} />;
 }
 
 export function HourglassIcon({ className }: P) {

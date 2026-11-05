@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n";
 import type { SeatInfo } from "@/lib/domino-client";
 import { SoundToggle } from "./sound-toggle";
 import { Emblem } from "@/components/cafe-icons";
+import { tableAvatars } from "./player-badge";
 
 type Props = { code: string; options: DominoOptions; seats: SeatInfo[]; mySeat: number };
 
@@ -16,6 +17,7 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const players = options.players;
+  const avatars = tableAvatars(seats.map((s) => s.userId));
 
   async function share() {
     const text = t("domino.shareText", { code });
@@ -81,10 +83,7 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
       </section>
 
       <div className="flex flex-1 items-center justify-center py-12">
-        <div className="felt-table relative aspect-square w-[min(15rem,62vw)] rounded-[2.5rem]">
-          <p className="absolute inset-0 flex items-center justify-center px-16 text-center text-xs font-medium text-cafe-text/90">
-            {t("domino.waitingHint")}
-          </p>
+        <div className="table-photo relative aspect-[4/5] w-[min(16rem,66vw)]">
           {positions.map(({ seat, cls }) => {
             const who = seats.find((s) => s.seat === seat);
             const partner = players === 4 && seat === (mySeat + 2) % 4;
@@ -92,11 +91,12 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
               <div key={seat} className={`absolute flex flex-col items-center gap-1 ${cls}`}>
                 <span
                   key={who?.userId ?? "free"}
-                  className={`flex size-14 items-center justify-center rounded-full border-2 text-lg font-semibold ${
+                  className={`flex size-14 items-center justify-center overflow-hidden rounded-full border-2 text-lg font-semibold ${
                     who ? "animate-seat border-gold bg-gradient-to-b from-cafe-2 to-cafe-0 shadow-[0_0_14px_rgba(216,167,72,0.45)]" : "border-dashed border-gold/40 bg-black/40 text-cafe-muted"
                   }`}
                 >
-                  {who ? <span className="text-gilded">{who.username.charAt(0).toUpperCase()}</span> : "·"}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {who ? <img src={avatars[who.userId]} alt="" className="size-full rounded-full object-cover" /> : "·"}
                 </span>
                 <span className="cafe-panel max-w-28 truncate rounded-full px-2 text-xs">
                   {who ? (seat === mySeat ? t("domino.you") : who.username) : t("domino.freeSeat")}
@@ -108,6 +108,7 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
         </div>
       </div>
 
+      <p className="mb-1 px-6 text-center text-sm text-cafe-text/90">{t("domino.waitingHint")}</p>
       <p className="mb-3 text-center text-sm text-cafe-muted">
         {players === 4 ? t("play.players4") : t("play.players2")} · {options.targetScore} ·{" "}
         {options.turnSeconds ? t("play.seconds", { n: options.turnSeconds }) : t("play.unlimited")}

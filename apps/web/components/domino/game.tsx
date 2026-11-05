@@ -10,7 +10,7 @@ import { playClack, playYourTurn } from "@/lib/sound";
 import type { DominoView, SeatInfo } from "@/lib/domino-client";
 import { DominoChain } from "./chain";
 import { DominoHand } from "./hand";
-import { Avatar, PlayerBadge, type PlayerInfo } from "./player-badge";
+import { Avatar, PlayerBadge, type PlayerInfo, tableAvatars } from "./player-badge";
 import { SoundToggle } from "./sound-toggle";
 import { DominoBack, DominoTile } from "./tile";
 import { Emblem, HourglassIcon, TrophyIcon, UsersIcon } from "@/components/cafe-icons";
@@ -143,12 +143,14 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const themScore = view.scores[myTeam === 0 ? 1 : 0];
 
   const { peers } = useVoice();
+  const avatars = useMemo(() => tableAvatars(seats.map((x) => x.userId)), [seats]);
   const info = (seat: number): PlayerInfo => {
     const s = seats.find((x) => x.seat === seat);
     const peer = s ? peers.find((x) => x.identity === s.userId) : undefined;
     return {
       name: seat === mySeat ? t("domino.you") : (s?.username ?? null),
       userId: s?.userId ?? null,
+      avatar: s ? (avatars[s.userId] ?? null) : null,
       score: view.scores[players === 2 ? (seat as 0 | 1) : teamOf(seat)],
       count: view.handCounts[seat] ?? 0,
       active: view.phase === "playing" && view.turn === seat,
@@ -205,11 +207,10 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
         </div>
 
         {/* La table et les joueurs autour */}
-        <div className="relative min-h-0 flex-1 px-3 pt-16 pb-2">
-          <div className="felt-table relative h-full overflow-hidden rounded-[3.25rem]">
-            <div className="felt-grain absolute inset-0" aria-hidden="true" />
-            <Rosette className="absolute top-1/2 left-1/2 w-[78%] max-w-80 -translate-x-1/2 -translate-y-1/2 opacity-[0.1]" />
-            <div className="absolute inset-x-3 top-[4.5rem] bottom-3 flex items-center justify-center">
+        <div className="relative min-h-0 flex-1 px-2 pt-12 pb-1">
+          <div className="table-photo relative h-full">
+            <img src="/assets/rosette.webp" alt="" aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 w-[72%] max-w-72 -translate-x-1/2 -translate-y-1/2 opacity-35" />
+            <div className="absolute -inset-x-6 -top-3 -bottom-10 flex items-center justify-center">
               {view.chain.length === 0 && !selected ? (
                 <p className="text-gilded text-center text-lg font-semibold">{t("domino.round", { n: view.round })}</p>
               ) : (
@@ -217,7 +218,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
               )}
             </div>
             {players === 2 && (
-              <span className="absolute bottom-3 end-4 flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1 text-xs text-cafe-text">
+              <span className="absolute -bottom-9 end-0 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs text-cafe-text">
                 <DominoBack size={6} /> {t("domino.boneyard", { n: view.boneyardCount })}
               </span>
             )}
@@ -268,24 +269,6 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
       )}
       {showScores && <ScoresSheet view={view} seats={seats} mySeat={mySeat} onClose={() => setShowScores(false)} />}
     </div>
-  );
-}
-
-/** La rosette dorée imprimée au centre du feutre (étoile à huit branches). */
-function Rosette({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 200" className={className} aria-hidden="true">
-      <g fill="none" stroke="var(--gold-light)" strokeWidth="1.6">
-        <circle cx="100" cy="100" r="96" />
-        <circle cx="100" cy="100" r="88" strokeDasharray="2 5" />
-        <rect x="38" y="38" width="124" height="124" />
-        <rect x="38" y="38" width="124" height="124" transform="rotate(45 100 100)" />
-        <rect x="62" y="62" width="76" height="76" transform="rotate(22.5 100 100)" />
-        <rect x="62" y="62" width="76" height="76" transform="rotate(67.5 100 100)" />
-        <circle cx="100" cy="100" r="24" />
-        <circle cx="100" cy="100" r="10" />
-      </g>
-    </svg>
   );
 }
 
