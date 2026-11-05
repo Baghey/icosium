@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "ICOSIUM",
+    "tagline": "The corner café, online."
+  },
+  "nav": {
+    "home": "Café",
+    "voice": "Voice room",
+    "profile": "Profile",
+    "main": "Main navigation"
+  },
+  "home": {
+    "greeting": "Welcome, {name}",
+    "intro": "Games arrive in the next step. For now, try the voice room with your friends.",
+    "openVoice": "Open the voice room",
+    "status": "Server status",
+    "statusChecking": "Checking…",
+    "statusOk": "Online",
+    "statusDown": "Unreachable",
+    "service": {
+      "accounts": "Accounts (Nakama)",
+      "games": "Game server (Colyseus)",
+      "voice": "Voice (LiveKit)"
+    }
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "guest": "Guest",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "username": "Username",
+    "usernameHint": "3 to 20 letters, numbers or underscores.",
+    "birthdate": "Date of birth",
+    "birthdateHint": "ICOSIUM is for people aged 16 and over.",
+    "guestIntro": "Try ICOSIUM in one tap. Your guest account stays on this device.",
+    "guestAge": "I am 16 or older",
+    "continueAsGuest": "Continue as guest",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create my account",
+    "working": "One moment…",
+    "signOut": "Sign out",
+    "error": {
+      "tooYoung": "You must be at least 16 to join ICOSIUM.",
+      "invalidBirthdate": "Please enter a valid date of birth.",
+      "badCredentials": "Wrong email or password.",
+      "emailTaken": "An account already exists with this email.",
+      "usernameTaken": "This username is already taken.",
+      "invalidUsername": "Usernames use 3 to 20 letters, numbers or underscores.",
+      "weakPassword": "Your password needs at least 8 characters.",
+      "ageNotConfirmed": "Please confirm you are 16 or older.",
+      "network": "Can't reach ICOSIUM right now. Check your connection and try again.",
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "voice": {
+    "title": "Voice room",
+    "intro": "Up to 4 people. Everyone arrives with their mic off.",
+    "join": "Join the voice room",
+    "joining": "Joining…",
+    "leave": "Leave",
+    "micOn": "Mic on",
+    "micOff": "Mic off",
+    "micHint": "Tap to turn your mic on or off. Hold to talk.",
+    "pushToTalk": "Talking…",
+    "emptySeat": "Free seat",
+    "you": "You",
+    "speaking": "Speaking",
+    "inRoom": "In the voice room",
+    "nobodySpeaking": "Nobody is talking",
+    "isSpeaking": "{name} is talking",
+    "reconnecting": "Reconnecting…",
+    "full": "This voice room is full (4 people).",
+    "micDenied": "ICOSIUM can't use your microphone. Allow it in your browser settings.",
+    "error": "Couldn't join the voice room. Please try again.",
+    "back": "Back to the room"
+  },
+  "profile": {
+    "title": "Profile",
+    "username": "Username",
+    "account": "Account type",
+    "guestAccount": "Guest",
+    "emailAccount": "Email",
+    "navigateHint": "Switch pages while in the voice room: the voice bar stays on top."
+  },
+  "common": {
+    "loading": "Loading…",
+    "language": "Language"
+  }
+}
