@@ -58,7 +58,9 @@
       "tooManyAttempts": "Trop d'essais. Attends une minute et réessaie.",
       "signupRefused": "Impossible de créer ton compte. Vérifie ta date de naissance et ton pseudo."
     },
-    "checkEmail": "Presque fini ! Ouvre l'email qu'on vient de t'envoyer pour confirmer ton compte, puis connecte-toi."
+    "checkEmail": "Presque fini ! Ouvre l'email qu'on vient de t'envoyer pour confirmer ton compte, puis connecte-toi.",
+    "guestName": "Ton pseudo",
+    "guestNameHint": "3 à 20 lettres, chiffres ou tirets bas. Laisse vide pour un pseudo au hasard."
   },
   "voice": {
     "title": "Salon vocal",
@@ -88,7 +90,10 @@
     "account": "Type de compte",
     "guestAccount": "Invité",
     "emailAccount": "Email",
-    "navigateHint": "Change de page pendant le vocal : la barre vocale reste en haut."
+    "navigateHint": "Change de page pendant le vocal : la barre vocale reste en haut.",
+    "rename": "Changer mon pseudo",
+    "renameSave": "Enregistrer",
+    "renamed": "Pseudo changé."
   },
   "common": {
     "loading": "Chargement…",
@@ -130,7 +135,10 @@
       "seat_taken": "Quelqu'un vient de prendre cette chaise. Réessaie.",
       "rate_limited": "Tu as ouvert beaucoup de tables. Attends quelques minutes.",
       "unknown": "Un problème est survenu. Réessaie."
-    }
+    },
+    "solo": "Jouer seul contre des bots",
+    "soloHint": "Tu joues tout de suite, les autres chaises sont prises par des bots.",
+    "soloStarting": "On installe les bots…"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -187,6 +195,23 @@
     "table": "Table {code}",
     "players": "Joueurs",
     "consultUs": "Ytchawro : toi ou ton partenaire ouvre",
-    "consultThem": "L'autre équipe se concerte"
+    "consultThem": "L'autre équipe se concerte",
+    "bot": "Bot",
+    "fillBots": "Compléter avec des bots",
+    "fillBotsHint": "Les chaises libres sont données à des bots et la partie commence.",
+    "thinking": "{name} réfléchit…",
+    "redealSixDoubles": "6 doubles dans une main : on redistribue.",
+    "redealFamily": "{name} a redéclaré : nouvelle donne.",
+    "kept": "{name} garde sa donne : son équipe ne marquera rien cette manche.",
+    "declareTitle": "Donne déséquilibrée",
+    "declareMine": "Tu as reçu 6 pierres de la famille du {n}.",
+    "declareOther": "{name} a reçu 6 pierres de la famille du {n}.",
+    "declareExplain": "Redéclarer : on remélange et on redistribue. Garder : on joue, mais l'équipe qui garde ne marque aucun point cette manche, ils vont aux adversaires.",
+    "declareWait": "On attend son choix… {n} s",
+    "redeclare": "Redéclarer",
+    "keep": "Garder",
+    "penaltyChip": "Sans points cette manche",
+    "roundReplay": "Personne ne marque : la manche est rejouée et le double-six ouvre.",
+    "penalized": "Donne gardée : les points vont à l'équipe adverse."
   }
 }

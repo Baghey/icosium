@@ -7,6 +7,7 @@ import { type FormEvent, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DominoTile } from "@/components/domino/tile";
 import { callDomino } from "@/lib/domino-client";
+import { BotIcon } from "@/components/cafe-icons";
 import { useT } from "@/lib/i18n";
 
 export default function PlayPage() {
@@ -60,14 +61,15 @@ function Play() {
   const router = useRouter();
   const [options, setOptions] = useState<DominoOptions>(DEFAULT_DOMINO_OPTIONS);
   const [code, setCode] = useState("");
-  const [busy, setBusy] = useState<"create" | "join" | null>(null);
+  const [busy, setBusy] = useState<"create" | "solo" | "join" | null>(null);
   const [error, setError] = useState<{ where: "create" | "join"; key: MessageKey } | null>(null);
   const set = <K extends keyof DominoOptions>(k: K, v: DominoOptions[K]) => setOptions((o) => ({ ...o, [k]: v }));
 
-  async function create() {
-    setBusy("create");
+  /** solo : je joue tout de suite, les autres chaises vont à des bots (c'est mon choix explicite). */
+  async function create(solo = false) {
+    setBusy(solo ? "solo" : "create");
     setError(null);
-    const res = await callDomino({ op: "create", options });
+    const res = await callDomino({ op: "create", options, solo });
     if (res.ok) router.push(`/play/${res.data.code as string}`);
     else {
       setBusy(null);
@@ -104,6 +106,21 @@ function Play() {
           <p className="text-ink-muted">{t("play.subtitle")}</p>
         </div>
       </header>
+
+      <button
+        type="button"
+        onClick={() => void create(true)}
+        disabled={busy !== null}
+        className="cafe-bg group relative flex min-h-20 items-center gap-4 overflow-hidden rounded-card border border-gold/50 px-4 py-3 text-start text-cafe-text shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-transform duration-150 active:scale-[0.98] disabled:opacity-70"
+      >
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-black/40 text-gold-light">
+          <BotIcon className="size-7" />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-gilded text-lg font-bold">{busy === "solo" ? t("play.soloStarting") : t("play.solo")}</span>
+          <span className="text-sm text-cafe-muted">{t("play.soloHint")}</span>
+        </span>
+      </button>
 
       <form onSubmit={join} className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4">
         <div>
@@ -200,6 +217,15 @@ function Play() {
           className="flex min-h-14 items-center justify-center rounded-card bg-mint px-6 text-lg font-semibold text-mint-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
         >
           {busy === "create" ? t("play.creating") : t("play.create")}
+        </button>
+        <button
+          type="button"
+          onClick={() => void create(true)}
+          disabled={busy !== null}
+          className="-mt-2 flex min-h-touch items-center justify-center gap-2 rounded-card border border-line px-6 font-medium text-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+        >
+          <BotIcon className="size-5" />
+          {busy === "solo" ? t("play.soloStarting") : t("play.solo")}
         </button>
       </section>
     </div>

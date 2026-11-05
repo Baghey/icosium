@@ -42,7 +42,10 @@ export default function LoginPage() {
 
   /** Vérifications rapides côté app ; le serveur refait les mêmes et a le dernier mot. */
   function localCheck(): MessageKey | null {
-    if (mode === "guest") return ageConfirmed ? null : "auth.error.ageNotConfirmed";
+    if (mode === "guest") {
+      if (username.trim() && !USERNAME_PATTERN.test(username.trim())) return "auth.error.invalidUsername";
+      return ageConfirmed ? null : "auth.error.ageNotConfirmed";
+    }
     if (password.length < MIN_PASSWORD_LENGTH) return "auth.error.weakPassword";
     if (mode === "signUp") {
       if (!USERNAME_PATTERN.test(username)) return "auth.error.invalidUsername";
@@ -77,7 +80,12 @@ export default function LoginPage() {
           return;
         }
       } else {
-        await auth.signInAsGuest();
+        const name = username.trim();
+        if (name && !(await auth.isUsernameAvailable(name))) {
+          setError("auth.error.usernameTaken");
+          return;
+        }
+        await auth.signInAsGuest(name || undefined);
       }
       router.replace(nextPath());
     } catch (err) {
@@ -118,6 +126,20 @@ export default function LoginPage() {
         {mode === "guest" ? (
           <>
             <p className="text-ink-muted">{t("auth.guestIntro")}</p>
+            <Field label={t("auth.guestName")} hint={t("auth.guestNameHint")}>
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  autoComplete="nickname"
+                  autoCapitalize="none"
+                  maxLength={20}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9_]/g, ""))}
+                  className={INPUT}
+                />
+              )}
+            </Field>
             <label className="flex min-h-touch items-center gap-3">
               <input
                 type="checkbox"

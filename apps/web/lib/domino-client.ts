@@ -5,7 +5,11 @@ import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
 export type DominoView = DominoPublicView & { sentAt: number };
-export type SeatInfo = { seat: number; userId: string; username: string };
+/** Une chaise : un humain (userId) ou un bot (userId null). */
+export type SeatInfo = { seat: number; userId: string | null; username: string; isBot: boolean };
+/** Clé stable d'une chaise (pour l'avatar) : l'id de la personne, ou « bot-<chaise> ». */
+export const seatKey = (s: SeatInfo): string => s.userId ?? `bot-${s.seat}`;
+
 export type TableInfo = { id: string; code: string; hostId: string; options: DominoOptions; status: "waiting" | "playing" | "finished" };
 
 export type CallResult = { ok: true; data: Record<string, unknown> } | { ok: false; error: string };
@@ -34,8 +38,13 @@ export async function fetchTable(tableId: string): Promise<TableInfo | null> {
 }
 
 export async function fetchSeats(tableId: string): Promise<SeatInfo[]> {
-  const { data } = await supabase().from("domino_seats").select("seat, user_id, username").eq("table_id", tableId).order("seat");
-  return (data ?? []).map((r) => ({ seat: r.seat as number, userId: r.user_id as string, username: r.username as string }));
+  const { data } = await supabase().from("domino_seats").select("seat, user_id, username, is_bot").eq("table_id", tableId).order("seat");
+  return (data ?? []).map((r) => ({
+    seat: r.seat as number,
+    userId: (r.user_id as string | null) ?? null,
+    username: r.username as string,
+    isBot: Boolean(r.is_bot),
+  }));
 }
 
 export async function fetchView(tableId: string): Promise<{ version: number; view: DominoView } | null> {

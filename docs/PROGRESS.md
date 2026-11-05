@@ -16,6 +16,35 @@
   début de chaque manche. Sans WebGL, la table en image reste affichée.
 - Page de contrôle visuel en développement : `/dev/table3d?n=12&start=3&ghost=1`.
 
+## Domino : bots, pseudo invité, nouvelles règles (5 novembre 2026)
+
+Demandé par le propriétaire après avoir joué sur son téléphone.
+
+Ce qui marche :
+- **Écran de jeu** : les autres joueurs sont dans une rangée au-dessus de la table (avatar, nom,
+  pastille dorée avec le nombre de pierres). Plus rien ne cache la table.
+- **Jouer seul** : bouton « Jouer seul contre des bots » sur la page Jouer, et « Compléter avec des
+  bots » pour le Patron dans la salle d'attente. Les bots ne viennent que sur ce choix explicite
+  (`botAllowed` passe à true). Le bot (`chooseBotMove`) joue sur le serveur, en ~1 s, et ne voit que
+  ce qu'un joueur verrait : sa main, la table, et qui a passé sur quel chiffre. Sa main n'est jamais
+  écrite dans `domino_hands`. Pas de salon vocal quand on est seul avec des bots.
+- **Invité** : choix du pseudo à l'entrée (facultatif) et changement dans le Profil
+  (`set_guest_username`).
+- **6 doubles** dans une main : la donne est annulée et refaite, avec un message.
+- **6 pierres d'une même famille** : la manche attend (phase `declare`). Le joueur choisit
+  « Redéclarer » (nouvelle donne) ou « Garder » (son équipe ne marque rien sur la manche : si elle
+  gagne, les points vont aux adversaires). Sans choix en 20 s, on redistribue. Un bot redéclare.
+- **Blocage à égalité** : aucun point, la manche est rejouée (même numéro) et le double-six ouvre.
+- Migration `20261105080000_bots_and_guest_names.sql` appliquée en ligne ; fonction `domino` v3
+  déployée (envoyée en un seul fichier JavaScript, construit avec esbuild depuis les sources).
+
+Tests : shared 55, fonctions 16, web 11, i18n 7. Parties complètes jouées en local contre les bots
+(2D et 3D), captures à 360 px.
+
+Reste / à confirmer avec le propriétaire :
+- Les détails de l'easter egg « 6 pierres d'une famille » (6 sur 7 suffisent, seul le joueur
+  choisit, redistribution si le temps passe, aussi à 2 joueurs) sont ma lecture : à valider.
+
 ## Étape 2 : le domino algérien (5 novembre 2026)
 
 ### Ce qui marche

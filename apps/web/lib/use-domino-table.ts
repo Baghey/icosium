@@ -161,6 +161,26 @@ export function useDominoTable(code: string) {
     await refreshView();
   }, [refreshView]);
 
+  /** Le Patron donne les chaises libres à des bots (le serveur vérifie que c'est bien lui). */
+  const addBots = useCallback(async () => {
+    const tableId = tableIdRef.current;
+    if (!tableId) return { ok: false as const, error: "not_seated" };
+    const res = await callDomino({ op: "bots", tableId });
+    await Promise.all([refreshSeats(), refreshView()]);
+    return res;
+  }, [refreshSeats, refreshView]);
+
+  /** Donne « 6 pierres d'une famille » : redéclarer ou garder. */
+  const declare = useCallback(
+    async (choice: "redeclare" | "keep") => {
+      const tableId = tableIdRef.current;
+      if (!tableId) return;
+      await callDomino({ op: "declare", tableId, choice });
+      await refreshView();
+    },
+    [refreshView],
+  );
+
   const mySeat = state.seats.find((s) => s.userId === userId)?.seat ?? null;
-  return { ...state, mySeat, play, tick, nextRound };
+  return { ...state, mySeat, play, tick, nextRound, addBots, declare };
 }

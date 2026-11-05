@@ -58,7 +58,9 @@
       "tooManyAttempts": "Too many attempts. Wait a minute and try again.",
       "signupRefused": "We couldn't create your account. Check your date of birth and username."
     },
-    "checkEmail": "Almost there! Open the email we just sent you to confirm your account, then sign in."
+    "checkEmail": "Almost there! Open the email we just sent you to confirm your account, then sign in.",
+    "guestName": "Your nickname",
+    "guestNameHint": "3 to 20 letters, digits or underscores. Leave empty for a random one."
   },
   "voice": {
     "title": "Voice room",
@@ -88,7 +90,10 @@
     "account": "Account type",
     "guestAccount": "Guest",
     "emailAccount": "Email",
-    "navigateHint": "Switch pages while in the voice room: the voice bar stays on top."
+    "navigateHint": "Switch pages while in the voice room: the voice bar stays on top.",
+    "rename": "Change my nickname",
+    "renameSave": "Save",
+    "renamed": "Nickname changed."
   },
   "common": {
     "loading": "Loading…",
@@ -130,7 +135,10 @@
       "seat_taken": "Someone just took that seat. Try again.",
       "rate_limited": "You opened a lot of tables. Wait a few minutes.",
       "unknown": "Something went wrong. Please try again."
-    }
+    },
+    "solo": "Play alone against bots",
+    "soloHint": "Start right away, bots take the other seats.",
+    "soloStarting": "Seating the bots…"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -187,6 +195,23 @@
     "table": "Table {code}",
     "players": "Players",
     "consultUs": "Your team opens: talk it over",
-    "consultThem": "The other team is deciding who opens"
+    "consultThem": "The other team is deciding who opens",
+    "bot": "Bot",
+    "fillBots": "Fill with bots",
+    "fillBotsHint": "Free seats go to bots and the game starts.",
+    "thinking": "{name} is thinking…",
+    "redealSixDoubles": "6 doubles in one hand: the tiles are dealt again.",
+    "redealFamily": "{name} asked for a redeal: new hand.",
+    "kept": "{name} keeps the hand: their team scores nothing this round.",
+    "declareTitle": "Unbalanced deal",
+    "declareMine": "You were dealt 6 tiles of the {n} family.",
+    "declareOther": "{name} was dealt 6 tiles of the {n} family.",
+    "declareExplain": "Redeal: shuffle and deal again. Keep: play on, but the keeping team scores nothing this round, the points go to the opponents.",
+    "declareWait": "Waiting for their choice… {n} s",
+    "redeclare": "Redeal",
+    "keep": "Keep",
+    "penaltyChip": "No points this round",
+    "roundReplay": "Nobody scores: the round is replayed and the double-six opens.",
+    "penalized": "Hand kept: the points go to the other team."
   }
 }

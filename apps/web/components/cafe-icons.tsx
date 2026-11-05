@@ -41,3 +41,30 @@ export function CrownIcon({ className }: P) {
     </svg>
   );
 }
+
+/** Bot : une petite tête ronde à antenne, comme un jeton de café. */
+export function BotIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 3v3" />
+      <circle cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none" />
+      <rect x="4.5" y="6.5" width="15" height="12" rx="5" />
+      <circle cx="9.3" cy="12.2" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="14.7" cy="12.2" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M9.5 15.6c1.5 1 3.5 1 5 0" />
+      <path d="M2.5 11v3M21.5 11v3" />
+    </svg>
+  );
+}
+
+/** Une pierre de domino vue de dos, en or, pour compter les pierres d'un joueur. */
+export function TileBackIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 12 20" className={className} aria-hidden="true">
+      <rect x="0.6" y="1.4" width="10.8" height="18" rx="2.4" fill="#6e4b18" />
+      <rect x="0.6" y="0.6" width="10.8" height="17.8" rx="2.4" fill="#d9ab4e" stroke="#8a5f1d" strokeWidth="0.8" />
+      <path d="M6 5.2l1 2.2 2.3.2-1.8 1.5.6 2.3L6 10.2l-2.1 1.2.6-2.3-1.8-1.5 2.3-.2z" fill="#f6dc95" opacity="0.9" />
+      <rect x="1.8" y="1.6" width="8.4" height="2" rx="1" fill="#fff3c4" opacity="0.35" />
+    </svg>
+  );
+}

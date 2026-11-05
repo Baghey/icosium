@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MicButton } from "@/components/mic-button";
 import { useI18n } from "@/lib/i18n";
 import { playClack, playYourTurn } from "@/lib/sound";
-import type { DominoView, SeatInfo } from "@/lib/domino-client";
+import { type DominoView, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { DominoChain } from "./chain";
 import { DominoHand } from "./hand";
 import { Avatar, PlayerBadge, type PlayerInfo, tableAvatars } from "./player-badge";
@@ -27,6 +27,7 @@ type Props = {
   play: (tile: TileId, end: End) => Promise<{ ok: boolean; error?: string }>;
   tick: () => Promise<void>;
   nextRound: () => Promise<void>;
+  declare: (choice: "redeclare" | "keep") => Promise<void>;
 };
 
 const Table3D = dynamic(() => import("./table3d"), { ssr: false, loading: () => null });
@@ -74,7 +75,7 @@ const ERROR_KEYS: Record<string, MessageKey> = {
 };
 
 /** L'écran de jeu : la table au centre, les autres autour, ma main et le micro en bas. */
-export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play, tick, nextRound }: Props) {
+export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play, tick, nextRound, declare }: Props) {
   const { t } = useI18n();
   const players = view.options.players;
   const now = useNow(250);
@@ -85,6 +86,9 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const [bubbles, setBubbles] = useState<Record<number, string>>({});
   const [freshTile, setFreshTile] = useState<string | null>(null);
   const [showScores, setShowScores] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const bots = view.bots ?? [];
+  const botTurn = view.phase === "playing" && bots.includes(view.turn);
 
   const nameOf = (seat: number) => seats.find((s) => s.seat === seat)?.username ?? null;
   // Début de manche après 50 points : le gagnant ou son partenaire peut ouvrir (« ytchawro »).
@@ -113,6 +117,12 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
         setFreshTile(e.tile);
       } else if (e.type === "pass") next[e.seat] = t("domino.pass");
       else if (e.type === "draw") next[e.seat] = t("domino.drew", { n: e.count });
+      else if (e.type === "redeal") {
+        const who = e.seat === mySeat ? t("domino.you") : (nameOf(e.seat) ?? "…");
+        setNotice(e.reason === "sixDoubles" ? t("domino.redealSixDoubles") : t("domino.redealFamily", { name: who }));
+      } else if (e.type === "keep") {
+        setNotice(t("domino.kept", { name: e.seat === mySeat ? t("domino.you") : (nameOf(e.seat) ?? "…") }));
+      }
     }
     if (Object.keys(next).length) {
       setBubbles(next);
@@ -120,18 +130,27 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
     }
     if (view.phase === "playing" && view.turn === mySeat) playYourTurn();
     setSelected(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.eventSeq, view.events, view.phase, view.turn, mySeat, t]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => setNotice(null), 4200);
+    return () => window.clearTimeout(id);
+  }, [notice]);
 
   // Chrono écoulé : on prévient le serveur, qui vérifie l'heure et joue à la place du joueur.
   const remainingMs = view.deadline === null ? null : view.deadline - serverNow;
   const tickedFor = useRef<string>("");
   useEffect(() => {
-    if (remainingMs === null || remainingMs > -800 || view.phase === "gameOver") return;
+    // Pour un bot, on prévient vite (il « réfléchit » une seconde) ; pour un humain, avec une marge.
+    const grace = botTurn || (view.phase === "declare" && view.declare && bots.includes(view.declare.seat)) ? -250 : -800;
+    if (remainingMs === null || remainingMs > grace || view.phase === "gameOver") return;
     const key = `${view.eventSeq}-${Math.floor(-remainingMs / 4000)}`;
     if (tickedFor.current === key) return;
     tickedFor.current = key;
     void tick();
-  }, [remainingMs, view.eventSeq, view.phase, tick]);
+  }, [remainingMs, view.eventSeq, view.phase, view.declare, botTurn, bots, tick]);
 
   async function doPlay(tile: TileId, end: End) {
     setPending(true);
@@ -178,24 +197,26 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const { peers } = useVoice();
   const webgl = useWebGL();
   const reducedMotion = useReducedMotion();
-  const avatars = useMemo(() => tableAvatars(seats.map((x) => x.userId)), [seats]);
+  const avatars = useMemo(() => tableAvatars(seats.map(seatKey)), [seats]);
   const info = (seat: number): PlayerInfo => {
     const s = seats.find((x) => x.seat === seat);
-    const peer = s ? peers.find((x) => x.identity === s.userId) : undefined;
+    const peer = s?.userId ? peers.find((x) => x.identity === s.userId) : undefined;
+    const bot = bots.includes(seat);
     return {
       name: seat === mySeat ? t("domino.you") : (s?.username ?? null),
       userId: s?.userId ?? null,
-      avatar: s ? (avatars[s.userId] ?? null) : null,
+      avatar: s ? (avatars[seatKey(s)] ?? null) : null,
       score: view.scores[players === 2 ? (seat as 0 | 1) : teamOf(seat)],
       count: view.handCounts[seat] ?? 0,
       active: isTurnOf(seat),
-      timeLeft: view.turn === seat ? fraction : null,
+      timeLeft: view.turn === seat && !bot ? fraction : null,
       bubble: bubbles[seat] ?? null,
       inVoice: Boolean(peer),
       micOn: Boolean(peer?.micOn),
       speaking: Boolean(peer?.isSpeaking && peer.micOn),
       partner: players === 4 && seat === (mySeat + 2) % 4,
       me: seat === mySeat,
+      bot,
     };
   };
 
@@ -211,7 +232,9 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
           : t("domino.consultThem")
         : myTurn
           ? t("domino.yourTurnShort")
-          : t("domino.turnOf", { name: nameOf(view.turn) ?? "…" });
+          : botTurn
+            ? t("domino.thinking", { name: nameOf(view.turn) ?? "…" })
+            : t("domino.turnOf", { name: nameOf(view.turn) ?? "…" });
 
   return (
     <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
@@ -244,14 +267,26 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
           <div className={`cafe-panel flex items-center gap-2 rounded-2xl px-4 py-1 ${myTurn ? "border-gold" : ""}`}>
             <HourglassIcon className={`size-4 ${myTurn ? "text-gold-light" : "text-cafe-muted"}`} />
             <span className="max-w-40 truncate text-sm font-medium">{turnLabel}</span>
-            {clock && view.phase === "playing" && (
+            {clock && view.phase === "playing" && !botTurn && (
               <span className={`text-gilded text-lg font-bold tabular-nums ${secs !== null && secs <= 5 ? "animate-pulse" : ""}`}>{clock}</span>
             )}
           </div>
         </div>
 
-        {/* La table et les joueurs autour */}
-        <div className="relative min-h-0 flex-1 px-2 pt-12 pb-1">
+        {/* Les autres joueurs, en rangée au-dessus de la table : rien ne cache le jeu */}
+        <div className={`relative z-10 grid items-start px-2 pt-2 ${players === 4 ? "grid-cols-3" : "grid-cols-1"}`}>
+          {around.map(({ seat, pos }) => (
+            <div
+              key={pos}
+              className={`flex ${pos === "left" ? "justify-start pt-3" : pos === "right" ? "justify-end pt-3" : "justify-center"}`}
+            >
+              <PlayerBadge p={info(seat)} size={pos === "top" ? 50 : 46} />
+            </div>
+          ))}
+        </div>
+
+        {/* La table */}
+        <div className="relative min-h-0 flex-1 px-2 pb-1">
           {webgl ? (
             <div className="absolute inset-0">
               <Table3D
@@ -282,16 +317,20 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
             )}
           </div>
           )}
-          {around.map(({ seat, pos }) => (
-            <div
-              key={pos}
-              className={`absolute ${
-                pos === "top" ? "top-0 left-1/2 -translate-x-1/2" : pos === "left" ? "start-1 top-9" : "end-1 top-9"
-              }`}
+          {notice && (
+            <p
+              key={notice}
+              role="status"
+              className="animate-bubble cafe-panel absolute inset-x-6 top-2 z-20 mx-auto max-w-sm rounded-2xl border-gold/60 px-4 py-2 text-center text-sm font-semibold text-gold-light"
             >
-              <PlayerBadge p={info(seat)} size={pos === "top" ? 50 : 46} />
-            </div>
-          ))}
+              {notice}
+            </p>
+          )}
+          {view.penaltyTeam !== null && view.penaltyTeam !== undefined && view.phase === "playing" && (
+            <span className="absolute end-3 bottom-2 z-10 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-[#e9a68f] ring-1 ring-[#e9826a]/50">
+              {view.penaltyTeam === (players === 2 ? mySeat : teamOf(mySeat)) ? t("domino.us") : t("domino.them")} · {t("domino.penaltyChip")}
+            </span>
+          )}
         </div>
 
         {/* Ma main, dans un plateau sombre bordé d'or */}
@@ -326,6 +365,16 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
       {(view.phase === "roundOver" || view.phase === "gameOver") && view.lastResult && (
         <RoundSheet view={view} seats={seats} mySeat={mySeat} serverNow={serverNow} onNext={nextRound} />
       )}
+      {view.phase === "declare" && view.declare && (
+        <DeclareSheet
+          seat={view.declare.seat}
+          family={view.declare.family}
+          mine={view.declare.seat === mySeat}
+          name={nameOf(view.declare.seat) ?? "…"}
+          secondsLeft={remainingMs === null ? null : Math.max(0, Math.ceil(remainingMs / 1000))}
+          onChoose={declare}
+        />
+      )}
       {showScores && <ScoresSheet view={view} seats={seats} mySeat={mySeat} onClose={() => setShowScores(false)} />}
     </div>
   );
@@ -348,6 +397,68 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: () 
         {children}
       </div>
     </div>
+  );
+}
+
+/** Donne « 6 pierres d'une même famille » : le joueur choisit, les autres voient le message. */
+function DeclareSheet({
+  family,
+  mine,
+  name,
+  secondsLeft,
+  onChoose,
+}: {
+  seat: number;
+  family: number;
+  mine: boolean;
+  name: string;
+  secondsLeft: number | null;
+  onChoose: (choice: "redeclare" | "keep") => Promise<void>;
+}) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const choose = async (choice: "redeclare" | "keep") => {
+    setBusy(true);
+    await onChoose(choice);
+  };
+  return (
+    <Sheet>
+      <div className="mb-4 flex flex-col items-center gap-2 text-center">
+        <span className="animate-pop flex items-center gap-1" dir="ltr" aria-hidden="true">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <span key={i} style={{ transform: `rotate(${(i - 2.5) * 7}deg) translateY(${Math.abs(i - 2.5) * 3}px)` }}>
+              <DominoTile a={family} b={i} orientation="vertical" size={16} />
+            </span>
+          ))}
+        </span>
+        <h2 className="text-gilded text-xl font-bold">{t("domino.declareTitle")}</h2>
+        <p className="font-semibold">{mine ? t("domino.declareMine", { n: family }) : t("domino.declareOther", { name, n: family })}</p>
+        <p className="text-sm text-cafe-muted">{t("domino.declareExplain")}</p>
+      </div>
+      {mine ? (
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void choose("redeclare")}
+            className="gold-button flex min-h-14 flex-col items-center justify-center rounded-card text-base font-bold transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+          >
+            {t("domino.redeclare")}
+            {secondsLeft !== null && <span className="text-xs font-semibold opacity-75">{secondsLeft} s</span>}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void choose("keep")}
+            className="flex min-h-14 items-center justify-center rounded-card border border-gold/50 bg-black/30 text-base font-bold text-cafe-text transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+          >
+            {t("domino.keep")}
+          </button>
+        </div>
+      ) : (
+        <p className="text-center text-sm font-semibold text-gold-light">{t("domino.declareWait", { n: secondsLeft ?? 0 })}</p>
+      )}
+    </Sheet>
   );
 }
 
@@ -385,6 +496,8 @@ function RoundSheet({ view, seats, mySeat, serverNow, onNext }: { view: DominoVi
           {r.winnerTeam !== null && (
             <p className={`animate-pop mt-1 text-lg font-semibold ${r.winnerTeam === myTeam ? "text-gold-light" : "text-[#e9826a]"}`}>{t("domino.points", { n: r.points })}</p>
           )}
+          {r.winnerTeam === null && <p className="mt-1 text-sm text-cafe-muted">{t("domino.roundReplay")}</p>}
+          {r.penalized && <p className="mt-1 text-sm font-semibold text-[#e9a68f]">{t("domino.penalized")}</p>}
         </div>
       )}
 
