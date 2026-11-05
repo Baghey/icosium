@@ -7,11 +7,12 @@
     "home": "Café",
     "voice": "Voice room",
     "profile": "Profile",
-    "main": "Main navigation"
+    "main": "Main navigation",
+    "play": "Play"
   },
   "home": {
     "greeting": "Welcome, {name}",
-    "intro": "Games arrive in the next step. For now, try the voice room with your friends.",
+    "intro": "Open a domino table, share the code, and play with your friends while you talk.",
     "openVoice": "Open the voice room",
     "status": "Server status",
     "statusChecking": "Checking…",
@@ -20,7 +21,8 @@
     "service": {
       "accounts": "Accounts (Supabase)",
       "voice": "Voice (LiveKit)"
-    }
+    },
+    "playDomino": "Play domino"
   },
   "auth": {
     "signIn": "Sign in",
@@ -95,5 +97,88 @@
   "language": {
     "en": "English",
     "fr": "Français"
+  },
+  "play": {
+    "title": "Domino",
+    "subtitle": "Algerian double-six, 2 players or 4 in teams.",
+    "create": "Open a table",
+    "createHint": "You're the boss: you choose the rules.",
+    "join": "Join a table",
+    "joinHint": "Enter the 4-letter code a friend sent you.",
+    "code": "Table code",
+    "joinButton": "Sit down",
+    "creating": "Opening…",
+    "joining": "Sitting down…",
+    "players": "Players",
+    "players2": "2 players",
+    "players4": "4 in teams",
+    "target": "Target score",
+    "opener": "Who opens next rounds",
+    "openerWinner": "Round winner",
+    "openerDoubleSix": "Double-six",
+    "scoring": "Winner scores",
+    "scoringOpponents": "Opponents' hands",
+    "scoringAll": "All hands",
+    "turnTime": "Time per turn",
+    "seconds": "{n} s",
+    "unlimited": "Unlimited",
+    "error": {
+      "invalid_code": "A table code has 4 letters.",
+      "table_not_found": "No table with this code.",
+      "table_full": "This table is full.",
+      "table_started": "This game has already started.",
+      "seat_taken": "Someone just took that seat. Try again.",
+      "rate_limited": "You opened a lot of tables. Wait a few minutes.",
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "domino": {
+    "waitingTitle": "Table {code}",
+    "waitingHint": "The game starts as soon as every seat is taken.",
+    "share": "Share the code",
+    "copied": "Code copied",
+    "shareText": "Come play domino with me on ICOSIUM! Table code: {code}",
+    "freeSeat": "Free seat",
+    "you": "You",
+    "partner": "Partner",
+    "us": "Us",
+    "them": "Them",
+    "scoreTo": "to {n}",
+    "round": "Round {n}",
+    "yourTurn": "Your turn",
+    "theirTurn": "{name} is playing",
+    "pass": "Pass",
+    "drew": "+{n}",
+    "tiles": "{n} tiles",
+    "boneyard": "Boneyard: {n}",
+    "pickEnd": "Choose an end",
+    "playHere": "Play here",
+    "mustOpen": "Open with the {tile}",
+    "notYourTurn": "Wait for your turn",
+    "scores": "Scores",
+    "close": "Close",
+    "roundClosed": "{name} closes the round!",
+    "roundBlocked": "Blocked game",
+    "roundDraw": "Tie: no points this round",
+    "points": "+{n} points",
+    "nextRound": "Next round",
+    "nextRoundIn": "Next round in {n} s",
+    "remaining": "Tiles left in hand",
+    "gameOverWin": "You win!",
+    "gameOverLose": "You lose this time",
+    "gameOverTeam": "{names} win the game",
+    "backHome": "Back to the café",
+    "sound": "Sound",
+    "soundOn": "Sound on",
+    "soundOff": "Sound off",
+    "loading": "Setting the table…",
+    "leave": "Leave the table",
+    "error": {
+      "not_your_turn": "It's not your turn.",
+      "illegal_move": "That tile doesn't fit there.",
+      "conflict": "The table moved on. Try again.",
+      "not_seated": "You are not seated at this table.",
+      "unknown": "Couldn't play that tile. Try again."
+    }
   }
 }

@@ -11,6 +11,9 @@ describe("authErrorKey", () => {
       "auth.error.signupRefused",
     );
   });
+  it("transmet le refus précis de la base quand il est disponible", () => {
+    expect(authErrorKey("signUp", { status: 500, code: "P0001", message: "too_young" })).toBe("auth.error.tooYoung");
+  });
   it("signale un compte invité désactivé et l'email non confirmé", () => {
     expect(authErrorKey("guest", { status: 422, code: "anonymous_provider_disabled", message: "" })).toBe("auth.error.guestDisabled");
     expect(authErrorKey("signIn", { status: 400, code: "email_not_confirmed", message: "" })).toBe("auth.error.emailNotConfirmed");

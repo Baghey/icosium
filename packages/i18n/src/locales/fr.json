@@ -7,11 +7,12 @@
     "home": "Café",
     "voice": "Salon vocal",
     "profile": "Profil",
-    "main": "Navigation principale"
+    "main": "Navigation principale",
+    "play": "Jouer"
   },
   "home": {
     "greeting": "Salut, {name}",
-    "intro": "Les jeux arrivent à la prochaine étape. En attendant, essaie le salon vocal avec tes amis.",
+    "intro": "Ouvre une table de domino, partage le code et joue avec tes amis en parlant.",
     "openVoice": "Ouvrir le salon vocal",
     "status": "État des serveurs",
     "statusChecking": "Vérification…",
@@ -20,7 +21,8 @@
     "service": {
       "accounts": "Comptes (Supabase)",
       "voice": "Vocal (LiveKit)"
-    }
+    },
+    "playDomino": "Jouer au domino"
   },
   "auth": {
     "signIn": "Connexion",
@@ -95,5 +97,88 @@
   "language": {
     "en": "English",
     "fr": "Français"
+  },
+  "play": {
+    "title": "Domino",
+    "subtitle": "Double-six algérien, à 2 ou à 4 en équipes.",
+    "create": "Ouvrir une table",
+    "createHint": "C'est toi le Patron : tu choisis les règles.",
+    "join": "Rejoindre une table",
+    "joinHint": "Tape le code de 4 lettres qu'un ami t'a envoyé.",
+    "code": "Code de la table",
+    "joinButton": "S'asseoir",
+    "creating": "Ouverture…",
+    "joining": "On s'assoit…",
+    "players": "Joueurs",
+    "players2": "2 joueurs",
+    "players4": "4 en équipes",
+    "target": "Score à atteindre",
+    "opener": "Qui ouvre les manches suivantes",
+    "openerWinner": "Le gagnant",
+    "openerDoubleSix": "Le double-six",
+    "scoring": "Le gagnant marque",
+    "scoringOpponents": "Mains adverses",
+    "scoringAll": "Toutes les mains",
+    "turnTime": "Temps par tour",
+    "seconds": "{n} s",
+    "unlimited": "Illimité",
+    "error": {
+      "invalid_code": "Un code de table a 4 lettres.",
+      "table_not_found": "Aucune table avec ce code.",
+      "table_full": "Cette table est complète.",
+      "table_started": "Cette partie a déjà commencé.",
+      "seat_taken": "Quelqu'un vient de prendre cette chaise. Réessaie.",
+      "rate_limited": "Tu as ouvert beaucoup de tables. Attends quelques minutes.",
+      "unknown": "Un problème est survenu. Réessaie."
+    }
+  },
+  "domino": {
+    "waitingTitle": "Table {code}",
+    "waitingHint": "La partie commence dès que toutes les chaises sont prises.",
+    "share": "Partager le code",
+    "copied": "Code copié",
+    "shareText": "Viens jouer au domino avec moi sur ICOSIUM ! Code de la table : {code}",
+    "freeSeat": "Chaise libre",
+    "you": "Toi",
+    "partner": "Partenaire",
+    "us": "Nous",
+    "them": "Eux",
+    "scoreTo": "sur {n}",
+    "round": "Manche {n}",
+    "yourTurn": "À toi de jouer",
+    "theirTurn": "{name} joue",
+    "pass": "Passe",
+    "drew": "+{n}",
+    "tiles": "{n} dominos",
+    "boneyard": "Pioche : {n}",
+    "pickEnd": "Choisis un bout",
+    "playHere": "Poser ici",
+    "mustOpen": "Ouvre avec le {tile}",
+    "notYourTurn": "Attends ton tour",
+    "scores": "Scores",
+    "close": "Fermer",
+    "roundClosed": "{name} ferme la manche !",
+    "roundBlocked": "Partie bloquée",
+    "roundDraw": "Égalité : pas de points cette manche",
+    "points": "+{n} points",
+    "nextRound": "Manche suivante",
+    "nextRoundIn": "Manche suivante dans {n} s",
+    "remaining": "Dominos restants en main",
+    "gameOverWin": "Vous avez gagné !",
+    "gameOverLose": "Perdu cette fois",
+    "gameOverTeam": "{names} gagnent la partie",
+    "backHome": "Retour au café",
+    "sound": "Son",
+    "soundOn": "Son activé",
+    "soundOff": "Son coupé",
+    "loading": "On installe la table…",
+    "leave": "Quitter la table",
+    "error": {
+      "not_your_turn": "Ce n'est pas ton tour.",
+      "illegal_move": "Ce domino ne va pas là.",
+      "conflict": "La table a avancé. Réessaie.",
+      "not_seated": "Tu n'es pas assis à cette table.",
+      "unknown": "Impossible de poser ce domino. Réessaie."
+    }
   }
 }

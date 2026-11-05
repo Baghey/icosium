@@ -19,6 +19,11 @@ export function authErrorKey(mode: AuthMode, failure: AuthFailure): MessageKey {
   const { code, status } = failure;
   const message = failure.message.toLowerCase();
   if (status === 0) return "auth.error.network";
+  // Refus précis de la base (âge, pseudo), quand Supabase transmet le message du trigger.
+  if (message.includes("too_young")) return "auth.error.tooYoung";
+  if (message.includes("invalid_birthdate")) return "auth.error.invalidBirthdate";
+  if (message.includes("invalid_username")) return "auth.error.invalidUsername";
+  if (message.includes("age_not_confirmed")) return "auth.error.ageNotConfirmed";
   if (code === "user_already_exists" || code === "email_exists") return "auth.error.emailTaken";
   if (code === "invalid_credentials") return "auth.error.badCredentials";
   if (code === "email_not_confirmed") return "auth.error.emailNotConfirmed";

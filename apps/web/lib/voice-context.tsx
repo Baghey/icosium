@@ -193,6 +193,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => void roomRef.current?.disconnect(), []);
 
+  // Le navigateur bloque le son tant qu'on n'a pas touché l'écran (ex. après un rechargement) :
+  // le premier toucher débloque l'audio du salon.
+  useEffect(() => {
+    const unlock = () => void roomRef.current?.startAudio().catch(() => undefined);
+    document.addEventListener("pointerdown", unlock);
+    return () => document.removeEventListener("pointerdown", unlock);
+  }, []);
+
   const value = useMemo<VoiceValue>(
     () => ({ status, roomName, peers, micOn, error, join, leave, setMic }),
     [status, roomName, peers, micOn, error, join, leave, setMic],
