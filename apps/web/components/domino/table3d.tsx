@@ -357,7 +357,8 @@ function CameraRig() {
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera;
     const aspect = size.width / Math.max(size.height, 1);
-    const halfW = FELT_W / 2 + RIM + 0.4;
+    // Marge en plus : avec la perspective, le bord proche de la table paraît plus large.
+    const halfW = FELT_W / 2 + RIM + 1.6;
     const dist = halfW / (Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * aspect);
     const tilt = THREE.MathUtils.degToRad(28); // angle depuis la verticale
     cam.position.set(0, Math.cos(tilt) * dist, Math.sin(tilt) * dist + 0.6);
