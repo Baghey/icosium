@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"] },
+  "include": ["_shared", "domino/service.ts", "domino/store.ts", "domino/*.test.ts", "domino/memory-store.ts", "sync.test.ts"]
+}

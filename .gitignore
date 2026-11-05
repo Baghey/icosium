@@ -10,3 +10,5 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 infra/nakama/build/
+supabase/.branches
+supabase/.temp

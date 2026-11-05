@@ -1,0 +1,16 @@
+{
+  "name": "@icosium/functions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fonctions serveur Supabase (Deno). Les tests tournent sous Node avec un stockage en mémoire.",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
