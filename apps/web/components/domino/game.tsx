@@ -363,7 +363,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
         <p
           key={notice}
           role="status"
-          className="animate-bubble cafe-panel absolute inset-x-6 top-2 z-20 mx-auto max-w-sm rounded-2xl border-gold/60 px-4 py-2 text-center text-sm font-semibold text-gold-light"
+          className="animate-bubble cafe-panel absolute inset-x-6 top-[38%] z-20 mx-auto max-w-sm rounded-2xl border-gold/60 px-4 py-2 text-center text-sm font-semibold text-gold-light"
         >
           {notice}
         </p>
@@ -470,17 +470,18 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
           {/* Le chrono doré */}
           <div className="flex justify-center pt-2">{turnChip}</div>
 
-          {/* Les autres joueurs, en rangée au-dessus de la table : rien ne cache le jeu */}
-          <div className={`relative z-10 grid items-start px-2 pt-2 ${players === 4 ? "grid-cols-3" : "grid-cols-1"}`}>
-            {around.map(({ seat, pos }) => (
-              <div key={pos} className={`flex ${pos === "left" ? "justify-start pt-3" : pos === "right" ? "justify-end pt-3" : "justify-center"}`}>
-                {badge(seat, pos === "top" ? 50 : 46)}
-              </div>
-            ))}
-          </div>
-
           {/* La table */}
-          <div className="relative min-h-0 flex-1 px-2 pb-1">{table}</div>
+          <div className="relative min-h-0 flex-1 px-2 pb-1">
+            {table}
+            {/* Les autres joueurs, assis au bord haut de la table (la vue leur laisse la place) */}
+            <div className={`pointer-events-none absolute inset-x-0 top-1 z-10 grid items-start px-2 ${players === 4 ? "grid-cols-3" : "grid-cols-1"}`}>
+              {around.map(({ seat, pos }) => (
+                <div key={pos} className={`pointer-events-auto flex ${pos === "left" ? "justify-start pt-4" : pos === "right" ? "justify-end pt-4" : "justify-center"}`}>
+                  {badge(seat, pos === "top" ? 48 : 44)}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Ma main, dans un plateau sombre bordé d'or */}
           <section className="relative px-3 pt-5">

@@ -7,7 +7,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
-import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Placement, layoutChain } from "@/lib/chain-layout";
+import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
  * La table de domino en 3D : feutre vert, rebord en noyer verni, filet doré, rosette,
@@ -392,34 +392,48 @@ function corners(minX: number, maxX: number, minZ: number, maxZ: number, height:
 }
 
 /**
- * La caméra est fixe : toute la table, rebord compris, tient à l'écran, sans zoom ni mouvement
- * pendant la partie (la chaîne tourne en spirale et reste sur le feutre). Elle ne se recalcule
- * que si l'écran change de taille ou d'orientation, avec une transition douce.
+ * La caméra regarde toujours le centre de la table, sans jamais se décaler. En début de manche
+ * elle est proche (les pierres sont grandes et lisibles), puis elle recule lentement, seulement
+ * quand la chaîne approche du bord de l'écran. Elle ne se rapproche jamais en cours de manche :
+ * pas d'effet de zoom qui va et vient. Au plus loin, toute la table (rebord compris) est visible.
  */
-function CameraRig({ tableRot, margins }: { tableRot: number; margins: Margins }) {
+function CameraRig({ bounds, chainLength, tableRot, chainRot, margins }: { bounds: Bounds; chainLength: number; tableRot: number; chainRot: number; margins: Margins }) {
   const { camera, size } = useThree();
   const current = useRef<{ dist: number; z: number } | null>(null);
-  const target = useMemo(() => {
+  const farthest = useRef<{ dist: number; length: number }>({ dist: 0, length: 0 });
+  const table = useMemo(() => {
     const cam = (camera as THREE.PerspectiveCamera).clone();
     cam.aspect = size.width / Math.max(size.height, 1);
     cam.updateProjectionMatrix();
     const tableHalfW = FELT_W / 2 + RIM + 0.2;
     const tableHalfD = FELT_D / 2 + RIM + 0.2;
-    const table = corners(-tableHalfW, tableHalfW, -tableHalfD, tableHalfD, 0.35, tableRot);
-    // On cherche le point visé qui permet la table la plus grande à l'écran.
+    const pts = corners(-tableHalfW, tableHalfW, -tableHalfD, tableHalfD, 0.35, tableRot);
+    // Le point visé qui donne la plus grande table à l'écran.
     let best = { dist: Number.POSITIVE_INFINITY, z: 0 };
     for (let z = -1.5; z <= 1.5; z += 0.25) {
-      const dist = fitDistance(cam, table, z, margins);
+      const dist = fitDistance(cam, pts, z, margins);
       if (dist < best.dist) best = { dist, z };
     }
-    return best;
+    return { ...best, cam };
   }, [camera, size.width, size.height, tableRot, margins]);
+  const wanted = useMemo(() => {
+    // Toute la chaîne, plus une marge pour la prochaine pierre.
+    const pad = 1.8;
+    const pts = corners(bounds.minX - pad, bounds.maxX + pad, bounds.minZ - pad, bounds.maxZ + pad, TILE_H, chainRot, CHAIN_SCALE);
+    const need = fitDistance(table.cam, pts, table.z, margins);
+    return THREE.MathUtils.clamp(need, table.dist * 0.5, table.dist);
+  }, [bounds, chainRot, table, margins]);
   useFrame((_, dt) => {
+    // Nouvelle manche (la chaîne repart de zéro) : on peut se rapprocher à nouveau.
+    const f = farthest.current;
+    if (chainLength < f.length) f.dist = 0;
+    f.length = chainLength;
+    f.dist = Math.max(f.dist, wanted);
     const cam = camera as THREE.PerspectiveCamera;
-    const cur = current.current ?? { ...target };
-    const k = 1 - Math.exp(-dt / 0.07);
-    cur.dist += (target.dist - cur.dist) * k;
-    cur.z += (target.z - cur.z) * k;
+    const cur = current.current ?? { dist: f.dist, z: table.z };
+    const k = 1 - Math.exp(-dt / 0.3);
+    cur.dist += (f.dist - cur.dist) * k;
+    cur.z += (table.z - cur.z) * k;
     current.current = cur;
     aim(cam, cur.dist, cur.z);
   });
@@ -431,7 +445,7 @@ function CameraRig({ tableRot, margins }: { tableRot: number; margins: Margins }
 
 // ---------- la scène ----------
 
-const PORTRAIT_MARGINS: Margins = { x: 0.02, top: 0.02, bottom: 0.02 };
+const PORTRAIT_MARGINS: Margins = { x: 0.02, top: 0.24, bottom: 0.02 };
 const LANDSCAPE_MARGINS: Margins = { x: 0.02, top: 0.1, bottom: 0.01 };
 
 function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false }: Props) {
@@ -439,13 +453,13 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
   // Paysage : on tourne la table ; la chaîne court alors dans la largeur de l'écran.
   const tableRot = landscape ? Math.PI / 2 : 0;
   const chainRot = landscape ? 0 : Math.PI / 2;
-  const { tiles, slots } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
+  const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
   const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig tableRot={tableRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
+      <CameraRig bounds={bounds} chainLength={chain.length} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       <ambientLight intensity={0.35} color="#ffe2b8" />
       <spotLight
         position={[1.5, 16, 3]}
