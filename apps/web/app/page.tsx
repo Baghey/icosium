@@ -66,7 +66,7 @@ function Home() {
         className="animate-rise group relative block overflow-hidden rounded-[1.6rem] border border-gold/50 shadow-[0_18px_40px_rgb(0_0_0/0.55)] transition-transform duration-200 active:scale-[0.98]"
         style={{ animationDelay: "60ms" }}
       >
-        <div className="felt-table felt-grain relative flex min-h-44 flex-col justify-end !rounded-[1.6rem] p-5">
+        <div className="felt-table felt-grain relative flex min-h-48 flex-col justify-end !rounded-[1.6rem] p-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/rosette.webp" alt="" aria-hidden="true" className="pointer-events-none absolute end-[-1.5rem] top-[-1.5rem] size-44 opacity-25" />
           <span className="absolute end-6 top-5 flex gap-1.5 transition-transform duration-250 ease-icos group-hover:-rotate-3 group-active:rotate-0" dir="ltr" aria-hidden="true">
@@ -77,7 +77,7 @@ function Home() {
               <DominoTile a={5} b={3} orientation="vertical" size={26} />
             </span>
           </span>
-          <span className="relative flex flex-col gap-0.5">
+          <span className="relative flex flex-col gap-0.5 pe-24">
             <span className="text-gilded text-2xl font-bold drop-shadow">{t("home.playNow")}</span>
             <span className="text-sm text-cafe-text/85">{t("home.playNowHint")}</span>
           </span>
