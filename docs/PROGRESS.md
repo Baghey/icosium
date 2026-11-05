@@ -10,7 +10,11 @@ Ce qui marche :
   table de jardin en plastique blanc, sous un lampadaire. Tout est dessiné au chargement
   (`lib/street-textures.ts`), aucune image à télécharger.
 - Le fond de l'écran de jeu est le goudron la nuit (`street-bg`, grain en SVG, lueur du lampadaire).
-- Pierres en plastique blanc à points noirs, sans clou doré : sur la table, dans la main et au dos.
+- Pierres ivoire au clou doré (choix du propriétaire, 5/11 23 h), sur la table comme dans la main ;
+  sur la table, les points sont dessinés par-dessus sans éclairage pour rester d'un noir franc.
+- Grosses pierres sur la table (choix du propriétaire) : la caméra suit le jeu de près (une pierre
+  fait environ 40 px de large, comme dans la main). Elle glisse vers la dernière pierre posée, et à
+  mon tour elle cadre mes bouts jouables. Bouton loupe (ou pincer à deux doigts) pour voir toute la table.
 - Chaque pierre de la chaîne est posée un peu de travers (moins de 3°, toujours le même angle pour
   la même pierre), comme à la main ; la disposition calculée et ses tests ne changent pas.
 - Son du mélange : extrait du son « HQ Sounds » fourni par le propriétaire (`public/sfx/shuffle.mp3`).

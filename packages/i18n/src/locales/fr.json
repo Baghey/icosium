@@ -232,6 +232,8 @@
     "playOn": "Sur le {n}",
     "rotate": "Tourner l'écran",
     "rotateHint": "Tourne ton téléphone pour plus de place",
+    "viewAll": "Voir toute la table",
+    "viewFollow": "Suivre le jeu de près",
     "roundClosedYou": "Tu fermes la manche !",
     "youPass": "Rien à jouer : tu passes ton tour"
   },

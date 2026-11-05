@@ -7,9 +7,10 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
+import { useI18n } from "@/lib/i18n";
 import { playShuffle } from "@/lib/sound";
 import { drawCardboard, drawCardboardBump, drawPlastic, seeded } from "@/lib/street-textures";
-import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
+import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
  * La table de domino en 3D, comme dans la rue le soir : un carton déchiré posé sur une table de
@@ -437,10 +438,10 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
 
 const TILT = THREE.MathUtils.degToRad(28); // angle de la caméra depuis la verticale
 
-/** Place la caméra à `dist` de la table, en visant le point (0, 0, z). */
-function aim(cam: THREE.PerspectiveCamera, dist: number, z: number) {
-  cam.position.set(0, Math.cos(TILT) * dist, Math.sin(TILT) * dist + z);
-  cam.lookAt(0, 0, z);
+/** Place la caméra à `dist` de la table, en visant le point (x, 0, z). */
+function aim(cam: THREE.PerspectiveCamera, dist: number, z: number, x = 0) {
+  cam.position.set(x, Math.cos(TILT) * dist, Math.sin(TILT) * dist + z);
+  cam.lookAt(x, 0, z);
   cam.updateMatrixWorld(true);
 }
 
@@ -458,12 +459,12 @@ function fits(cam: THREE.PerspectiveCamera, pts: THREE.Vector3[], m: Margins): b
 }
 
 /** La plus petite distance où tous les points tiennent à l'écran (recherche par dichotomie). */
-function fitDistance(cam: THREE.PerspectiveCamera, pts: THREE.Vector3[], z: number, m: Margins): number {
+function fitDistance(cam: THREE.PerspectiveCamera, pts: THREE.Vector3[], z: number, m: Margins, x = 0): number {
   let lo = 2;
   let hi = 90;
   for (let i = 0; i < 22; i++) {
     const mid = (lo + hi) / 2;
-    aim(cam, mid, z);
+    aim(cam, mid, z, x);
     if (fits(cam, pts, m)) hi = mid;
     else lo = mid;
   }
@@ -480,16 +481,19 @@ function corners(minX: number, maxX: number, minZ: number, maxZ: number, height:
   return out;
 }
 
+/** Taille voulue d'une pierre de la chaîne à l'écran (petit côté, en pixels CSS) : comme dans la main. */
+const TILE_PX = 40;
+
 /**
- * La caméra regarde toujours le centre de la table, sans jamais se décaler. En début de manche
- * elle est proche (les pierres sont grandes et lisibles), puis elle recule lentement, seulement
- * quand la chaîne approche du bord de l'écran. Elle ne se rapproche jamais en cours de manche :
- * pas d'effet de zoom qui va et vient. Au plus loin, toute la table (rebord compris) est visible.
+ * La caméra suit le jeu de près, pour que les pierres soient grosses comme celles de la main :
+ * - pendant le tour des autres, elle glisse doucement vers la dernière pierre posée ;
+ * - à mon tour, elle cadre les bouts où je peux jouer (et recule juste assez s'ils sont loin) ;
+ * - « vue d'ensemble » (bouton, double-tap ou deux doigts) : toute la table, rebord compris.
+ * Les mouvements sont lents et amortis (pas d'à-coups).
  */
-function CameraRig({ bounds, chainLength, tableRot, chainRot, margins }: { bounds: Bounds; chainLength: number; tableRot: number; chainRot: number; margins: Margins }) {
+function CameraRig({ focus, overview, tableRot, chainRot, margins }: { focus: { x: number; z: number }[]; overview: boolean; tableRot: number; chainRot: number; margins: Margins }) {
   const { camera, size } = useThree();
-  const current = useRef<{ dist: number; z: number } | null>(null);
-  const farthest = useRef<{ dist: number; length: number }>({ dist: 0, length: 0 });
+  const current = useRef<{ dist: number; x: number; z: number } | null>(null);
   const table = useMemo(() => {
     const cam = (camera as THREE.PerspectiveCamera).clone();
     cam.aspect = size.width / Math.max(size.height, 1);
@@ -503,28 +507,36 @@ function CameraRig({ bounds, chainLength, tableRot, chainRot, margins }: { bound
       const dist = fitDistance(cam, pts, z, margins);
       if (dist < best.dist) best = { dist, z };
     }
-    return { ...best, cam };
+    // Distance où une pierre de la chaîne fait TILE_PX de large à l'écran.
+    const fov = THREE.MathUtils.degToRad(cam.fov);
+    const close = (CHAIN_SCALE * size.height) / (2 * Math.tan(fov / 2) * TILE_PX);
+    return { ...best, close: Math.min(close, best.dist), cam };
   }, [camera, size.width, size.height, tableRot, margins]);
   const wanted = useMemo(() => {
-    // Toute la chaîne, plus une marge pour la prochaine pierre.
-    const pad = 1.8;
-    const pts = corners(bounds.minX - pad, bounds.maxX + pad, bounds.minZ - pad, bounds.maxZ + pad, TILE_H, chainRot, CHAIN_SCALE);
-    const need = fitDistance(table.cam, pts, table.z, margins);
-    return THREE.MathUtils.clamp(need, table.dist * 0.5, table.dist);
-  }, [bounds, chainRot, table, margins]);
+    const whole = { dist: table.dist, x: 0, z: table.z };
+    if (overview || focus.length === 0) return whole;
+    const rot = new THREE.Matrix4().makeRotationY(chainRot);
+    const world = focus.map((f) => new THREE.Vector3(f.x * CHAIN_SCALE, 0, f.z * CHAIN_SCALE).applyMatrix4(rot));
+    const cx = world.reduce((s, v) => s + v.x, 0) / world.length;
+    const cz = world.reduce((s, v) => s + v.z, 0) / world.length;
+    // Chaque point compte avec une pierre autour (plus un peu d'air).
+    const pad = 1.6;
+    const pts = focus.flatMap((f) => corners(f.x - pad, f.x + pad, f.z - pad, f.z + pad, TILE_H, chainRot, CHAIN_SCALE));
+    const need = fitDistance(table.cam, pts, cz, margins, cx);
+    const dist = THREE.MathUtils.clamp(need, table.close, table.dist);
+    // Si tout ne tient qu'en reculant au maximum, on montre toute la table, bien centrée.
+    if (need >= table.dist) return whole;
+    return { dist, x: cx, z: cz };
+  }, [focus, overview, chainRot, table, margins]);
   useFrame((_, dt) => {
-    // Nouvelle manche (la chaîne repart de zéro) : on peut se rapprocher à nouveau.
-    const f = farthest.current;
-    if (chainLength < f.length) f.dist = 0;
-    f.length = chainLength;
-    f.dist = Math.max(f.dist, wanted);
     const cam = camera as THREE.PerspectiveCamera;
-    const cur = current.current ?? { dist: f.dist, z: table.z };
-    const k = 1 - Math.exp(-dt / 0.3);
-    cur.dist += (f.dist - cur.dist) * k;
-    cur.z += (table.z - cur.z) * k;
+    const cur = current.current ?? { ...wanted };
+    const k = 1 - Math.exp(-dt / 0.45);
+    cur.dist += (wanted.dist - cur.dist) * k;
+    cur.x += (wanted.x - cur.x) * k;
+    cur.z += (wanted.z - cur.z) * k;
     current.current = cur;
-    aim(cam, cur.dist, cur.z);
+    aim(cam, cur.dist, cur.z, cur.x);
   });
   useEffect(() => {
     (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
@@ -537,18 +549,33 @@ function CameraRig({ bounds, chainLength, tableRot, chainRot, margins }: { bound
 const PORTRAIT_MARGINS: Margins = { x: 0.02, top: 0.24, bottom: 0.02 };
 const LANDSCAPE_MARGINS: Margins = { x: 0.02, top: 0.18, bottom: 0.01 };
 
-function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false }: Props) {
+function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false, overview }: Props & { overview: boolean }) {
   // Portrait : la table est en long et la chaîne tournée d'un quart de tour pour suivre sa longueur.
   // Paysage : on tourne la table ; la chaîne court alors dans la largeur de l'écran.
   const tableRot = landscape ? Math.PI / 2 : 0;
   const chainRot = landscape ? 0 : Math.PI / 2;
-  const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
+  const { tiles, slots } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
   const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
+  // Ce que la caméra suit : les bouts où poser la pierre choisie, sinon mes bouts jouables,
+  // sinon la dernière pierre posée.
+  const focusKey = `${chain.length}|${targets.join()}|${[...new Set(glowEnds)].join()}|${freshTile ?? ""}`;
+  const focus = useMemo(() => {
+    if (chain.length === 0) return [];
+    if (targets.length > 0) return targets.map((e) => ({ x: slots[e].x, z: slots[e].z }));
+    const at = (end: End) => {
+      const p = endTile(end);
+      return p ? [{ x: p.x, z: p.z }] : [];
+    };
+    if (glowEnds.length > 0) return [...new Set(glowEnds)].flatMap(at);
+    const fresh = tiles.find((t) => t.tile === freshTile);
+    if (fresh) return [{ x: fresh.x, z: fresh.z }];
+    return [...at("left"), ...at("right")];
+  }, [focusKey, tiles, slots]);
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig bounds={bounds} chainLength={chain.length} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
+      <CameraRig focus={focus} overview={overview} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       {/* La nuit : un peu de bleu partout, et le lampadaire qui éclaire la table d'un côté. */}
       <hemisphereLight args={["#b4c4e0", "#1a1714", 0.75]} />
       <spotLight position={[-6, 22, -5]} angle={0.55} penumbra={0.9} intensity={520} decay={2} color="#fff3e2" />
@@ -598,21 +625,83 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
   );
 }
 
-export default function Table3D(props: Props) {
+/** Loupe : « voir toute la table » / « suivre le jeu de près ». */
+function ViewIcon({ overview }: { overview: boolean }) {
   return (
-    <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      camera={{ fov: 30, near: 0.5, far: 120, position: [0, 30, 14] }}
-      onCreated={({ gl }) => {
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.05;
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {overview ? (
+        <>
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="M20 20l-4.2-4.2M11 8v6M8 11h6" />
+        </>
+      ) : (
+        <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+      )}
+    </svg>
+  );
+}
+
+export default function Table3D(props: Props) {
+  const { t } = useI18n();
+  // Vue d'ensemble : bouton, ou pincer à deux doigts (rapprocher = tout voir, écarter = de près).
+  const [overview, setOverview] = useState(false);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinchStart = useRef<number | null>(null);
+  const spread = () => {
+    const [a, b] = [...pointers.current.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  };
+  const release = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinchStart.current = null;
+  };
+  return (
+    <div
+      className="relative h-full w-full"
+      style={{ touchAction: "none" }}
+      onPointerDown={(e) => {
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.current.size === 2) pinchStart.current = spread();
       }}
-      style={{ touchAction: "manipulation" }}
+      onPointerMove={(e) => {
+        if (!pointers.current.has(e.pointerId)) return;
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const start = pinchStart.current;
+        if (start === null) return;
+        const d = spread() - start;
+        if (Math.abs(d) > 40) {
+          setOverview(d < 0);
+          pinchStart.current = spread();
+        }
+      }}
+      onPointerUp={release}
+      onPointerCancel={release}
     >
-      <Suspense fallback={null}>
-        <Scene {...props} />
-      </Suspense>
-    </Canvas>
+      <Canvas
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        camera={{ fov: 30, near: 0.5, far: 120, position: [0, 30, 14] }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.05;
+        }}
+      >
+        <Suspense fallback={null}>
+          <Scene {...props} overview={overview} />
+        </Suspense>
+      </Canvas>
+      {props.chain.length > 0 && (
+        <button
+          type="button"
+          aria-pressed={overview}
+          aria-label={t(overview ? "domino.viewFollow" : "domino.viewAll")}
+          title={t(overview ? "domino.viewFollow" : "domino.viewAll")}
+          onClick={() => setOverview((v) => !v)}
+          className="cafe-panel absolute end-2 bottom-2 z-10 flex size-11 items-center justify-center rounded-full text-gold-light transition-transform duration-200 active:scale-95"
+        >
+          <ViewIcon overview={overview} />
+        </button>
+      )}
+    </div>
   );
 }
