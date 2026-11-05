@@ -5,19 +5,35 @@ import Link from "next/link";
 import { useState } from "react";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
-import type { SeatInfo } from "@/lib/domino-client";
+import { type CallResult, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { SoundToggle } from "./sound-toggle";
-import { Emblem } from "@/components/cafe-icons";
+import { AddFriendIcon, BotIcon, Emblem } from "@/components/cafe-icons";
+import { InviteFriends } from "@/components/social/invite-friends";
 import { tableAvatars } from "./player-badge";
 
-type Props = { code: string; options: DominoOptions; seats: SeatInfo[]; mySeat: number };
+type Props = {
+  code: string;
+  options: DominoOptions;
+  seats: SeatInfo[];
+  mySeat: number;
+  isHost: boolean;
+  addBots: () => Promise<CallResult>;
+};
 
 /** En attendant les amis : le code en grand, le bouton partager, et les chaises qui se remplissent. */
-export function WaitingRoom({ code, options, seats, mySeat }: Props) {
+export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  const [botsBusy, setBotsBusy] = useState(false);
+  const [inviting, setInviting] = useState(false);
   const players = options.players;
-  const avatars = tableAvatars(seats.map((s) => s.userId));
+  const avatars = tableAvatars(seats.map((s) => ({ key: seatKey(s), botName: s.userId ? null : s.username })));
+
+  async function fillBots() {
+    setBotsBusy(true);
+    const res = await addBots();
+    if (!res.ok) setBotsBusy(false);
+  }
 
   async function share() {
     const text = t("domino.shareText", { code });
@@ -80,6 +96,16 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
         >
           {copied ? t("domino.copied") : t("domino.share")}
         </button>
+        {seats.length < players && (
+          <button
+            type="button"
+            onClick={() => setInviting(true)}
+            className="cafe-panel flex min-h-touch items-center gap-2 rounded-full px-5 text-sm font-semibold text-gold-light transition-transform duration-150 active:scale-[0.97]"
+          >
+            <AddFriendIcon className="size-5" />
+            {t("social.inviteFriends")}
+          </button>
+        )}
       </section>
 
       <div className="flex flex-1 items-center justify-center py-12">
@@ -90,13 +116,13 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
             return (
               <div key={seat} className={`absolute flex flex-col items-center gap-1 ${cls}`}>
                 <span
-                  key={who?.userId ?? "free"}
+                  key={who ? seatKey(who) : "free"}
                   className={`flex size-14 items-center justify-center overflow-hidden rounded-full border-2 text-lg font-semibold ${
                     who ? "animate-seat border-gold bg-gradient-to-b from-cafe-2 to-cafe-0 shadow-[0_0_14px_rgba(216,167,72,0.45)]" : "border-dashed border-gold/40 bg-black/40 text-cafe-muted"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {who ? <img src={avatars[who.userId]} alt="" className="size-full rounded-full object-cover" /> : "·"}
+                  {who ? <img src={avatars[seatKey(who)]} alt="" className="size-full rounded-full object-cover" /> : "·"}
                 </span>
                 <span className="cafe-panel max-w-28 truncate rounded-full px-2 text-xs">
                   {who ? (seat === mySeat ? t("domino.you") : who.username) : t("domino.freeSeat")}
@@ -113,10 +139,25 @@ export function WaitingRoom({ code, options, seats, mySeat }: Props) {
         {players === 4 ? t("play.players4") : t("play.players2")} · {options.targetScore} ·{" "}
         {options.turnSeconds ? t("play.seconds", { n: options.turnSeconds }) : t("play.unlimited")}
       </p>
+      {isHost && seats.length < players && (
+        <div className="mb-4 flex flex-col items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => void fillBots()}
+            disabled={botsBusy}
+            className="cafe-panel flex min-h-touch items-center gap-2 rounded-full border-gold/60 px-5 text-sm font-semibold text-gold-light transition-transform duration-150 active:scale-[0.97] disabled:opacity-60"
+          >
+            <BotIcon className="size-5" />
+            {botsBusy ? t("play.soloStarting") : t("domino.fillBots")}
+          </button>
+          <p className="max-w-72 text-center text-xs text-cafe-muted">{t("domino.fillBotsHint")}</p>
+        </div>
+      )}
       <div className="flex justify-center">
         <MicButton tone="cafe" />
       </div>
     </div>
+    {inviting && <InviteFriends code={code} players={players} free={players - seats.length} onClose={() => setInviting(false)} />}
     </div>
   );
 }

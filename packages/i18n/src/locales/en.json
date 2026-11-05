@@ -5,10 +5,11 @@
   },
   "nav": {
     "home": "Café",
-    "voice": "Voice room",
+    "voice": "Voice",
     "profile": "Profile",
     "main": "Main navigation",
-    "play": "Play"
+    "play": "Play",
+    "friends": "Friends"
   },
   "home": {
     "greeting": "Welcome, {name}",
@@ -22,7 +23,20 @@
       "accounts": "Accounts (Supabase)",
       "voice": "Voice (LiveKit)"
     },
-    "playDomino": "Play domino"
+    "playDomino": "Play domino",
+    "welcome": "Welcome to the café",
+    "tagline": "Your corner café, online.",
+    "playNow": "A game of dominoes",
+    "playNowHint": "Open a table or join your friends",
+    "soloQuick": "Solo against bots",
+    "joinCode": "I have a code",
+    "friendsOnline": "Friends online",
+    "noFriendsOnline": "No friends online right now.",
+    "findFriends": "Add friends",
+    "seeAll": "See all",
+    "messages": "Messages",
+    "greetingGuest": "Hi there!",
+    "pickName": "Pick your nickname"
   },
   "auth": {
     "signIn": "Sign in",
@@ -58,7 +72,9 @@
       "tooManyAttempts": "Too many attempts. Wait a minute and try again.",
       "signupRefused": "We couldn't create your account. Check your date of birth and username."
     },
-    "checkEmail": "Almost there! Open the email we just sent you to confirm your account, then sign in."
+    "checkEmail": "Almost there! Open the email we just sent you to confirm your account, then sign in.",
+    "guestName": "Your nickname",
+    "guestNameHint": "3 to 20 letters, digits or underscores. Leave empty for a random one."
   },
   "voice": {
     "title": "Voice room",
@@ -88,11 +104,16 @@
     "account": "Account type",
     "guestAccount": "Guest",
     "emailAccount": "Email",
-    "navigateHint": "Switch pages while in the voice room: the voice bar stays on top."
+    "navigateHint": "Switch pages while in the voice room: the voice bar stays on top.",
+    "rename": "Change my nickname",
+    "renameSave": "Save",
+    "renamed": "Nickname changed."
   },
   "common": {
     "loading": "Loading…",
-    "language": "Language"
+    "language": "Language",
+    "close": "Close",
+    "retry": "Retry"
   },
   "language": {
     "en": "English",
@@ -130,7 +151,10 @@
       "seat_taken": "Someone just took that seat. Try again.",
       "rate_limited": "You opened a lot of tables. Wait a few minutes.",
       "unknown": "Something went wrong. Please try again."
-    }
+    },
+    "solo": "Play alone against bots",
+    "soloHint": "Start right away, bots take the other seats.",
+    "soloStarting": "Seating the bots…"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -187,6 +211,117 @@
     "table": "Table {code}",
     "players": "Players",
     "consultUs": "Your team opens: talk it over",
-    "consultThem": "The other team is deciding who opens"
+    "consultThem": "The other team is deciding who opens",
+    "bot": "Bot",
+    "fillBots": "Fill with bots",
+    "fillBotsHint": "Free seats go to bots and the game starts.",
+    "thinking": "{name} is thinking…",
+    "redealSixDoubles": "6 doubles in one hand: the tiles are dealt again.",
+    "redealFamily": "{name} asked for a redeal: new hand.",
+    "kept": "{name} keeps the hand: their team scores nothing this round.",
+    "declareTitle": "Unbalanced deal",
+    "declareMine": "You were dealt 6 tiles of the {n} family.",
+    "declareOther": "{name} was dealt 6 tiles of the {n} family.",
+    "declareExplain": "Redeal: shuffle and deal again. Keep: play on, but the keeping team scores nothing this round, the points go to the opponents.",
+    "declareWait": "Waiting for their choice… {n} s",
+    "redeclare": "Redeal",
+    "keep": "Keep",
+    "penaltyChip": "No points this round",
+    "roundReplay": "Nobody scores: the round is replayed and the double-six opens.",
+    "penalized": "Hand kept: the points go to the other team.",
+    "playOn": "On the {n}",
+    "rotate": "Rotate screen",
+    "rotateHint": "Turn your phone sideways for more room",
+    "roundClosedYou": "You close the round!",
+    "youPass": "Nothing to play: you pass"
+  },
+  "social": {
+    "title": "Friends",
+    "subtitle": "Your friends, your messages, your invites.",
+    "tabMessages": "Messages",
+    "tabFriends": "Friends",
+    "tabRequests": "Requests",
+    "addTitle": "Add a friend",
+    "addPlaceholder": "Exact username",
+    "addButton": "Add",
+    "add": {
+      "sent": "Request sent to {name}.",
+      "accepted": "You are now friends!",
+      "already": "Already friends or request already sent.",
+      "not_found": "Nobody has that username.",
+      "self": "That's you!",
+      "blocked": "You can't add this person.",
+      "rate_limited": "Too many requests, try again later.",
+      "error": "That didn't work, try again."
+    },
+    "noMessages": "No messages yet. Write to a friend from the Friends tab.",
+    "noFriends": "No friends yet. Add someone by username, or from a table.",
+    "noRequests": "No pending requests.",
+    "incoming": "Friend requests",
+    "outgoing": "Sent",
+    "messageRequests": "Message requests",
+    "messageRequestHint": "This person is not your friend. They won't know you read it until you reply.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "cancel": "Cancel",
+    "pending": "Pending",
+    "message": "Message",
+    "remove": "Remove friend",
+    "block": "Block",
+    "report": "Report",
+    "unblock": "Unblock",
+    "online": "Online",
+    "atTable": "At a domino table",
+    "inVoice": "In voice",
+    "offline": "Offline",
+    "you": "You",
+    "inviteCard": "Domino table",
+    "inviteJoin": "Join",
+    "inviteSeats": "{free} seat(s) free",
+    "inviteSent": "Invite sent",
+    "inviteFriends": "Invite a friend",
+    "inviteHint": "Your friends get the table code in their messages.",
+    "invite": "Invite",
+    "invited": "Invited",
+    "inviteBody": "Come play dominoes! Code: {code}",
+    "typing": "typing…",
+    "seen": "Seen",
+    "sending": "Sending…",
+    "failed": "Not sent. Tap to retry.",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "back": "Back",
+    "requestBanner": "{name} wants to message you. Reply to accept the conversation.",
+    "requestAccept": "Accept",
+    "requestDelete": "Delete",
+    "error": {
+      "blocked": "You can't message this person.",
+      "rate_limited": "Easy! Wait a little before writing.",
+      "invalid_body": "Message empty or too long.",
+      "not_member": "Conversation not found.",
+      "network": "No network. We'll retry as soon as it's back.",
+      "error": "That didn't work."
+    },
+    "confirmRemove": "Remove {name} from your friends?",
+    "confirmBlock": "Block {name}? You won't be able to message or add each other.",
+    "reportTitle": "Report {name}",
+    "reportReason": {
+      "spam": "Spam",
+      "insult": "Insults or harassment",
+      "cheat": "Cheating",
+      "other": "Other"
+    },
+    "reportDetails": "Details (optional)",
+    "reportSend": "Send report",
+    "reported": "Thanks, noted. We'll look into it.",
+    "blockedDone": "{name} is blocked.",
+    "menu": "More options",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "conversationWith": "Conversation with {name}",
+    "newMessages": "{n} unread",
+    "youPrefix": "You: ",
+    "invitePreview": "🁫 Table invite",
+    "guestNotice": "Guests can message their friends. Create an account to keep your friends."
   }
 }

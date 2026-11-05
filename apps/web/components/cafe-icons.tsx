@@ -41,3 +41,183 @@ export function CrownIcon({ className }: P) {
     </svg>
   );
 }
+
+/** Bot : une petite tête ronde à antenne, comme un jeton de café. */
+export function BotIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 3v3" />
+      <circle cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none" />
+      <rect x="4.5" y="6.5" width="15" height="12" rx="5" />
+      <circle cx="9.3" cy="12.2" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="14.7" cy="12.2" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M9.5 15.6c1.5 1 3.5 1 5 0" />
+      <path d="M2.5 11v3M21.5 11v3" />
+    </svg>
+  );
+}
+
+/** Une pierre de domino vue de dos, en or, pour compter les pierres d'un joueur. */
+export function TileBackIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 12 20" className={className} aria-hidden="true">
+      <rect x="0.6" y="1.4" width="10.8" height="18" rx="2.4" fill="#6e4b18" />
+      <rect x="0.6" y="0.6" width="10.8" height="17.8" rx="2.4" fill="#d9ab4e" stroke="#8a5f1d" strokeWidth="0.8" />
+      <path d="M6 5.2l1 2.2 2.3.2-1.8 1.5.6 2.3L6 10.2l-2.1 1.2.6-2.3-1.8-1.5 2.3-.2z" fill="#f6dc95" opacity="0.9" />
+      <rect x="1.8" y="1.6" width="8.4" height="2" rx="1" fill="#fff3c4" opacity="0.35" />
+    </svg>
+  );
+}
+
+/** Le café : un verre de thé à la menthe sur sa soucoupe, avec la vapeur. */
+export function CafeIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 9h10l-1.3 9.2a2 2 0 0 1-2 1.8h-3.4a2 2 0 0 1-2-1.8z" />
+      <path d="M7.4 12h9.2" opacity="0.6" />
+      <path d="M4.5 21h15" />
+      <path d="M10 6c0-1 1-1.3 1-2.3M13.5 6c0-1 1-1.3 1-2.3" />
+    </svg>
+  );
+}
+
+/** Jouer : deux dominos penchés. */
+export function DominoIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3.5" y="5" width="7" height="14" rx="1.8" transform="rotate(-10 7 12)" />
+      <path d="M3.9 12.6l6.9-1.2" transform="rotate(0)" />
+      <circle cx="6.6" cy="8.9" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="15.6" r="0.9" fill="currentColor" stroke="none" />
+      <rect x="13" y="4" width="7" height="14" rx="1.8" transform="rotate(12 16.5 11)" />
+      <path d="M13.3 10.4l6.8 1.4" />
+      <circle cx="17.4" cy="7.6" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="15.6" cy="14.6" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="17.6" cy="15" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/** Amis : deux personnes et une bulle de discussion. */
+export function FriendsIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="8.5" cy="9" r="3" />
+      <path d="M3 19.5c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" />
+      <path d="M14.5 4.5h6a1.5 1.5 0 0 1 1.5 1.5v3.5a1.5 1.5 0 0 1-1.5 1.5h-2.5l-2.2 1.8v-1.8h-1.3A1.5 1.5 0 0 1 13 9.5V6a1.5 1.5 0 0 1 1.5-1.5z" />
+    </svg>
+  );
+}
+
+/** Micro du salon vocal. */
+export function VoiceIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" />
+    </svg>
+  );
+}
+
+/** Profil : un buste dans un médaillon. */
+export function ProfileIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M6.5 18.2c1.2-2 3.1-3 5.5-3s4.3 1 5.5 3" />
+    </svg>
+  );
+}
+
+/** Envoyer un message. */
+export function SendIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M3.4 20.4 21 12 3.4 3.6l-.1 6.5L15 12 3.3 13.9z" />
+    </svg>
+  );
+}
+
+/** Ajouter un ami. */
+export function AddFriendIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <circle cx="9.5" cy="8.5" r="3.5" />
+      <path d="M3 20c.7-3.4 3.2-5.2 6.5-5.2 1.6 0 3 .4 4.1 1.2M18 13v7M14.5 16.5h7" />
+    </svg>
+  );
+}
+
+/** Retour. */
+export function BackIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  );
+}
+
+/** Drapeau (signaler) et cercle barré (bloquer). */
+export function FlagIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+    </svg>
+  );
+}
+export function BlockIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
+/** Trois points (plus d'options). */
+export function MoreIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="12" r="1.9" />
+      <circle cx="12" cy="12" r="1.9" />
+      <circle cx="19" cy="12" r="1.9" />
+    </svg>
+  );
+}
+
+/** Coche (accepter, vu) et croix (refuser, fermer). */
+export function CheckIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}
+export function CloseIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+/** Bulle de message. */
+export function ChatIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 5.5h16v10H10l-4.5 3.8V15.5H4z" />
+      <path d="M8 9.5h8M8 12.3h5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Un téléphone qui pivote (passer en paysage / en portrait). */
+export function RotateIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="9" width="12" height="12" rx="2" transform="rotate(-90 9 15)" />
+      <path d="M14 3a7 7 0 0 1 7 7M21 10l-2.2-1.6M21 10l1.4-2.4" />
+    </svg>
+  );
+}

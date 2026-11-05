@@ -1,6 +1,7 @@
 "use client";
 
 import { checkBirthdate } from "@icosium/shared";
+import { Emblem } from "@/components/cafe-icons";
 import type { MessageKey } from "@icosium/i18n";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
@@ -42,7 +43,10 @@ export default function LoginPage() {
 
   /** Vérifications rapides côté app ; le serveur refait les mêmes et a le dernier mot. */
   function localCheck(): MessageKey | null {
-    if (mode === "guest") return ageConfirmed ? null : "auth.error.ageNotConfirmed";
+    if (mode === "guest") {
+      if (username.trim() && !USERNAME_PATTERN.test(username.trim())) return "auth.error.invalidUsername";
+      return ageConfirmed ? null : "auth.error.ageNotConfirmed";
+    }
     if (password.length < MIN_PASSWORD_LENGTH) return "auth.error.weakPassword";
     if (mode === "signUp") {
       if (!USERNAME_PATTERN.test(username)) return "auth.error.invalidUsername";
@@ -77,7 +81,12 @@ export default function LoginPage() {
           return;
         }
       } else {
-        await auth.signInAsGuest();
+        const name = username.trim();
+        if (name && !(await auth.isUsernameAvailable(name))) {
+          setError("auth.error.usernameTaken");
+          return;
+        }
+        await auth.signInAsGuest(name || undefined);
       }
       router.replace(nextPath());
     } catch (err) {
@@ -88,13 +97,14 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-4 py-10">
+    <main className="animate-rise mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-4 py-10">
       <header className="flex flex-col gap-1 text-center">
-        <h1 className="text-3xl font-semibold tracking-wide">{t("app.name")}</h1>
+        <Emblem className="mx-auto mb-2 size-24 drop-shadow-[0_0_22px_rgb(216_167_72/0.5)]" />
+        <h1 className="text-gilded text-4xl font-bold tracking-[0.18em]">{t("app.name")}</h1>
         <p className="text-ink-muted">{t("app.tagline")}</p>
       </header>
 
-      <div role="tablist" className="grid grid-cols-3 gap-1 rounded-control bg-surface-2 p-1">
+      <div role="tablist" className="grid grid-cols-3 gap-1 rounded-control bg-black/35 p-1 ring-1 ring-gold/20">
         {TABS.map((tab) => (
           <button
             key={tab.mode}
@@ -106,7 +116,7 @@ export default function LoginPage() {
               setError(null);
             }}
             className={`min-h-touch rounded-[calc(var(--radius-control)-0.25rem)] text-sm font-medium transition-colors duration-200 ${
-              mode === tab.mode ? "bg-surface text-ink shadow-sm" : "text-ink-muted"
+              mode === tab.mode ? "gold-button" : "text-ink-muted"
             }`}
           >
             {t(tab.label)}
@@ -118,6 +128,20 @@ export default function LoginPage() {
         {mode === "guest" ? (
           <>
             <p className="text-ink-muted">{t("auth.guestIntro")}</p>
+            <Field label={t("auth.guestName")} hint={t("auth.guestNameHint")}>
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  autoComplete="nickname"
+                  autoCapitalize="none"
+                  maxLength={20}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9_]/g, ""))}
+                  className={INPUT}
+                />
+              )}
+            </Field>
             <label className="flex min-h-touch items-center gap-3">
               <input
                 type="checkbox"
@@ -167,13 +191,13 @@ export default function LoginPage() {
         )}
 
         {notice && (
-          <p role="status" className="rounded-control bg-mint-soft p-3 text-sm text-ink">
+          <p role="status" className="rounded-control bg-gold/15 p-3 text-sm text-ink ring-1 ring-gold/30">
             {t(notice)}
           </p>
         )}
 
         {error && (
-          <p role="alert" className="rounded-control bg-surface-2 p-3 text-sm text-danger">
+          <p role="alert" className="rounded-control bg-black/40 p-3 text-sm text-danger ring-1 ring-danger/40">
             {t(error)}
           </p>
         )}
@@ -181,7 +205,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={busy}
-          className="flex min-h-14 items-center justify-center rounded-card bg-mint px-6 text-lg font-semibold text-mint-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+          className="flex min-h-14 items-center justify-center rounded-card gold-button px-6 text-lg font-bold transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
         >
           {busy
             ? t("auth.working")
@@ -199,7 +223,7 @@ export default function LoginPage() {
 }
 
 const INPUT =
-  "min-h-touch w-full rounded-control border border-line bg-surface px-3 text-base text-ink outline-none transition-colors duration-200 focus:border-mint";
+  "cafe-input min-h-touch w-full px-3 text-base transition-colors duration-200";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: (id: string) => ReactNode }) {
   const id = useId();

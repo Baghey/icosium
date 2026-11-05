@@ -72,8 +72,8 @@ export function MicButton({ size = "large", tone = "app" }: { size?: "large" | "
             ? "bg-mic-on text-white shadow-[0_0_0_3px_rgba(31,184,96,0.35),0_0_28px_rgba(31,184,96,0.55)]"
             : "cafe-panel text-cafe-text"
           : micOn
-            ? "bg-mint text-mint-ink"
-            : "bg-surface-2 text-ink"
+            ? "bg-mic-on text-white shadow-[0_0_0_3px_rgba(31,184,96,0.35),0_0_28px_rgba(31,184,96,0.55)]"
+            : "cafe-panel text-cafe-text"
       } ${speaking ? "animate-ring" : ""}`}
     >
       {micOn ? <MicIcon className={iconSize} /> : <MicOffIcon className={iconSize} />}

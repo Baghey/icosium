@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: t("app.name"),
   description: t("app.tagline"),
   applicationName: t("app.name"),
-  appleWebApp: { capable: true, title: t("app.name"), statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: t("app.name"), statusBarStyle: "black-translucent" },
   icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
@@ -19,16 +19,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6efe3" },
-    { media: "(prefers-color-scheme: dark)", color: "#1f1712" },
-  ],
+  themeColor: "#120c08",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={DEFAULT_LOCALE} dir={directionOf(DEFAULT_LOCALE)}>
+    // Fond sombre posé dès le premier octet : pas de flash blanc avant le chargement du style.
+    <html lang={DEFAULT_LOCALE} dir={directionOf(DEFAULT_LOCALE)} style={{ backgroundColor: "#120c08", colorScheme: "dark" }}>
       <body className="min-h-dvh bg-bg text-ink antialiased">
+        <div className="app-backdrop" aria-hidden="true" />
         <Providers>
           <VoiceBar />
           {children}

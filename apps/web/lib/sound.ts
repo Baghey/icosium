@@ -1,8 +1,11 @@
 "use client";
 
 /**
- * Sons d'ICOSIUM, fabriqués par le navigateur (Web Audio) : aucun fichier à télécharger.
- * Le claquement imite un domino posé sec sur une table en bois.
+ * Sons d'ICOSIUM.
+ * - Les dominos utilisent de vrais sons (public/sfx, 4 à 5 Ko chacun, volume égalisé),
+ *   chargés en arrière-plan au premier son joué.
+ * - Tant qu'ils ne sont pas arrivés (réseau lent, hors ligne), le navigateur fabrique
+ *   un claquement de secours (synthèse Web Audio), donc il y a toujours un son.
  */
 
 const STORAGE_KEY = "icosium.sound";
@@ -47,58 +50,174 @@ function audio(): AudioContext | null {
   return ctx;
 }
 
-/** Le claquement d'un domino. `strong` : plus fort et plus grave, quand on ferme la manche. */
+/** Les vrais sons, chargés une seule fois. */
+const SAMPLE_FILES = {
+  clack: ["/sfx/clack1.mp3", "/sfx/clack2.mp3", "/sfx/clack3.mp3", "/sfx/clack4.mp3"],
+  slam: ["/sfx/slam.mp3"],
+} as const;
+type SampleName = keyof typeof SAMPLE_FILES;
+const samples: Partial<Record<SampleName, AudioBuffer[]>> = {};
+let loading = false;
+
+function loadSamples(ac: AudioContext): void {
+  if (loading) return;
+  loading = true;
+  for (const [name, urls] of Object.entries(SAMPLE_FILES) as [SampleName, readonly string[]][]) {
+    void Promise.all(
+      urls.map(async (url) => {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(url);
+        return ac.decodeAudioData(await res.arrayBuffer());
+      }),
+    )
+      .then((buffers) => {
+        samples[name] = buffers;
+      })
+      .catch(() => {
+        // On réessaiera au prochain son (coupure réseau courte).
+        loading = false;
+      });
+  }
+}
+
+/** Joue un vrai son s'il est prêt ; renvoie false sinon (on utilisera la synthèse). */
+function playSample(ac: AudioContext, name: SampleName, level: number, rate: number): boolean {
+  const list = samples[name];
+  if (!list?.length) return false;
+  const src = ac.createBufferSource();
+  src.buffer = list[Math.floor(Math.random() * list.length)] as AudioBuffer;
+  src.playbackRate.value = rate;
+  const gain = ac.createGain();
+  gain.gain.value = level;
+  src.connect(gain).connect(ac.destination);
+  src.start(ac.currentTime + 0.003);
+  return true;
+}
+
+/** Charge les vrais sons à l'avance (appelé dès qu'une partie s'affiche). */
+export function preloadSounds(): void {
+  const ac = audio();
+  if (ac) loadSamples(ac);
+}
+
+/** Une sortie commune, légèrement adoucie, pour que les sons ne soient jamais agressifs. */
+let master: AudioNode | null = null;
+function out(ac: AudioContext): AudioNode {
+  if (!master) {
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.ratio.value = 3;
+    comp.attack.value = 0.002;
+    comp.release.value = 0.12;
+    const soft = ac.createBiquadFilter();
+    soft.type = "lowpass";
+    soft.frequency.value = 9000;
+    soft.connect(comp).connect(ac.destination);
+    master = soft;
+  }
+  return master;
+}
+
+/** Un bruit très bref (l'impact), réutilisé par tous les sons. */
+let impulse: AudioBuffer | null = null;
+function impact(ac: AudioContext): AudioBuffer {
+  if (!impulse) {
+    const n = Math.floor(ac.sampleRate * 0.006);
+    impulse = ac.createBuffer(1, n, ac.sampleRate);
+    const d = impulse.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+  }
+  return impulse;
+}
+
+/**
+ * Fait « sonner » des résonances (synthèse modale) : chaque mode est un filtre très étroit
+ * excité par l'impact. Une pierre en ivoire = modes aigus et brefs ; la table en bois = modes graves.
+ */
+function strike(ac: AudioContext, at: number, modes: [freq: number, q: number, gain: number][], level: number, detune: number) {
+  const src = ac.createBufferSource();
+  src.buffer = impact(ac);
+  const dest = out(ac);
+  for (const [f, q, g] of modes) {
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = f * detune;
+    bp.Q.value = q;
+    const gain = ac.createGain();
+    gain.gain.value = g * level;
+    src.connect(bp).connect(gain).connect(dest);
+  }
+  // Le « clic » sec du contact, filtré vers les aigus.
+  const hp = ac.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 3500;
+  const click = ac.createGain();
+  click.gain.value = 0.35 * level;
+  src.connect(hp).connect(click).connect(dest);
+  src.start(at);
+}
+
+/** Modes de la pierre (ivoire/résine dure) et de la table (bois épais). */
+const STONE: [number, number, number][] = [
+  [2950, 28, 5.5],
+  [4380, 32, 3.8],
+  [6420, 36, 2.4],
+];
+const TABLE: [number, number, number][] = [
+  [165, 9, 9],
+  [390, 12, 6],
+  [720, 14, 3.5],
+];
+
+/** Le claquement d'un domino posé sur la table. `strong` : on ferme la manche (plus fort, plus grave). */
 export function playClack(strong = false): void {
+  // Petite vibration du téléphone, comme le choc de la pierre sur la table.
+  try {
+    navigator.vibrate?.(strong ? [18, 40, 28] : 14);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
   if (!isSoundOn()) return;
   const ac = audio();
   if (!ac) return;
-  const t = ac.currentTime;
-  const volume = strong ? 0.9 : 0.5;
-
-  // Le « clac » : un bruit très court, filtré vers les aigus.
-  const length = Math.floor(ac.sampleRate * 0.05);
-  const buffer = ac.createBuffer(1, length, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 6);
-  const noise = ac.createBufferSource();
-  noise.buffer = buffer;
-  const band = ac.createBiquadFilter();
-  band.type = "bandpass";
-  band.frequency.value = strong ? 1800 : 2600;
-  band.Q.value = 1.2;
-  const noiseGain = ac.createGain();
-  noiseGain.gain.value = volume;
-  noise.connect(band).connect(noiseGain).connect(ac.destination);
-  noise.start(t);
-
-  // Le « toc » de la table en bois.
-  const body = ac.createOscillator();
-  body.type = "sine";
-  body.frequency.setValueAtTime(strong ? 140 : 220, t);
-  body.frequency.exponentialRampToValueAtTime(strong ? 60 : 110, t + 0.08);
-  const bodyGain = ac.createGain();
-  bodyGain.gain.setValueAtTime(volume * (strong ? 0.9 : 0.4), t);
-  bodyGain.gain.exponentialRampToValueAtTime(0.001, t + (strong ? 0.18 : 0.09));
-  body.connect(bodyGain).connect(ac.destination);
-  body.start(t);
-  body.stop(t + 0.2);
+  loadSamples(ac);
+  // Un vrai son, avec une hauteur qui varie un tout petit peu à chaque pierre.
+  const rate = 0.95 + Math.random() * 0.1;
+  if (strong ? playSample(ac, "slam", 0.75, rate) : playSample(ac, "clack", 0.6, rate)) return;
+  const t = ac.currentTime + 0.005;
+  // Son de secours. Jamais deux fois exactement le même son : on varie un peu la hauteur.
+  const detune = (strong ? 0.86 : 1) * (0.96 + Math.random() * 0.08);
+  const level = strong ? 6 : 4;
+  strike(ac, t, [...STONE, ...TABLE.map(([f, q, g]) => [f, q, g * (strong ? 1.6 : 1)] as [number, number, number])], level, detune);
+  // La pierre rebondit à peine et se pose : un second contact, tout léger.
+  strike(ac, t + 0.014 + Math.random() * 0.006, STONE, level * 0.28, detune * 1.01);
 }
 
-/** Petit signal doux : c'est ton tour. */
+/** « C'est à toi » : deux notes douces, comme un petit carillon en bois. */
 export function playYourTurn(): void {
   if (!isSoundOn()) return;
   const ac = audio();
   if (!ac) return;
-  const t = ac.currentTime;
-  const osc = ac.createOscillator();
-  osc.type = "triangle";
-  osc.frequency.setValueAtTime(660, t);
-  osc.frequency.setValueAtTime(880, t + 0.08);
-  const gain = ac.createGain();
-  gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
-  osc.connect(gain).connect(ac.destination);
-  osc.start(t);
-  osc.stop(t + 0.3);
+  const t = ac.currentTime + 0.005;
+  const dest = out(ac);
+  const note = (at: number, f: number, level: number) => {
+    // Le son d'une lame de bois : la note, plus une harmonique aiguë qui s'éteint vite.
+    for (const [mult, decay, g] of [
+      [1, 0.45, 1],
+      [3.9, 0.08, 0.25],
+    ] as const) {
+      const osc = ac.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = f * mult;
+      const gain = ac.createGain();
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(level * g, at + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
+      osc.connect(gain).connect(dest);
+      osc.start(at);
+      osc.stop(at + decay + 0.05);
+    }
+  };
+  note(t, 784, 0.15); // sol
+  note(t + 0.11, 1175, 0.12); // ré
 }

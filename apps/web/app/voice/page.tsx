@@ -24,7 +24,7 @@ function VoiceRoom() {
   return (
     <div className="flex min-h-[calc(100dvh-12rem)] flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{t("voice.title")}</h1>
+        <h1 className="text-gilded text-3xl font-bold">{t("voice.title")}</h1>
         <p className="text-ink-muted">{t("voice.intro")}</p>
       </header>
 
@@ -37,7 +37,7 @@ function VoiceRoom() {
       </ul>
 
       {error && (
-        <p role="alert" className="rounded-control bg-surface-2 p-3 text-sm text-danger">
+        <p role="alert" className="rounded-control bg-black/40 p-3 text-sm text-danger ring-1 ring-danger/40">
           {t(error === "full" ? "voice.full" : error === "micDenied" ? "voice.micDenied" : "voice.error")}
         </p>
       )}
@@ -53,7 +53,7 @@ function VoiceRoom() {
             type="button"
             disabled={status === "connecting"}
             onClick={() => void join(TEST_VOICE_ROOM)}
-            className="flex min-h-14 w-full items-center justify-center rounded-card bg-mint px-6 text-lg font-semibold text-mint-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+            className="flex min-h-14 w-full items-center justify-center rounded-card gold-button px-6 text-lg font-bold transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
           >
             {status === "connecting" ? t("voice.joining") : t("voice.join")}
           </button>
@@ -67,7 +67,7 @@ function Seat({ peer }: { peer: VoicePeer | null }) {
   const t = useT();
   if (!peer) {
     return (
-      <div className="flex aspect-square flex-col items-center justify-center gap-2 rounded-card border border-dashed border-line text-ink-muted">
+      <div className="flex aspect-square flex-col items-center justify-center gap-2 rounded-card border border-dashed border-gold/35 bg-black/25 text-ink-muted">
         <SeatIcon className="size-8" />
         <span className="text-sm">{t("voice.emptySeat")}</span>
       </div>
@@ -77,12 +77,12 @@ function Seat({ peer }: { peer: VoicePeer | null }) {
   const initial = peer.name.trim().charAt(0).toUpperCase() || "?";
   return (
     <div
-      className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-card border bg-surface transition-colors duration-200 ${
-        speaking ? "border-mint" : "border-line"
+      className={`flex aspect-square flex-col items-center justify-center gap-2 cafe-card transition-colors duration-200 ${
+        speaking ? "!border-mic-on" : ""
       }`}
     >
       <div
-        className={`flex size-16 items-center justify-center rounded-full bg-surface-2 text-2xl font-semibold ${
+        className={`flex size-16 items-center justify-center rounded-full border-2 border-gold/60 bg-cafe-2 text-2xl font-semibold text-gold-light ${
           speaking ? "animate-ring" : ""
         }`}
         aria-hidden="true"

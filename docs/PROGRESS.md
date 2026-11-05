@@ -16,6 +16,78 @@
   début de chaque manche. Sans WebGL, la table en image reste affichée.
 - Page de contrôle visuel en développement : `/dev/table3d?n=12&start=3&ghost=1`.
 
+## Amis, messagerie, nouveau design et nouvelles pierres (5 novembre 2026)
+
+### Ce qui marche
+
+- **Chaîne de domino** : rangées dans la longueur de la table, rien ne sort du feutre, une pierre
+  posée ne bouge plus, les doubles en travers (jamais dans un coin), la caméra suit la chaîne,
+  halo doré sur les bouts jouables, vibration à la pose.
+- **Pierres refaites** : en 3D, ivoire verni au grain d'os léger, arêtes arrondies, points
+  vraiment creusés (relief), trait gravé et clou en laiton en relief ; dans la main, même style en
+  SVG (gros points creusés, reflet verni, tranche). Page de contrôle : `/dev/tiles` (en local).
+- **Design café sur toute l'app** : fond du café flouté partout, couleurs or et brun, navigation
+  à 5 onglets (Café, Jouer, Amis, Vocal, Profil) avec pastille de non-lus, nouvel accueil
+  (enseigne, grande table de domino, « seul contre des bots », « j'ai un code », amis en ligne,
+  derniers messages), pages Jouer, Profil, Vocal et Connexion restylées.
+- **Amis** (onglet Amis) : ajouter par pseudo, accepter ou refuser, annuler une demande, retirer,
+  bloquer, signaler (raison + détails). Pastille de présence : en ligne, à une table, en vocal.
+- **Messagerie façon Messenger** : liste des conversations, demandes de message des inconnus à
+  part (l'autre ne sait pas qu'on a lu tant qu'on ne répond pas), bulles groupées, « Vu »,
+  « écrit… », envoi immédiat avec réessai tout seul quand le réseau revient.
+- **Inviter un ami** depuis la table d'attente : il reçoit une carte « Table de domino » avec
+  le code et un bouton « Rejoindre ».
+- Sécurité : RLS sur les 6 nouvelles tables, aucune écriture directe (tout passe par des
+  fonctions qui vérifient amis, blocages et anti-spam : 30 demandes d'ami par heure,
+  20 messages par minute, 20 signalements par jour).
+
+### Vérifié
+
+- `pnpm test` : 92 tests passent ; `pnpm typecheck` et `next build` passent.
+- Test automatique à deux navigateurs (360 px) sur une copie locale de Supabase : demande
+  d'ami, acceptation, messages, « écrit… », « Vu », badge de non-lus, invitation à une table
+  puis « Rejoindre », menu signaler/bloquer.
+
+### Ce qui reste
+
+- Plus tard dans l'étape 4 : messages vocaux, appels privés, groupes, réactions, partage des
+  résultats de partie dans les messages, Cercles.
+- Signaler / bloquer directement depuis la table de jeu (aujourd'hui : depuis Amis et la
+  conversation).
+
+### Problèmes connus
+
+- La base « amis + messages » doit être approuvée dans Supabase avant la mise en ligne.
+
+## Domino : bots, pseudo invité, nouvelles règles (5 novembre 2026)
+
+Demandé par le propriétaire après avoir joué sur son téléphone.
+
+Ce qui marche :
+- **Écran de jeu** : les autres joueurs sont dans une rangée au-dessus de la table (avatar, nom,
+  pastille dorée avec le nombre de pierres). Plus rien ne cache la table.
+- **Jouer seul** : bouton « Jouer seul contre des bots » sur la page Jouer, et « Compléter avec des
+  bots » pour le Patron dans la salle d'attente. Les bots ne viennent que sur ce choix explicite
+  (`botAllowed` passe à true). Le bot (`chooseBotMove`) joue sur le serveur, en ~1 s, et ne voit que
+  ce qu'un joueur verrait : sa main, la table, et qui a passé sur quel chiffre. Sa main n'est jamais
+  écrite dans `domino_hands`. Pas de salon vocal quand on est seul avec des bots.
+- **Invité** : choix du pseudo à l'entrée (facultatif) et changement dans le Profil
+  (`set_guest_username`).
+- **6 doubles** dans une main : la donne est annulée et refaite, avec un message.
+- **6 pierres d'une même famille** : la manche attend (phase `declare`). Le joueur choisit
+  « Redéclarer » (nouvelle donne) ou « Garder » (son équipe ne marque rien sur la manche : si elle
+  gagne, les points vont aux adversaires). Sans choix en 20 s, on redistribue. Un bot redéclare.
+- **Blocage à égalité** : aucun point, la manche est rejouée (même numéro) et le double-six ouvre.
+- Migration `20261105080000_bots_and_guest_names.sql` appliquée en ligne ; fonction `domino` v3
+  déployée (envoyée en un seul fichier JavaScript, construit avec esbuild depuis les sources).
+
+Tests : shared 55, fonctions 16, web 11, i18n 7. Parties complètes jouées en local contre les bots
+(2D et 3D), captures à 360 px.
+
+Reste / à confirmer avec le propriétaire :
+- Les détails de l'easter egg « 6 pierres d'une famille » (6 sur 7 suffisent, seul le joueur
+  choisit, redistribution si le temps passe, aussi à 2 joueurs) sont ma lecture : à valider.
+
 ## Étape 2 : le domino algérien (5 novembre 2026)
 
 ### Ce qui marche
@@ -168,6 +240,48 @@ Supabase et LiveKit « En ligne ».
   sur le réseau privé. Il faut accepter, sinon le téléphone ne trouve pas l'ordinateur.
 - Les Easter eggs ne sont pas recopiés dans `docs/ICOSIUM.md` (ils doivent rester secrets) ;
   la liste reste dans le document d'origine, pour l'étape 8.
+
+## Domino plus fluide, mode paysage et vrais sons (5 novembre 2026, soir)
+
+Ce qui marche :
+- Vrais sons de dominos (pierre posée en 4 variantes, pierre claquée en fin de manche), générés avec ElevenLabs,
+  découpés et au même volume (`apps/web/public/sfx`, 4 à 5 Ko chacun). La synthèse reste en secours.
+- Mode paysage sur téléphone : la table est tournée dans la largeur, les joueurs et les boutons sur les côtés.
+  Sur Android, l'écran passe en plein écran et se verrouille en paysage dès l'entrée en partie (ou au premier toucher).
+  Sur iPhone, un conseil « Tourne ton téléphone » s'affiche. Un bouton permet de revenir en portrait (choix retenu).
+- Choix du bout par deux gros boutons « Sur le 3 / Sur le 5 » au-dessus de la main.
+- Le message « Attends ton tour » s'efface tout seul et dès que le jeu avance.
+- La caméra cadre exactement la chaîne (chaque coin est projeté à l'écran) : plus de pierre coupée en haut.
+- Les panneaux du bas (fin de manche, scores) ont un fond plein.
+
+Testé : partie à 4 joueurs humains dans 4 navigateurs (un en paysage, trois en portrait), aucune fuite de main ni de pioche.
+
+Reste : son du mélange (à récupérer depuis le PC du propriétaire), test réel à plusieurs téléphones.
+
+## Analyse vidéo vérifiée et paysage peaufiné (5 novembre 2026, 20 h)
+
+Corrigé :
+- Le chrono ne remonte plus (le décalage d'horloge garde la meilleure mesure ; une relecture tardive ne le fausse plus).
+- « Tu fermes la manche ! » au lieu de « Toi ferme la manche ! ».
+- Quand tu n'as rien à jouer, le serveur te fait passer tout seul et un message le dit.
+- Les bots ont un visage qui va avec leur prénom.
+- Plus de boutons en double (son, scores) ; un seul bouton « Jouer seul » sur la page Jouer.
+- Invité sans pseudo : « Salut ! » + lien « Choisis ton pseudo ».
+- Fond sombre dès le premier affichage (plus de flash blanc), marge du bas qui tient compte de la barre du téléphone.
+- La table 3D se prépare dès l'arrivée à la table.
+- Paysage : mélange propre (les pierres tournent puis s'alignent devant chaque joueur), table entière visible,
+  fin de manche sur deux colonnes, pierres de la main plus grandes.
+
+Vérifié et déjà correct : sens des pierres et doubles en travers (nouveau test sur 500 parties au hasard).
+
+## Table fixe et chaîne en spirale (5 novembre 2026, 20 h 30)
+
+- La caméra ne bouge plus : la table entière (rebord compris) est toujours visible, en portrait comme en paysage.
+- La chaîne tourne en spirale comme au café : un court tronc au centre, puis chaque bras tourne et longe le bord.
+  Les deux bras tournent dans le même sens et gardent chacun leur moitié de table.
+- Pierres de la chaîne un peu plus petites (échelle 0,62) pour que tout tienne sur le feutre.
+- Testé sur 2000 parties au hasard : aucune pierre ne se chevauche ; dans environ 1 % des très longues chaînes,
+  la dernière pierre mord un peu sur le rebord.
 
 ## 5 novembre 2026 — Outils et skills pour Claude
 

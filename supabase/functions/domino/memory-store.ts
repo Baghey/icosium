@@ -37,7 +37,7 @@ export class MemoryStore implements DominoStore {
   }
   async insertSeat(tableId: string, seat: SeatRow) {
     const rows = this.seatRows.get(tableId) ?? [];
-    if (rows.some((r) => r.seat === seat.seat || r.userId === seat.userId)) return false;
+    if (rows.some((r) => r.seat === seat.seat || (seat.userId !== null && r.userId === seat.userId))) return false;
     rows.push(seat);
     this.seatRows.set(tableId, rows);
     return true;
@@ -45,6 +45,10 @@ export class MemoryStore implements DominoStore {
   async setStatus(tableId: string, status: TableStatus) {
     const t = this.tables.get(tableId);
     if (t) t.status = status;
+  }
+  async allowBots(tableId: string) {
+    const t = this.tables.get(tableId);
+    if (t) t.options = { ...t.options, botAllowed: true };
   }
   async loadGame(tableId: string) {
     const g = this.games.get(tableId);

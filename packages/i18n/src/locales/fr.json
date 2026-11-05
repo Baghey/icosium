@@ -5,10 +5,11 @@
   },
   "nav": {
     "home": "Café",
-    "voice": "Salon vocal",
+    "voice": "Vocal",
     "profile": "Profil",
     "main": "Navigation principale",
-    "play": "Jouer"
+    "play": "Jouer",
+    "friends": "Amis"
   },
   "home": {
     "greeting": "Salut, {name}",
@@ -22,7 +23,20 @@
       "accounts": "Comptes (Supabase)",
       "voice": "Vocal (LiveKit)"
     },
-    "playDomino": "Jouer au domino"
+    "playDomino": "Jouer au domino",
+    "welcome": "Bienvenue au café",
+    "tagline": "Le café du coin, en ligne.",
+    "playNow": "Une partie de domino",
+    "playNowHint": "Ouvre une table ou rejoins tes amis",
+    "soloQuick": "Seul contre des bots",
+    "joinCode": "J'ai un code",
+    "friendsOnline": "Amis en ligne",
+    "noFriendsOnline": "Aucun ami en ligne pour l'instant.",
+    "findFriends": "Ajouter des amis",
+    "seeAll": "Tout voir",
+    "messages": "Messages",
+    "greetingGuest": "Salut !",
+    "pickName": "Choisis ton pseudo"
   },
   "auth": {
     "signIn": "Connexion",
@@ -58,7 +72,9 @@
       "tooManyAttempts": "Trop d'essais. Attends une minute et réessaie.",
       "signupRefused": "Impossible de créer ton compte. Vérifie ta date de naissance et ton pseudo."
     },
-    "checkEmail": "Presque fini ! Ouvre l'email qu'on vient de t'envoyer pour confirmer ton compte, puis connecte-toi."
+    "checkEmail": "Presque fini ! Ouvre l'email qu'on vient de t'envoyer pour confirmer ton compte, puis connecte-toi.",
+    "guestName": "Ton pseudo",
+    "guestNameHint": "3 à 20 lettres, chiffres ou tirets bas. Laisse vide pour un pseudo au hasard."
   },
   "voice": {
     "title": "Salon vocal",
@@ -88,11 +104,16 @@
     "account": "Type de compte",
     "guestAccount": "Invité",
     "emailAccount": "Email",
-    "navigateHint": "Change de page pendant le vocal : la barre vocale reste en haut."
+    "navigateHint": "Change de page pendant le vocal : la barre vocale reste en haut.",
+    "rename": "Changer mon pseudo",
+    "renameSave": "Enregistrer",
+    "renamed": "Pseudo changé."
   },
   "common": {
     "loading": "Chargement…",
-    "language": "Langue"
+    "language": "Langue",
+    "close": "Fermer",
+    "retry": "Réessayer"
   },
   "language": {
     "en": "English",
@@ -130,7 +151,10 @@
       "seat_taken": "Quelqu'un vient de prendre cette chaise. Réessaie.",
       "rate_limited": "Tu as ouvert beaucoup de tables. Attends quelques minutes.",
       "unknown": "Un problème est survenu. Réessaie."
-    }
+    },
+    "solo": "Jouer seul contre des bots",
+    "soloHint": "Tu joues tout de suite, les autres chaises sont prises par des bots.",
+    "soloStarting": "On installe les bots…"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -187,6 +211,117 @@
     "table": "Table {code}",
     "players": "Joueurs",
     "consultUs": "Ytchawro : toi ou ton partenaire ouvre",
-    "consultThem": "L'autre équipe se concerte"
+    "consultThem": "L'autre équipe se concerte",
+    "bot": "Bot",
+    "fillBots": "Compléter avec des bots",
+    "fillBotsHint": "Les chaises libres sont données à des bots et la partie commence.",
+    "thinking": "{name} réfléchit…",
+    "redealSixDoubles": "6 doubles dans une main : on redistribue.",
+    "redealFamily": "{name} a redéclaré : nouvelle donne.",
+    "kept": "{name} garde sa donne : son équipe ne marquera rien cette manche.",
+    "declareTitle": "Donne déséquilibrée",
+    "declareMine": "Tu as reçu 6 pierres de la famille du {n}.",
+    "declareOther": "{name} a reçu 6 pierres de la famille du {n}.",
+    "declareExplain": "Redéclarer : on remélange et on redistribue. Garder : on joue, mais l'équipe qui garde ne marque aucun point cette manche, ils vont aux adversaires.",
+    "declareWait": "On attend son choix… {n} s",
+    "redeclare": "Redéclarer",
+    "keep": "Garder",
+    "penaltyChip": "Sans points cette manche",
+    "roundReplay": "Personne ne marque : la manche est rejouée et le double-six ouvre.",
+    "penalized": "Donne gardée : les points vont à l'équipe adverse.",
+    "playOn": "Sur le {n}",
+    "rotate": "Tourner l'écran",
+    "rotateHint": "Tourne ton téléphone pour plus de place",
+    "roundClosedYou": "Tu fermes la manche !",
+    "youPass": "Rien à jouer : tu passes ton tour"
+  },
+  "social": {
+    "title": "Amis",
+    "subtitle": "Tes amis, tes messages, tes invitations.",
+    "tabMessages": "Messages",
+    "tabFriends": "Amis",
+    "tabRequests": "Demandes",
+    "addTitle": "Ajouter un ami",
+    "addPlaceholder": "Pseudo exact",
+    "addButton": "Ajouter",
+    "add": {
+      "sent": "Demande envoyée à {name}.",
+      "accepted": "Vous êtes maintenant amis !",
+      "already": "Déjà ami ou demande déjà envoyée.",
+      "not_found": "Personne ne s'appelle comme ça.",
+      "self": "C'est toi !",
+      "blocked": "Impossible d'ajouter cette personne.",
+      "rate_limited": "Trop de demandes, réessaie plus tard.",
+      "error": "Ça n'a pas marché, réessaie."
+    },
+    "noMessages": "Pas encore de message. Écris à un ami depuis l'onglet Amis.",
+    "noFriends": "Pas encore d'amis. Ajoute quelqu'un avec son pseudo, ou depuis une table.",
+    "noRequests": "Aucune demande en attente.",
+    "incoming": "Demandes d'amis",
+    "outgoing": "Envoyées",
+    "messageRequests": "Demandes de message",
+    "messageRequestHint": "Cette personne n'est pas ton amie. Elle ne saura pas que tu as lu tant que tu ne réponds pas.",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "cancel": "Annuler",
+    "pending": "En attente",
+    "message": "Écrire",
+    "remove": "Retirer des amis",
+    "block": "Bloquer",
+    "report": "Signaler",
+    "unblock": "Débloquer",
+    "online": "En ligne",
+    "atTable": "À une table de domino",
+    "inVoice": "En vocal",
+    "offline": "Hors ligne",
+    "you": "Toi",
+    "inviteCard": "Table de domino",
+    "inviteJoin": "Rejoindre",
+    "inviteSeats": "{free} place(s) libre(s)",
+    "inviteSent": "Invitation envoyée",
+    "inviteFriends": "Inviter un ami",
+    "inviteHint": "Tes amis reçoivent le code de la table dans leurs messages.",
+    "invite": "Inviter",
+    "invited": "Invité",
+    "inviteBody": "Viens jouer au domino ! Code : {code}",
+    "typing": "écrit…",
+    "seen": "Vu",
+    "sending": "Envoi…",
+    "failed": "Pas envoyé. Toucher pour réessayer.",
+    "placeholder": "Écris un message…",
+    "send": "Envoyer",
+    "back": "Retour",
+    "requestBanner": "{name} veut t'écrire. Réponds pour accepter la conversation.",
+    "requestAccept": "Accepter",
+    "requestDelete": "Supprimer",
+    "error": {
+      "blocked": "Tu ne peux pas écrire à cette personne.",
+      "rate_limited": "Doucement ! Attends un peu avant d'écrire.",
+      "invalid_body": "Message vide ou trop long.",
+      "not_member": "Conversation introuvable.",
+      "network": "Pas de réseau. On réessaie dès qu'il revient.",
+      "error": "Ça n'a pas marché."
+    },
+    "confirmRemove": "Retirer {name} de tes amis ?",
+    "confirmBlock": "Bloquer {name} ? Vous ne pourrez plus vous écrire ni vous ajouter.",
+    "reportTitle": "Signaler {name}",
+    "reportReason": {
+      "spam": "Spam",
+      "insult": "Insultes ou harcèlement",
+      "cheat": "Triche",
+      "other": "Autre"
+    },
+    "reportDetails": "Détails (facultatif)",
+    "reportSend": "Envoyer le signalement",
+    "reported": "Merci, c'est noté. On regarde ça.",
+    "blockedDone": "{name} est bloqué.",
+    "menu": "Plus d'options",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "conversationWith": "Conversation avec {name}",
+    "newMessages": "{n} non lu(s)",
+    "youPrefix": "Toi : ",
+    "invitePreview": "🁫 Invitation à une table",
+    "guestNotice": "Les invités peuvent écrire à leurs amis. Crée un compte pour garder tes amis."
   }
 }

@@ -17,7 +17,10 @@ type AuthValue = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, username: string, birthdate: string) => Promise<SignUpResult>;
   isUsernameAvailable: (username: string) => Promise<boolean>;
-  signInAsGuest: () => Promise<void>;
+  /** Entre en invité, avec le pseudo choisi (ou un pseudo au hasard si vide). */
+  signInAsGuest: (username?: string) => Promise<void>;
+  /** Un invité change son pseudo. */
+  renameGuest: (username: string) => Promise<"ok" | "invalid" | "taken" | "not_guest">;
   signOut: () => Promise<void>;
 };
 
@@ -95,9 +98,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
         return data === true;
       },
-      async signInAsGuest() {
-        const { error } = await supabase().auth.signInAnonymously({ options: { data: { age_confirmed: "true" } } });
+      async signInAsGuest(name) {
+        const data: Record<string, string> = { age_confirmed: "true" };
+        if (name) data.username = name;
+        const { error } = await supabase().auth.signInAnonymously({ options: { data } });
         if (error) throw error;
+      },
+      async renameGuest(name) {
+        const { data, error } = await supabase().rpc("set_guest_username", { name });
+        if (error) throw error;
+        if (data === "ok") setUsername(name);
+        return data as "ok" | "invalid" | "taken" | "not_guest";
       },
       async signOut() {
         await supabase().auth.signOut();

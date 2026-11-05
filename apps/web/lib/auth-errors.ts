@@ -23,6 +23,7 @@ export function authErrorKey(mode: AuthMode, failure: AuthFailure): MessageKey {
   if (message.includes("too_young")) return "auth.error.tooYoung";
   if (message.includes("invalid_birthdate")) return "auth.error.invalidBirthdate";
   if (message.includes("invalid_username")) return "auth.error.invalidUsername";
+  if (message.includes("username_taken")) return "auth.error.usernameTaken";
   if (message.includes("age_not_confirmed")) return "auth.error.ageNotConfirmed";
   if (code === "user_already_exists" || code === "email_exists") return "auth.error.emailTaken";
   if (code === "invalid_credentials") return "auth.error.badCredentials";

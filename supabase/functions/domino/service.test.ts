@@ -120,3 +120,49 @@ describe("jouer", () => {
     expect(Math.max(...(view?.scores ?? [0]))).toBeGreaterThanOrEqual(100);
   });
 });
+
+describe("les bots", () => {
+  it("jouer seul : 3 bots s'assoient et la partie démarre aussitôt", async () => {
+    const { deps, store } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4 }, solo: true });
+    const tableId = r.body.tableId as string;
+    const seats = await store.seats(tableId);
+    expect(seats).toHaveLength(4);
+    expect(seats.filter((s) => s.isBot)).toHaveLength(3);
+    expect(new Set(seats.map((s) => s.username)).size).toBe(4);
+    expect((await store.tableById(tableId))?.options.botAllowed).toBe(true);
+    const game = (await store.loadGame(tableId))?.state;
+    expect(game?.bots).toEqual([1, 2, 3]);
+    // Les mains des bots ne sont jamais écrites dans la table des mains.
+    expect(Object.keys(store.hands.get(tableId) ?? {})).toEqual(["u0"]);
+  });
+  it("sans « jouer seul », aucun bot ne vient", async () => {
+    const { deps, store } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4, botAllowed: false } });
+    expect(await store.seats(r.body.tableId as string)).toHaveLength(1);
+  });
+  it("seul le Patron peut compléter sa table avec des bots, avant le début", async () => {
+    const { deps, store } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4 } });
+    const tableId = r.body.tableId as string;
+    await handle(deps, "u1", { op: "join", code: r.body.code });
+    expect((await handle(deps, "u1", { op: "bots", tableId })).body.error).toBe("not_host");
+    expect((await handle(deps, "u0", { op: "bots", tableId })).status).toBe(200);
+    const seats = await store.seats(tableId);
+    expect(seats.map((s) => Boolean(s.isBot))).toEqual([false, false, true, true]);
+    expect((await store.tableById(tableId))?.status).toBe("playing");
+    expect((await handle(deps, "u0", { op: "bots", tableId })).body.error).toBe("table_started");
+  });
+  it("une partie seul contre les bots va jusqu'au bout", async () => {
+    const { deps, store, clock } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4 }, solo: true });
+    const tableId = r.body.tableId as string;
+    for (let i = 0; i < 3000; i++) {
+      const game = (await store.loadGame(tableId))?.state;
+      if (!game || game.phase === "gameOver") break;
+      clock.advance(31_000);
+      await handle(deps, "u0", { op: "tick", tableId });
+    }
+    expect((await store.tableById(tableId))?.status).toBe("finished");
+  });
+});

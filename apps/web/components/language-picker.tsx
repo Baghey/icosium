@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n";
 export function LanguagePicker() {
   const { locale, setLocale, t } = useI18n();
   return (
-    <div role="group" aria-label={t("common.language")} className="flex gap-1 rounded-control bg-surface-2 p-1">
+    <div role="group" aria-label={t("common.language")} className="flex gap-1 rounded-control bg-black/35 p-1 ring-1 ring-gold/20">
       {LOCALES.map((code) => (
         <button
           key={code}
@@ -15,7 +15,7 @@ export function LanguagePicker() {
           aria-pressed={locale === code}
           onClick={() => setLocale(code)}
           className={`min-h-touch flex-1 rounded-[calc(var(--radius-control)-0.25rem)] px-3 text-sm font-medium transition-colors duration-200 ${
-            locale === code ? "bg-surface text-ink shadow-sm" : "text-ink-muted"
+            locale === code ? "gold-button" : "text-ink-muted"
           }`}
         >
           {t(`language.${code}`)}

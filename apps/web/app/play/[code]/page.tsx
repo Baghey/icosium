@@ -32,8 +32,16 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
     if (ready && !user) router.replace(`/login?next=/play/${code}`);
   }, [ready, user, router, code]);
 
+  // On prépare la table 3D (code et textures) dès l'arrivée : quand la partie démarre,
+  // le tapis et le mélange s'affichent tout de suite, pas deux secondes après la main.
+  useEffect(() => {
+    void import("@/components/domino/table3d");
+    for (const src of ["/assets/felt.webp", "/assets/wood.webp", "/assets/rosette.webp"]) new Image().src = src;
+  }, []);
+
   // Le salon vocal de la table : on y entre micro coupé, et on y revient seul après une coupure.
-  const seated = table.mySeat !== null;
+  // Seul avec des bots : pas besoin de salon vocal.
+  const seated = table.mySeat !== null && !(table.seats.length > 1 && table.seats.every((s) => s.isBot || s.userId === user?.id));
   const room = `table-${code.toLowerCase()}`;
   const { status, roomName, error, join } = voice;
   useEffect(() => {
@@ -59,7 +67,16 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
   }
 
   if (!table.view) {
-    return <WaitingRoom code={code} options={table.table.options} seats={table.seats} mySeat={table.mySeat} />;
+    return (
+      <WaitingRoom
+        code={code}
+        options={table.table.options}
+        seats={table.seats}
+        mySeat={table.mySeat}
+        isHost={table.table.hostId === user.id}
+        addBots={table.addBots}
+      />
+    );
   }
 
   return (
@@ -73,6 +90,7 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
       play={table.play}
       tick={table.tick}
       nextRound={table.nextRound}
+      declare={table.declare}
     />
   );
 }

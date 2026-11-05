@@ -89,16 +89,22 @@ const store: DominoStore = {
     return data[0] ? toTable(data[0]) : null;
   },
   async seats(tableId) {
-    const { data } = await rest<{ seat: number; user_id: string; username: string }[]>(
-      `domino_seats?table_id=eq.${tableId}&select=seat,user_id,username&order=seat`,
+    const { data } = await rest<{ seat: number; user_id: string | null; username: string; is_bot: boolean }[]>(
+      `domino_seats?table_id=eq.${tableId}&select=seat,user_id,username,is_bot&order=seat`,
     );
-    return data.map((r) => ({ seat: r.seat, userId: r.user_id, username: r.username }));
+    return data.map((r) => ({ seat: r.seat, userId: r.user_id, username: r.username, ...(r.is_bot ? { isBot: true } : {}) }));
   },
   async insertSeat(tableId, seat: SeatRow) {
     try {
       await rest("domino_seats", {
         method: "POST",
-        body: JSON.stringify({ table_id: tableId, seat: seat.seat, user_id: seat.userId, username: seat.username }),
+        body: JSON.stringify({
+          table_id: tableId,
+          seat: seat.seat,
+          user_id: seat.userId,
+          username: seat.username,
+          is_bot: seat.isBot === true,
+        }),
       });
       return true;
     } catch (err) {
@@ -108,6 +114,11 @@ const store: DominoStore = {
   },
   async setStatus(tableId, status) {
     await rest(`domino_tables?id=eq.${tableId}`, { method: "PATCH", body: JSON.stringify({ status }) });
+  },
+  async allowBots(tableId) {
+    const { data } = await rest<{ options: TableRow["options"] }[]>(`domino_tables?id=eq.${tableId}&select=options`);
+    const options = { ...(data[0]?.options ?? {}), botAllowed: true };
+    await rest(`domino_tables?id=eq.${tableId}`, { method: "PATCH", body: JSON.stringify({ bot_allowed: true, options }) });
   },
   async loadGame(tableId) {
     const { data } = await rest<{ version: number; state: DominoState }[]>("rpc/domino_load", {

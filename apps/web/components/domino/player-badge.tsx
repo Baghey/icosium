@@ -2,7 +2,8 @@
 
 import { MicIcon, MicOffIcon } from "@/components/icons";
 import { useT } from "@/lib/i18n";
-import { DominoBack } from "./tile";
+import { BotIcon, TileBackIcon } from "@/components/cafe-icons";
+import { DEFAULT_AVATARS, avatarIndex } from "@/lib/avatar";
 
 export type PlayerInfo = {
   name: string | null;
@@ -20,6 +21,7 @@ export type PlayerInfo = {
   speaking: boolean;
   partner?: boolean;
   me?: boolean;
+  bot?: boolean;
 };
 
 /** Couleur de fond de l'avatar, toujours la même pour une personne. */
@@ -29,24 +31,28 @@ function hueOf(id: string | null): number {
   return h;
 }
 
-/** Avatars par défaut (images du propriétaire), en attendant la photo de chacun. */
-const DEFAULT_AVATARS = [1, 2, 3, 5, 7, 8];
-function avatarIndex(id: string): number {
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % DEFAULT_AVATARS.length;
-}
+/** Les avatars d'hommes et de femmes, pour que le visage d'un bot aille avec son prénom. */
+const MALE_AVATARS = [1, 5, 7];
+const FEMALE_AVATARS = [2, 3, 8];
+const FEMALE_BOTS = new Set(["Khalti Nouria", "Lynda", "Yasmina"]);
 
-/** Un avatar par personne, toujours le même, et jamais deux fois le même à une table. */
-export function tableAvatars(userIds: string[]): Record<string, string> {
+/**
+ * Un avatar par personne, toujours le même, et jamais deux fois le même à une table.
+ * Les bots reçoivent un visage qui va avec leur prénom (Djamel n'a pas un visage de femme).
+ */
+export function tableAvatars(seats: { key: string; botName?: string | null }[]): Record<string, string> {
   const taken = new Set<number>();
   const out: Record<string, string> = {};
-  for (const id of userIds) {
-    let i = avatarIndex(id);
-    while (taken.has(i) && taken.size < DEFAULT_AVATARS.length) i = (i + 1) % DEFAULT_AVATARS.length;
-    taken.add(i);
-    out[id] = `/assets/avatars/${DEFAULT_AVATARS[i]}.webp`;
-  }
+  const pick = (key: string, pool: number[]) => {
+    const free = pool.filter((n) => !taken.has(n));
+    const list = free.length ? free : pool;
+    const n = list[avatarIndex(key) % list.length] as number;
+    taken.add(n);
+    out[key] = `/assets/avatars/${n}.webp`;
+  };
+  // Les bots d'abord : leur choix est plus contraint.
+  for (const s of seats) if (s.botName) pick(s.key, FEMALE_BOTS.has(s.botName) ? FEMALE_AVATARS : MALE_AVATARS);
+  for (const s of seats) if (!s.botName) pick(s.key, DEFAULT_AVATARS);
   return out;
 }
 
@@ -108,21 +114,32 @@ export function Avatar({ p, size }: { p: PlayerInfo; size: number }) {
   );
 }
 
-/** Un adversaire ou le partenaire autour de la table : avatar, nom, points et dominos restants. */
-export function PlayerBadge({ p, size = 52 }: { p: PlayerInfo; size?: number }) {
+/**
+ * Un adversaire ou le partenaire, dans la rangée au-dessus de la table (jamais posé dessus) :
+ * avatar, nombre de pierres en pastille dorée, et nom.
+ */
+export function PlayerBadge({ p, size = 48 }: { p: PlayerInfo; size?: number }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center gap-1">
-      <Avatar p={p} size={size} />
-      <div className="cafe-panel flex max-w-[7.5rem] flex-col items-center rounded-xl px-2.5 py-0.5 leading-tight">
-        <span className="max-w-full truncate text-xs font-semibold text-cafe-text">{p.name ?? t("domino.freeSeat")}</span>
-        <span className="text-[11px] text-cafe-muted">{t("domino.pts", { n: p.score })}</span>
+    <div className="flex w-[6.75rem] flex-col items-center gap-1">
+      <div className="relative">
+        <Avatar p={p} size={size} />
+        <span
+          key={p.count}
+          className="animate-pop absolute -start-2.5 -bottom-1 flex items-center gap-0.5 rounded-full bg-cafe-0/90 py-0.5 ps-1 pe-1.5 text-[11px] leading-none font-bold text-gold-light shadow-[0_2px_6px_rgba(0,0,0,0.5)] ring-1 ring-gold/60"
+          aria-label={t("domino.tiles", { n: p.count })}
+        >
+          <TileBackIcon className="h-3.5 w-2.5" />
+          {p.count}
+        </span>
       </div>
-      <span className="flex items-center gap-[2px]" aria-label={t("domino.tiles", { n: p.count })}>
-        {Array.from({ length: Math.min(p.count, 7) }, (_, i) => (
-          <DominoBack key={i} size={7} />
-        ))}
-        {p.count > 7 && <span className="ms-0.5 text-[10px] font-semibold text-gold-light">+{p.count - 7}</span>}
+      <span
+        className={`flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[11px] leading-tight font-semibold ${
+          p.active ? "bg-gold/90 text-cafe-0" : "bg-black/45 text-cafe-text ring-1 ring-gold/25"
+        } transition-colors duration-200`}
+      >
+        {p.bot && <BotIcon className="size-3 shrink-0" />}
+        <span className="truncate">{p.name ?? t("domino.freeSeat")}</span>
       </span>
     </div>
   );

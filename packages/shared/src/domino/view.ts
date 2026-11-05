@@ -18,6 +18,12 @@ export type DominoPublicView = {
   mustOpenWith: TileId | null;
   /** Qui peut ouvrir la manche (le gagnant ou son partenaire). Vide une fois la manche ouverte. */
   openers: number[];
+  /** Donne « 6 pierres d'une famille » en attente de choix (qui, et quelle famille). */
+  declare: { seat: number; family: number } | null;
+  /** Équipe qui a gardé une telle donne : elle ne marquera rien sur cette manche. */
+  penaltyTeam: Team | null;
+  /** Chaises tenues par un bot. */
+  bots: number[];
   scores: [number, number];
   lastResult: RoundResult | null;
   winnerTeam: Team | null;
@@ -28,7 +34,7 @@ export type DominoPublicView = {
 
 export function publicView(state: DominoState): DominoPublicView {
   // À la fin d'une manche, les mains restantes sont montrées à tous (comme sur une vraie table).
-  const lastResult = state.phase === "playing" ? null : state.lastResult;
+  const lastResult = state.phase === "roundOver" || state.phase === "gameOver" ? state.lastResult : null;
   return {
     options: state.options,
     phase: state.phase,
@@ -40,6 +46,9 @@ export function publicView(state: DominoState): DominoPublicView {
     turn: state.turn,
     mustOpenWith: state.mustOpenWith,
     openers: state.openers ?? [],
+    declare: state.declare ?? null,
+    penaltyTeam: state.penaltyTeam ?? null,
+    bots: state.bots ?? [],
     scores: state.scores,
     lastResult,
     winnerTeam: state.winnerTeam,
