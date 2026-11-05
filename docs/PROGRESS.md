@@ -168,3 +168,13 @@ Supabase et LiveKit « En ligne ».
   sur le réseau privé. Il faut accepter, sinon le téléphone ne trouve pas l'ordinateur.
 - Les Easter eggs ne sont pas recopiés dans `docs/ICOSIUM.md` (ils doivent rester secrets) ;
   la liste reste dans le document d'origine, pour l'étape 8.
+
+## 5 novembre 2026 — Outils et skills pour Claude
+
+- Recherche complète : `docs/recherche/Skills et outils pour ICOSIUM.md`.
+- Skills officiels copiés dans `.claude/skills/` (Supabase, Postgres, React Vercel, règles d'interface
+  Vercel, frontend-design et webapp-testing d'Anthropic), versions figées dans `skills-lock.json`.
+  Les fils de projet les trouvent grâce à `.claude/rules/skills.md`.
+- `pnpm verify` = typecheck + tests + build. CI GitHub (`.github/workflows/ci.yml`) : la même
+  commande + scan de secrets gitleaks sur chaque PR.
+- Reste (côté propriétaire) : connecteurs Context7 et LiveKit Docs, rendre la CI obligatoire sur `main`.
