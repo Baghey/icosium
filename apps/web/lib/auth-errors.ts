@@ -2,37 +2,33 @@ import type { MessageKey } from "@icosium/i18n";
 
 export type AuthMode = "signIn" | "signUp" | "guest";
 
-/** Erreur renvoyée par Nakama, une fois lue. */
-export type NakamaFailure = { status: number; message: string };
+/** Erreur renvoyée par Supabase Auth, réduite à ce qui sert à choisir le message. */
+export type AuthFailure = { status: number; code: string; message: string };
 
-/** Lit l'erreur levée par nakama-js (une Response fetch) ou une erreur réseau. */
-export async function readNakamaError(error: unknown): Promise<NakamaFailure> {
-  if (typeof Response !== "undefined" && error instanceof Response) {
-    let message = "";
-    try {
-      const body = (await error.json()) as { message?: string };
-      message = body.message ?? "";
-    } catch {
-      // corps vide ou non JSON
-    }
-    return { status: error.status, message };
+export function readAuthError(error: unknown): AuthFailure {
+  if (typeof error === "object" && error !== null) {
+    const e = error as { status?: number; code?: string; message?: string; name?: string };
+    const network = e.name === "AuthRetryableFetchError" || e.name === "TypeError";
+    return { status: network ? 0 : (e.status ?? 0), code: e.code ?? "", message: e.message ?? "" };
   }
-  return { status: 0, message: error instanceof Error ? error.message : "" };
+  return { status: 0, code: "", message: String(error) };
 }
 
-/** Transforme une erreur Nakama en texte à afficher. */
-export function authErrorKey(mode: AuthMode, failure: NakamaFailure): MessageKey {
+/** Transforme une erreur Supabase Auth en texte à afficher. */
+export function authErrorKey(mode: AuthMode, failure: AuthFailure): MessageKey {
+  const { code, status } = failure;
   const message = failure.message.toLowerCase();
-  if (message.includes("too_young")) return "auth.error.tooYoung";
-  if (message.includes("invalid_birthdate")) return "auth.error.invalidBirthdate";
-  if (message.includes("age_not_confirmed")) return "auth.error.ageNotConfirmed";
-  if (failure.status === 0) return "auth.error.network";
-  if (failure.status === 409) return "auth.error.usernameTaken";
-  if (failure.status === 401 || failure.status === 404) {
-    return mode === "signUp" ? "auth.error.emailTaken" : "auth.error.badCredentials";
+  if (status === 0) return "auth.error.network";
+  if (code === "user_already_exists" || code === "email_exists") return "auth.error.emailTaken";
+  if (code === "invalid_credentials") return "auth.error.badCredentials";
+  if (code === "email_not_confirmed") return "auth.error.emailNotConfirmed";
+  if (code === "weak_password") return "auth.error.weakPassword";
+  if (code === "anonymous_provider_disabled") return "auth.error.guestDisabled";
+  if (code === "over_request_rate_limit" || code === "over_email_send_rate_limit") return "auth.error.tooManyAttempts";
+  // Le refus de la base (âge, pseudo) arrive sous la forme d'une erreur générique.
+  if (message.includes("database error saving new user")) {
+    return mode === "guest" ? "auth.error.ageNotConfirmed" : "auth.error.signupRefused";
   }
-  if (failure.status === 400 && message.includes("password")) return "auth.error.weakPassword";
-  if (failure.status === 400 && message.includes("username")) return "auth.error.invalidUsername";
   return "auth.error.unknown";
 }
 

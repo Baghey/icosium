@@ -18,8 +18,7 @@
     "statusOk": "Online",
     "statusDown": "Unreachable",
     "service": {
-      "accounts": "Accounts (Nakama)",
-      "games": "Game server (Colyseus)",
+      "accounts": "Accounts (Supabase)",
       "voice": "Voice (LiveKit)"
     }
   },
@@ -51,8 +50,13 @@
       "weakPassword": "Your password needs at least 8 characters.",
       "ageNotConfirmed": "Please confirm you are 16 or older.",
       "network": "Can't reach ICOSIUM right now. Check your connection and try again.",
-      "unknown": "Something went wrong. Please try again."
-    }
+      "unknown": "Something went wrong. Please try again.",
+      "emailNotConfirmed": "Please confirm your email first: open the link we sent you.",
+      "guestDisabled": "Guest mode is turned off for now. Create an account instead.",
+      "tooManyAttempts": "Too many attempts. Wait a minute and try again.",
+      "signupRefused": "We couldn't create your account. Check your date of birth and username."
+    },
+    "checkEmail": "Almost there! Open the email we just sent you to confirm your account, then sign in."
   },
   "voice": {
     "title": "Voice room",

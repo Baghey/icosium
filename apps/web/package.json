@@ -11,9 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@heroiclabs/nakama-js": "^2.8.0",
     "@icosium/i18n": "workspace:*",
     "@icosium/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0",
     "livekit-client": "^2.15.0",
     "livekit-server-sdk": "^2.13.0",
     "next": "^16.0.0",

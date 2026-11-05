@@ -18,8 +18,7 @@
     "statusOk": "En ligne",
     "statusDown": "Injoignable",
     "service": {
-      "accounts": "Comptes (Nakama)",
-      "games": "Serveur de jeu (Colyseus)",
+      "accounts": "Comptes (Supabase)",
       "voice": "Vocal (LiveKit)"
     }
   },
@@ -51,8 +50,13 @@
       "weakPassword": "Ton mot de passe doit faire au moins 8 caractères.",
       "ageNotConfirmed": "Confirme que tu as 16 ans ou plus.",
       "network": "Impossible de joindre ICOSIUM pour l'instant. Vérifie ta connexion et réessaie.",
-      "unknown": "Un problème est survenu. Réessaie."
-    }
+      "unknown": "Un problème est survenu. Réessaie.",
+      "emailNotConfirmed": "Confirme d'abord ton email : ouvre le lien qu'on t'a envoyé.",
+      "guestDisabled": "Le mode invité est désactivé pour l'instant. Crée plutôt un compte.",
+      "tooManyAttempts": "Trop d'essais. Attends une minute et réessaie.",
+      "signupRefused": "Impossible de créer ton compte. Vérifie ta date de naissance et ton pseudo."
+    },
+    "checkEmail": "Presque fini ! Ouvre l'email qu'on vient de t'envoyer pour confirmer ton compte, puis connecte-toi."
   },
   "voice": {
     "title": "Salon vocal",

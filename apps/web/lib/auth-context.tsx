@@ -1,10 +1,13 @@
 "use client";
 
-import type { Client, Session } from "@heroiclabs/nakama-js";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { createNakamaClient, getDeviceId, restoreSession, saveSession } from "./nakama";
+import type { Session } from "@supabase/supabase-js";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { supabase } from "./supabase";
 
 export type AuthUser = { id: string; username: string; isGuest: boolean };
+
+/** Résultat d'une inscription : connecté tout de suite, ou email de confirmation envoyé. */
+export type SignUpResult = "signedIn" | "confirmEmail";
 
 type AuthValue = {
   ready: boolean;
@@ -12,98 +15,95 @@ type AuthValue = {
   /** Renvoie un jeton de session valide (rafraîchi si besoin), ou null si déconnecté. */
   getToken: () => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string, birthdate: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string, birthdate: string) => Promise<SignUpResult>;
+  isUsernameAvailable: (username: string) => Promise<boolean>;
   signInAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthValue | null>(null);
 
-function toUser(session: Session): AuthUser {
-  const vars = (session.vars ?? {}) as Record<string, string>;
+function toUser(session: Session | null, username: string | null): AuthUser | null {
+  if (!session) return null;
+  const meta = session.user.user_metadata as { username?: string };
   return {
-    id: session.user_id ?? "",
-    username: session.username ?? "",
-    isGuest: vars.age_confirmed === "true",
+    id: session.user.id,
+    username: username ?? meta.username ?? "",
+    isGuest: Boolean(session.user.is_anonymous),
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const clientRef = useRef<Client | null>(null);
-  const sessionRef = useRef<Session | null>(null);
   const [ready, setReady] = useState(false);
-  const [user, setUser] = useState<AuthUser | null>(null);
-
-  const client = useCallback((): Client => {
-    if (!clientRef.current) clientRef.current = createNakamaClient();
-    return clientRef.current;
-  }, []);
-
-  const adopt = useCallback((session: Session | null) => {
-    sessionRef.current = session;
-    saveSession(session);
-    setUser(session ? toUser(session) : null);
-  }, []);
+  const [session, setSession] = useState<Session | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    restoreSession(client()).then((session) => {
-      if (cancelled) return;
-      sessionRef.current = session;
-      setUser(session ? toUser(session) : null);
+    const client = supabase();
+    client.auth.getSession().then(({ data }) => {
+      setSession(data.session);
       setReady(true);
     });
+    const { data } = client.auth.onAuthStateChange((_event, next) => setSession(next));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  // Le pseudo vient du profil public (créé par la base à l'inscription).
+  const userId = session?.user.id ?? null;
+  useEffect(() => {
+    setUsername(null);
+    if (!userId) return;
+    let cancelled = false;
+    supabase()
+      .from("profiles")
+      .select("username")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data) setUsername(data.username as string);
+      });
     return () => {
       cancelled = true;
     };
-  }, [client]);
+  }, [userId]);
 
   const getToken = useCallback(async () => {
-    const session = sessionRef.current;
-    if (!session) return null;
-    const now = Date.now() / 1000;
-    if (session.isexpired(now + 60)) {
-      try {
-        const fresh = await client().sessionRefresh(session);
-        adopt(fresh);
-        return fresh.token;
-      } catch {
-        adopt(null);
-        return null;
-      }
-    }
-    return session.token;
-  }, [adopt, client]);
+    const { data } = await supabase().auth.getSession();
+    return data.session?.access_token ?? null;
+  }, []);
 
   const value = useMemo<AuthValue>(
     () => ({
       ready,
-      user,
+      user: toUser(session, username),
       getToken,
       async signIn(email, password) {
-        adopt(await client().authenticateEmail(email, password, false));
+        const { error } = await supabase().auth.signInWithPassword({ email, password });
+        if (error) throw error;
       },
-      async signUp(email, password, username, birthdate) {
-        adopt(await client().authenticateEmail(email, password, true, username, { birthdate }));
+      async signUp(email, password, name, birthdate) {
+        const { data, error } = await supabase().auth.signUp({
+          email,
+          password,
+          options: { data: { username: name, birthdate }, emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+        return data.session ? "signedIn" : "confirmEmail";
+      },
+      async isUsernameAvailable(name) {
+        const { data, error } = await supabase().rpc("username_available", { name });
+        if (error) throw error;
+        return data === true;
       },
       async signInAsGuest() {
-        // Le pseudo n'est utilisé qu'à la création du compte invité.
-        const guestName = `guest_${Math.random().toString(36).slice(2, 8)}`;
-        adopt(await client().authenticateDevice(getDeviceId(), true, guestName, { age_confirmed: "true" }));
+        const { error } = await supabase().auth.signInAnonymously({ options: { data: { age_confirmed: "true" } } });
+        if (error) throw error;
       },
       async signOut() {
-        const session = sessionRef.current;
-        adopt(null);
-        if (session) {
-          try {
-            await client().sessionLogout(session, session.token, session.refresh_token);
-          } catch {
-            // déjà déconnecté côté serveur : rien à faire
-          }
-        }
+        await supabase().auth.signOut();
       },
     }),
-    [adopt, client, getToken, ready, user],
+    [getToken, ready, session, username],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

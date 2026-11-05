@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { LanguagePicker } from "@/components/language-picker";
 import { useAuth } from "@/lib/auth-context";
-import { MIN_PASSWORD_LENGTH, USERNAME_PATTERN, authErrorKey, readNakamaError, type AuthMode } from "@/lib/auth-errors";
+import { MIN_PASSWORD_LENGTH, USERNAME_PATTERN, authErrorKey, readAuthError, type AuthMode } from "@/lib/auth-errors";
 import { useT } from "@/lib/i18n";
 
 const TABS: { mode: AuthMode; label: MessageKey }[] = [
@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<MessageKey | null>(null);
+  const [notice, setNotice] = useState<MessageKey | null>(null);
 
   useEffect(() => {
     if (auth.ready && auth.user) router.replace("/");
@@ -53,13 +54,27 @@ export default function LoginPage() {
     }
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
-      if (mode === "signIn") await auth.signIn(email.trim(), password);
-      else if (mode === "signUp") await auth.signUp(email.trim(), password, username, birthdate);
-      else await auth.signInAsGuest();
+      if (mode === "signIn") {
+        await auth.signIn(email.trim(), password);
+      } else if (mode === "signUp") {
+        if (!(await auth.isUsernameAvailable(username))) {
+          setError("auth.error.usernameTaken");
+          return;
+        }
+        const result = await auth.signUp(email.trim(), password, username, birthdate);
+        if (result === "confirmEmail") {
+          setNotice("auth.checkEmail");
+          setMode("signIn");
+          return;
+        }
+      } else {
+        await auth.signInAsGuest();
+      }
       router.replace("/");
     } catch (err) {
-      setError(authErrorKey(mode, await readNakamaError(err)));
+      setError(authErrorKey(mode, readAuthError(err)));
     } finally {
       setBusy(false);
     }
@@ -142,6 +157,12 @@ export default function LoginPage() {
               </>
             )}
           </>
+        )}
+
+        {notice && (
+          <p role="status" className="rounded-control bg-mint-soft p-3 text-sm text-ink">
+            {t(notice)}
+          </p>
         )}
 
         {error && (

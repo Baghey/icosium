@@ -7,11 +7,10 @@ import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
-type Status = { accounts: boolean; games: boolean; voice: boolean } | null;
+type Status = { accounts: boolean; voice: boolean } | null;
 
-const SERVICES: { key: "accounts" | "games" | "voice"; label: MessageKey }[] = [
+const SERVICES: { key: "accounts" | "voice"; label: MessageKey }[] = [
   { key: "accounts", label: "home.service.accounts" },
-  { key: "games", label: "home.service.games" },
   { key: "voice", label: "home.service.voice" },
 ];
 
@@ -32,7 +31,7 @@ function Home() {
     fetch("/api/status", { cache: "no-store" })
       .then((r) => r.json() as Promise<Status>)
       .then(setStatus)
-      .catch(() => setStatus({ accounts: false, games: false, voice: false }));
+      .catch(() => setStatus({ accounts: false, voice: false }));
   }, []);
 
   return (

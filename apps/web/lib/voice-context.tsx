@@ -111,7 +111,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (!res.ok) throw new Error(`token ${res.status}`);
-        const { token: voiceToken } = (await res.json()) as { token: string };
+        const { token: voiceToken, url } = (await res.json()) as { token: string; url: string };
 
         const room = new Room({
           adaptiveStream: true,
@@ -152,7 +152,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
             reset();
           });
 
-        await room.connect(`${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`, voiceToken);
+        await room.connect(url, voiceToken);
         // Débloque la lecture audio (le clic sur « rejoindre » compte comme geste de l'utilisateur).
         await room.startAudio().catch(() => undefined);
         if (room.state === ConnectionState.Connected) {

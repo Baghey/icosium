@@ -1,28 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { authErrorKey, readNakamaError } from "./auth-errors";
+import { authErrorKey, readAuthError } from "./auth-errors";
 
 describe("authErrorKey", () => {
-  it("reconnaît le refus d'âge du serveur", () => {
-    expect(authErrorKey("signUp", { status: 400, message: "too_young" })).toBe("auth.error.tooYoung");
-  });
   it("distingue mauvais identifiants et email déjà pris", () => {
-    expect(authErrorKey("signIn", { status: 401, message: "Invalid credentials." })).toBe("auth.error.badCredentials");
-    expect(authErrorKey("signUp", { status: 401, message: "Invalid credentials." })).toBe("auth.error.emailTaken");
+    expect(authErrorKey("signIn", { status: 400, code: "invalid_credentials", message: "" })).toBe("auth.error.badCredentials");
+    expect(authErrorKey("signUp", { status: 422, code: "user_already_exists", message: "" })).toBe("auth.error.emailTaken");
   });
-  it("signale un pseudo déjà pris", () => {
-    expect(authErrorKey("signUp", { status: 409, message: "Username is already in use." })).toBe("auth.error.usernameTaken");
+  it("reconnaît le refus de la base à l'inscription", () => {
+    expect(authErrorKey("signUp", { status: 500, code: "unexpected_failure", message: "Database error saving new user" })).toBe(
+      "auth.error.signupRefused",
+    );
+  });
+  it("signale un compte invité désactivé et l'email non confirmé", () => {
+    expect(authErrorKey("guest", { status: 422, code: "anonymous_provider_disabled", message: "" })).toBe("auth.error.guestDisabled");
+    expect(authErrorKey("signIn", { status: 400, code: "email_not_confirmed", message: "" })).toBe("auth.error.emailNotConfirmed");
   });
   it("signale un problème réseau", () => {
-    expect(authErrorKey("guest", { status: 0, message: "Failed to fetch" })).toBe("auth.error.network");
+    expect(authErrorKey("guest", { status: 0, code: "", message: "Failed to fetch" })).toBe("auth.error.network");
   });
 });
 
-describe("readNakamaError", () => {
-  it("lit le message d'une réponse Nakama", async () => {
-    const res = new Response(JSON.stringify({ code: 3, message: "too_young" }), { status: 400 });
-    expect(await readNakamaError(res)).toEqual({ status: 400, message: "too_young" });
+describe("readAuthError", () => {
+  it("lit une erreur Supabase", () => {
+    expect(readAuthError({ name: "AuthApiError", status: 400, code: "invalid_credentials", message: "Invalid login credentials" })).toEqual({
+      status: 400,
+      code: "invalid_credentials",
+      message: "Invalid login credentials",
+    });
   });
-  it("traite une exception comme une erreur réseau", async () => {
-    expect(await readNakamaError(new TypeError("Failed to fetch"))).toEqual({ status: 0, message: "Failed to fetch" });
+  it("traite une erreur de connexion comme une erreur réseau", () => {
+    expect(readAuthError({ name: "AuthRetryableFetchError", status: 502, message: "fetch failed" }).status).toBe(0);
   });
 });
