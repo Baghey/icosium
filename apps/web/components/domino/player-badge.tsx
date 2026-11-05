@@ -3,6 +3,7 @@
 import { MicIcon, MicOffIcon } from "@/components/icons";
 import { useT } from "@/lib/i18n";
 import { BotIcon, TileBackIcon } from "@/components/cafe-icons";
+import { DEFAULT_AVATARS, avatarIndex } from "@/lib/avatar";
 
 export type PlayerInfo = {
   name: string | null;
@@ -28,14 +29,6 @@ function hueOf(id: string | null): number {
   let h = 0;
   for (const c of id ?? "?") h = (h * 31 + c.charCodeAt(0)) % 360;
   return h;
-}
-
-/** Avatars par défaut (images du propriétaire), en attendant la photo de chacun. */
-const DEFAULT_AVATARS = [1, 2, 3, 5, 7, 8];
-function avatarIndex(id: string): number {
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % DEFAULT_AVATARS.length;
 }
 
 /** Un avatar par personne, toujours le même, et jamais deux fois le même à une table. */

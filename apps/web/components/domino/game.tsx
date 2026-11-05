@@ -11,6 +11,7 @@ import { playClack, playYourTurn } from "@/lib/sound";
 import { type DominoView, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { DominoChain } from "./chain";
 import { DominoHand } from "./hand";
+import { Sheet } from "@/components/sheet";
 import { Avatar, PlayerBadge, type PlayerInfo, tableAvatars } from "./player-badge";
 import { SoundToggle } from "./sound-toggle";
 import { DominoBack, DominoTile } from "./tile";
@@ -386,19 +387,6 @@ function teamNames(seats: SeatInfo[], team: number, players: number) {
     .filter((s) => (players === 2 ? s.seat === team : teamOf(s.seat) === team))
     .map((s) => s.username)
     .join(" & ");
-}
-
-function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 animate-fade" onClick={onClose}>
-      <div
-        className="animate-sheet cafe-panel w-full max-w-xl rounded-t-[1.75rem] border-b-0 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-cafe-text"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children}
-      </div>
-    </div>
-  );
 }
 
 /** Donne « 6 pierres d'une même famille » : le joueur choisit, les autres voient le message. */

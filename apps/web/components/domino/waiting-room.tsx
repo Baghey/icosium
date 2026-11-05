@@ -7,7 +7,8 @@ import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { type CallResult, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { SoundToggle } from "./sound-toggle";
-import { BotIcon, Emblem } from "@/components/cafe-icons";
+import { AddFriendIcon, BotIcon, Emblem } from "@/components/cafe-icons";
+import { InviteFriends } from "@/components/social/invite-friends";
 import { tableAvatars } from "./player-badge";
 
 type Props = {
@@ -24,6 +25,7 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
   const t = useT();
   const [copied, setCopied] = useState(false);
   const [botsBusy, setBotsBusy] = useState(false);
+  const [inviting, setInviting] = useState(false);
   const players = options.players;
   const avatars = tableAvatars(seats.map(seatKey));
 
@@ -94,6 +96,16 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
         >
           {copied ? t("domino.copied") : t("domino.share")}
         </button>
+        {seats.length < players && (
+          <button
+            type="button"
+            onClick={() => setInviting(true)}
+            className="cafe-panel flex min-h-touch items-center gap-2 rounded-full px-5 text-sm font-semibold text-gold-light transition-transform duration-150 active:scale-[0.97]"
+          >
+            <AddFriendIcon className="size-5" />
+            {t("social.inviteFriends")}
+          </button>
+        )}
       </section>
 
       <div className="flex flex-1 items-center justify-center py-12">
@@ -145,6 +157,7 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
         <MicButton tone="cafe" />
       </div>
     </div>
+    {inviting && <InviteFriends code={code} players={players} free={players - seats.length} onClose={() => setInviting(false)} />}
     </div>
   );
 }

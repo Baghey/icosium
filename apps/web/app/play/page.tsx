@@ -34,7 +34,7 @@ function Segmented<V extends string | number>({ label, value, choices, onChange 
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-sm font-medium text-ink-muted">{label}</legend>
-      <div className="flex gap-1 rounded-control bg-surface-2 p-1">
+      <div className="flex gap-1 rounded-control bg-black/35 p-1 ring-1 ring-gold/20">
         {choices.map((c) => {
           const active = c.value === value;
           return (
@@ -44,7 +44,7 @@ function Segmented<V extends string | number>({ label, value, choices, onChange 
               aria-pressed={active}
               onClick={() => onChange(c.value)}
               className={`min-h-touch flex-1 rounded-[0.65rem] px-2 text-sm font-medium transition-all duration-200 ease-icos ${
-                active ? "bg-surface text-ink shadow-sm ring-1 ring-line" : "text-ink-muted"
+                active ? "gold-button" : "text-ink-muted"
               }`}
             >
               {c.label}
@@ -102,7 +102,7 @@ function Play() {
           <DominoTile a={6} b={3} orientation="vertical" size={22} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold">{t("play.title")}</h1>
+          <h1 className="text-gilded text-3xl font-bold">{t("play.title")}</h1>
           <p className="text-ink-muted">{t("play.subtitle")}</p>
         </div>
       </header>
@@ -122,7 +122,7 @@ function Play() {
         </span>
       </button>
 
-      <form onSubmit={join} className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4">
+      <form id="join" onSubmit={join} className="flex scroll-mt-6 flex-col gap-3 cafe-card p-4">
         <div>
           <h2 className="font-semibold">{t("play.join")}</h2>
           <p className="text-sm text-ink-muted">{t("play.joinHint")}</p>
@@ -140,12 +140,12 @@ function Play() {
             autoComplete="off"
             placeholder="ABCD"
             dir="ltr"
-            className="min-h-14 w-0 flex-1 rounded-control border border-line bg-bg px-4 text-center text-2xl font-semibold tracking-[0.4em] uppercase placeholder:text-ink-muted/40 focus:border-mint focus:outline-none"
+            className="min-h-14 w-0 flex-1 cafe-input px-4 text-center text-2xl font-semibold tracking-[0.4em] uppercase placeholder:text-ink-muted/40"
           />
           <button
             type="submit"
             disabled={busy !== null}
-            className="min-h-14 rounded-control bg-ink px-5 font-semibold text-bg transition-transform duration-150 active:scale-[0.97] disabled:opacity-60"
+            className="min-h-14 rounded-control gold-button px-5 font-bold transition-transform duration-150 active:scale-[0.97] disabled:opacity-60"
           >
             {busy === "join" ? t("play.joining") : t("play.joinButton")}
           </button>
@@ -157,7 +157,7 @@ function Play() {
         )}
       </form>
 
-      <section className="flex flex-col gap-5 rounded-card border border-line bg-surface p-4">
+      <section className="flex flex-col gap-5 cafe-card p-4">
         <div>
           <h2 className="font-semibold">{t("play.create")}</h2>
           <p className="text-sm text-ink-muted">{t("play.createHint")}</p>
@@ -214,7 +214,7 @@ function Play() {
           type="button"
           onClick={() => void create()}
           disabled={busy !== null}
-          className="flex min-h-14 items-center justify-center rounded-card bg-mint px-6 text-lg font-semibold text-mint-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+          className="flex min-h-14 items-center justify-center rounded-card gold-button px-6 text-lg font-bold transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
         >
           {busy === "create" ? t("play.creating") : t("play.create")}
         </button>
@@ -222,7 +222,7 @@ function Play() {
           type="button"
           onClick={() => void create(true)}
           disabled={busy !== null}
-          className="-mt-2 flex min-h-touch items-center justify-center gap-2 rounded-card border border-line px-6 font-medium text-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
+          className="-mt-2 flex min-h-touch items-center justify-center gap-2 rounded-card border border-gold/30 px-6 font-medium text-ink transition-transform duration-150 active:scale-[0.98] disabled:opacity-60"
         >
           <BotIcon className="size-5" />
           {busy === "solo" ? t("play.soloStarting") : t("play.solo")}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/app-shell";
 import { LanguagePicker } from "@/components/language-picker";
+import { PersonAvatar } from "@/components/social/person-avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
@@ -23,8 +24,12 @@ function Profile() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{t("profile.title")}</h1>
-      <dl className="flex flex-col gap-3 rounded-card border border-line bg-surface p-4 text-sm">
+      <header className="animate-rise flex flex-col items-center gap-2 pt-2 text-center">
+        {user && <PersonAvatar id={user.id} size={96} />}
+        <h1 className="text-gilded text-3xl font-bold">{user?.username}</h1>
+        <p className="text-sm text-ink-muted">{user?.isGuest ? t("profile.guestAccount") : t("profile.emailAccount")}</p>
+      </header>
+      <dl className="flex flex-col gap-3 cafe-card p-4 text-sm">
         <div className="flex justify-between gap-3">
           <dt className="text-ink-muted">{t("profile.username")}</dt>
           <dd className="truncate font-medium">{user?.username}</dd>
@@ -36,7 +41,7 @@ function Profile() {
       </dl>
       {user?.isGuest && <GuestRename current={user.username} />}
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-ink-muted">{t("common.language")}</h2>
+        <h2 className="section-title">{t("common.language")}</h2>
         <LanguagePicker />
       </section>
       <p className="text-sm text-ink-muted">{t("profile.navigateHint")}</p>
@@ -46,7 +51,7 @@ function Profile() {
           await signOut();
           router.replace("/login");
         }}
-        className="min-h-touch rounded-control border border-line px-4 font-medium text-danger transition-colors duration-200 hover:bg-surface-2"
+        className="min-h-touch rounded-control border border-danger/40 px-4 font-medium text-danger transition-colors duration-200 hover:bg-white/5"
       >
         {t("auth.signOut")}
       </button>
@@ -94,12 +99,12 @@ function GuestRename({ current }: { current: string }) {
           maxLength={20}
           autoCapitalize="none"
           onChange={(e) => setName(e.target.value.replace(/[^A-Za-z0-9_]/g, ""))}
-          className="min-h-touch w-0 flex-1 rounded-control border border-line bg-bg px-3 focus:border-mint focus:outline-none"
+          className="min-h-touch w-0 flex-1 cafe-input px-3"
         />
         <button
           type="submit"
           disabled={busy || name.trim() === current}
-          className="min-h-touch rounded-control bg-ink px-4 font-semibold text-bg transition-transform duration-150 active:scale-[0.97] disabled:opacity-50"
+          className="min-h-touch rounded-control gold-button px-4 font-bold transition-transform duration-150 active:scale-[0.97] disabled:opacity-50"
         >
           {t("profile.renameSave")}
         </button>

@@ -7,7 +7,8 @@ import { useT } from "@/lib/i18n";
 import { BottomNav } from "./bottom-nav";
 
 /** Page réservée aux personnes connectées, avec la navigation du bas. */
-export function AppShell({ children }: { children: ReactNode }) {
+/** bare : plein écran sans navigation du bas (conversation). */
+export function AppShell({ children, bare = false }: { children: ReactNode; bare?: boolean }) {
   const t = useT();
   const router = useRouter();
   const { ready, user } = useAuth();
@@ -19,6 +20,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (!ready || !user) {
     return <p className="p-6 text-center text-ink-muted">{t("common.loading")}</p>;
   }
+
+  if (bare) return <>{children}</>;
 
   return (
     <>
