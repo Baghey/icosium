@@ -111,7 +111,7 @@ function Play() {
         type="button"
         onClick={() => void create(true)}
         disabled={busy !== null}
-        className="cafe-bg group relative flex min-h-20 items-center gap-4 overflow-hidden rounded-card border border-gold/50 px-4 py-3 text-start text-cafe-text shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-transform duration-150 active:scale-[0.98] disabled:opacity-70"
+        className="cafe-card group relative flex min-h-20 items-center gap-4 overflow-hidden !border-gold/50 px-4 py-3 text-start text-cafe-text shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-transform duration-150 active:scale-[0.98] disabled:opacity-70"
       >
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-black/40 text-gold-light">
           <BotIcon className="size-7" />
