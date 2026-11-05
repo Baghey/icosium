@@ -18,7 +18,7 @@ Ce qui marche :
 Reste à faire / problèmes connus :
 - Le repli sans WebGL garde l'ancienne table en feutre.
 - Les panneaux de l'interface restent dans le style café (sombre et or).
-- La demande « voix » du propriétaire reste à préciser.
+- Pas de phrases dites à voix haute pendant la partie (refusé par le propriétaire).
 
 ## Domino : règles précisées et table en 3D (5 novembre 2026)
 
