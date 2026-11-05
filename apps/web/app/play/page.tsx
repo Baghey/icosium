@@ -7,6 +7,7 @@ import { type FormEvent, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DominoTile } from "@/components/domino/tile";
 import { callDomino } from "@/lib/domino-client";
+import { preloadSounds } from "@/lib/sound";
 import { BotIcon } from "@/components/cafe-icons";
 import { useT } from "@/lib/i18n";
 
@@ -67,6 +68,8 @@ function Play() {
 
   /** solo : je joue tout de suite, les autres chaises vont à des bots (c'est mon choix explicite). */
   async function create(solo = false) {
+    // Ce toucher autorise le son : on charge déjà le mélange et les claquements.
+    preloadSounds();
     setBusy(solo ? "solo" : "create");
     setError(null);
     const res = await callDomino({ op: "create", options, solo });
@@ -78,6 +81,7 @@ function Play() {
   }
 
   async function join(e: FormEvent) {
+    preloadSounds();
     e.preventDefault();
     const clean = code.trim().toUpperCase();
     if (!/^[A-Z]{4}$/.test(clean)) {

@@ -54,6 +54,7 @@ function audio(): AudioContext | null {
 const SAMPLE_FILES = {
   clack: ["/sfx/clack1.mp3", "/sfx/clack2.mp3", "/sfx/clack3.mp3", "/sfx/clack4.mp3"],
   slam: ["/sfx/slam.mp3"],
+  shuffle: ["/sfx/shuffle.mp3"],
 } as const;
 type SampleName = keyof typeof SAMPLE_FILES;
 const samples: Partial<Record<SampleName, AudioBuffer[]>> = {};
@@ -220,4 +221,13 @@ export function playYourTurn(): void {
   };
   note(t, 784, 0.15); // sol
   note(t + 0.11, 1175, 0.12); // ré
+}
+
+/** Le mélange des pierres en début de manche (vrai son ; rien si pas encore chargé). */
+export function playShuffle(): void {
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  loadSamples(ac);
+  playSample(ac, "shuffle", 0.7, 1);
 }

@@ -7,6 +7,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
+import { playShuffle } from "@/lib/sound";
 import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
@@ -264,6 +265,7 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
   const group = useRef<THREE.Group>(null);
   const start = useRef<number | null>(null);
   const finished = useRef(false);
+  useEffect(() => playShuffle(), []);
   const seeds = useMemo(
     () =>
       Array.from({ length: 28 }, (_, i) => ({
