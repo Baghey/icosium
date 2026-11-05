@@ -1,5 +1,52 @@
 # Journal d'avancement d'ICOSIUM
 
+## Étape 2 : le domino algérien (5 novembre 2026)
+
+### Ce qui marche
+
+- **Règles** (`packages/shared/src/domino`) : double-six, 2 joueurs (pioche) ou 4 en équipes,
+  ouverture au double-six puis par le gagnant (ou toujours le double-six), passe, partie
+  bloquée, égalité, score cible 51/101/151, points « mains adverses » ou « toutes les mains »,
+  temps écoulé (le serveur joue le premier domino possible). 29 tests.
+- **Serveur** : fonction Supabase `domino` (`supabase/functions/domino`). Elle vérifie chaque
+  coup, enregistre l'état complet dans un schéma privé, publie une vue sans aucune main ni
+  pioche, et écrit la main de chacun dans une ligne que lui seul peut lire (RLS). Anti-spam :
+  5 tables par personne toutes les 10 minutes. 12 tests.
+- **Écran de jeu** (`/play/CODE`) : table en bois, dominos ivoire dessinés en SVG, chaîne qui se
+  replie en serpent, main en bas avec les dominos jouables surélevés, toucher un domino puis le
+  bout voulu, les autres joueurs autour (nombre de dominos, anneau du chrono, bulles « Passe » /
+  « +2 »), scores toujours accessibles, fin de manche avec les mains révélées, fin de partie.
+- **Animations** : domino qui claque, chaises qui se remplissent, feuilles qui glissent, toutes
+  entre 150 et 250 ms et coupées si le téléphone demande moins d'animations.
+- **Sons** : claquement (plus fort quand la manche se ferme), petit signal « à toi » ; bouton
+  pour couper le son, retenu par le téléphone.
+- **Vocal** : chaque table a son salon LiveKit (`table-code`), on y entre micro coupé, retour
+  automatique après une coupure.
+- **Page « Jouer »** (`/play`) : ouvrir une table avec les réglages, ou rejoindre avec un code
+  à 4 lettres. Salle d'attente avec le code en grand et « Partager le code ».
+- **Reconnexion** : recharger la page ramène à sa place, avec sa main.
+
+### Vérifié
+
+- `pnpm test` (65 tests), `pnpm typecheck` et le build passent.
+- Partie complète à 4 joueurs jusqu'à 51 points (4 manches, 121 coups) jouée par des
+  navigateurs automatiques contre une copie locale de Supabase : aucune main d'un autre joueur
+  ni la pioche n'est passée dans les messages réseau.
+- Rechargement en pleine partie : même main avant et après.
+- Captures à 360 px en clair et en sombre.
+- Base et fonction `domino` installées sur le projet Supabase en ligne.
+
+### Ce qui reste
+
+- Le test à 4 personnes sur 4 vrais téléphones, en vocal, sur le site en ligne.
+
+### Problèmes connus
+
+- Recharger la page empêche le son du vocal jusqu'au premier toucher de l'écran (règle des
+  navigateurs) : un toucher n'importe où le rétablit.
+- Conseils Supabase restants, voulus : les invités (anonymes) peuvent lire leurs tables, et
+  `is_domino_member` est appelable par les connectés (il ne dit que « suis-je assis ici »).
+
 ## Passage sur Supabase, sans Docker (5 novembre 2026)
 
 Décision du propriétaire : plus de Docker. Nakama, Colyseus, Redis, Caddy et le LiveKit local
