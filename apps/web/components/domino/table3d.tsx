@@ -10,7 +10,7 @@ import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
 import { useI18n } from "@/lib/i18n";
 import { playShuffle } from "@/lib/sound";
 import { drawCardboard, drawCardboardBump, drawPlastic, seeded } from "@/lib/street-textures";
-import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Placement, layoutChain } from "@/lib/chain-layout";
+import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
  * La table de domino en 3D, comme dans la rue le soir : un carton déchiré posé sur une table de
@@ -482,18 +482,19 @@ function corners(minX: number, maxX: number, minZ: number, maxZ: number, height:
 }
 
 /** Taille voulue d'une pierre de la chaîne à l'écran (petit côté, en pixels CSS) : comme dans la main. */
-const TILE_PX = 40;
+const TILE_PX = 36;
 
 /**
- * La caméra suit le jeu de près, pour que les pierres soient grosses comme celles de la main :
- * - pendant le tour des autres, elle glisse doucement vers la dernière pierre posée ;
- * - à mon tour, elle cadre les bouts où je peux jouer (et recule juste assez s'ils sont loin) ;
- * - « vue d'ensemble » (bouton, double-tap ou deux doigts) : toute la table, rebord compris.
- * Les mouvements sont lents et amortis (pas d'à-coups).
+ * La caméra montre toujours TOUTES les pierres posées, d'aussi près que possible :
+ * - en début de manche, elle est proche (une pierre fait environ TILE_PX à l'écran, comme dans la main) ;
+ * - quand la chaîne grandit, elle glisse et recule doucement juste assez pour tout garder à l'écran,
+ *   et ne se rapproche plus avant la manche suivante (pas de zoom qui va et vient) ;
+ * - « vue d'ensemble » (bouton loupe ou deux doigts) : toute la table, rebord compris.
  */
-function CameraRig({ focus, overview, tableRot, chainRot, margins }: { focus: { x: number; z: number }[]; overview: boolean; tableRot: number; chainRot: number; margins: Margins }) {
+function CameraRig({ bounds, chainLength, overview, tableRot, chainRot, margins }: { bounds: Bounds | null; chainLength: number; overview: boolean; tableRot: number; chainRot: number; margins: Margins }) {
   const { camera, size } = useThree();
   const current = useRef<{ dist: number; x: number; z: number } | null>(null);
+  const farthest = useRef({ dist: 0, length: 0 });
   const table = useMemo(() => {
     const cam = (camera as THREE.PerspectiveCamera).clone();
     cam.aspect = size.width / Math.max(size.height, 1);
@@ -514,27 +515,32 @@ function CameraRig({ focus, overview, tableRot, chainRot, margins }: { focus: { 
   }, [camera, size.width, size.height, tableRot, margins]);
   const wanted = useMemo(() => {
     const whole = { dist: table.dist, x: 0, z: table.z };
-    if (overview || focus.length === 0) return whole;
-    const rot = new THREE.Matrix4().makeRotationY(chainRot);
-    const world = focus.map((f) => new THREE.Vector3(f.x * CHAIN_SCALE, 0, f.z * CHAIN_SCALE).applyMatrix4(rot));
-    const cx = world.reduce((s, v) => s + v.x, 0) / world.length;
-    const cz = world.reduce((s, v) => s + v.z, 0) / world.length;
-    // Chaque point compte avec une pierre autour (plus un peu d'air).
-    const pad = 1.6;
-    const pts = focus.flatMap((f) => corners(f.x - pad, f.x + pad, f.z - pad, f.z + pad, TILE_H, chainRot, CHAIN_SCALE));
-    const need = fitDistance(table.cam, pts, cz, margins, cx);
-    const dist = THREE.MathUtils.clamp(need, table.close, table.dist);
-    // Si tout ne tient qu'en reculant au maximum, on montre toute la table, bien centrée.
+    if (overview || !bounds) return whole;
+    // Toute la chaîne, plus une marge pour la prochaine pierre, centrée à l'écran.
+    const pad = 1.8;
+    const pts = corners(bounds.minX - pad, bounds.maxX + pad, bounds.minZ - pad, bounds.maxZ + pad, TILE_H, chainRot, CHAIN_SCALE);
+    const c = new THREE.Vector3(((bounds.minX + bounds.maxX) / 2) * CHAIN_SCALE, 0, ((bounds.minZ + bounds.maxZ) / 2) * CHAIN_SCALE).applyAxisAngle(new THREE.Vector3(0, 1, 0), chainRot);
+    const need = fitDistance(table.cam, pts, c.z, margins, c.x);
     if (need >= table.dist) return whole;
-    return { dist, x: cx, z: cz };
-  }, [focus, overview, chainRot, table, margins]);
+    return { dist: Math.max(need, table.close), x: c.x, z: c.z };
+  }, [bounds, overview, chainRot, table, margins]);
   useFrame((_, dt) => {
+    // Nouvelle manche (la chaîne repart de zéro) : on peut se rapprocher à nouveau.
+    const f = farthest.current;
+    if (chainLength < f.length || chainLength === 0) f.dist = 0;
+    f.length = chainLength;
+    // Table vide (mélange) ou vue d'ensemble : toute la table, sans bloquer le recul de la manche.
+    const free = overview || !bounds;
+    const dist = free ? wanted.dist : Math.max(f.dist, wanted.dist);
+    if (!free) f.dist = dist;
+    // Même point visé : reculer davantage ne fait jamais sortir une pierre de l'écran.
+    const target = { dist, x: wanted.x, z: wanted.z };
     const cam = camera as THREE.PerspectiveCamera;
-    const cur = current.current ?? { ...wanted };
-    const k = 1 - Math.exp(-dt / 0.45);
-    cur.dist += (wanted.dist - cur.dist) * k;
-    cur.x += (wanted.x - cur.x) * k;
-    cur.z += (wanted.z - cur.z) * k;
+    const cur = current.current ?? { ...target };
+    const e = 1 - Math.exp(-dt / 0.45);
+    cur.dist += (target.dist - cur.dist) * e;
+    cur.x += (target.x - cur.x) * e;
+    cur.z += (target.z - cur.z) * e;
     current.current = cur;
     aim(cam, cur.dist, cur.z, cur.x);
   });
@@ -554,28 +560,26 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
   // Paysage : on tourne la table ; la chaîne court alors dans la largeur de l'écran.
   const tableRot = landscape ? Math.PI / 2 : 0;
   const chainRot = landscape ? 0 : Math.PI / 2;
-  const { tiles, slots } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
+  const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
   const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
-  // Ce que la caméra suit : les bouts où poser la pierre choisie, sinon mes bouts jouables,
-  // sinon la dernière pierre posée.
-  const focusKey = `${chain.length}|${targets.join()}|${[...new Set(glowEnds)].join()}|${freshTile ?? ""}`;
-  const focus = useMemo(() => {
-    if (chain.length === 0) return [];
-    if (targets.length > 0) return targets.map((e) => ({ x: slots[e].x, z: slots[e].z }));
-    const at = (end: End) => {
-      const p = endTile(end);
-      return p ? [{ x: p.x, z: p.z }] : [];
-    };
-    if (glowEnds.length > 0) return [...new Set(glowEnds)].flatMap(at);
-    const fresh = tiles.find((t) => t.tile === freshTile);
-    if (fresh) return [{ x: fresh.x, z: fresh.z }];
-    return [...at("left"), ...at("right")];
-  }, [focusKey, tiles, slots]);
+  // La caméra cadre toutes les pierres posées, plus les emplacements où je peux poser la mienne.
+  const view = useMemo((): Bounds | null => {
+    if (chain.length === 0) return null;
+    const b = { ...bounds };
+    for (const e of targets) {
+      const sl = slots[e];
+      b.minX = Math.min(b.minX, sl.x - 1);
+      b.maxX = Math.max(b.maxX, sl.x + 1);
+      b.minZ = Math.min(b.minZ, sl.z - 1);
+      b.maxZ = Math.max(b.maxZ, sl.z + 1);
+    }
+    return b;
+  }, [chain.length, bounds, slots, targets]);
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig focus={focus} overview={overview} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
+      <CameraRig bounds={view} chainLength={chain.length} overview={overview} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       {/* La nuit : un peu de bleu partout, et le lampadaire qui éclaire la table d'un côté. */}
       <hemisphereLight args={["#b4c4e0", "#1a1714", 0.75]} />
       <spotLight position={[-6, 22, -5]} angle={0.55} penumbra={0.9} intensity={520} decay={2} color="#fff3e2" />
