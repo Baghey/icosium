@@ -7,7 +7,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { type Placement, layoutChain } from "@/lib/chain-layout";
+import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
  * La table de domino en 3D : feutre vert, rebord en noyer verni, filet doré, rosette,
@@ -15,10 +15,7 @@ import { type Placement, layoutChain } from "@/lib/chain-layout";
  * cette scène ne fait qu'afficher la chaîne publique et renvoyer le bout choisi.
  */
 
-const FELT_W = 11; // largeur du feutre (en largeurs de domino)
-const FELT_D = 15; // profondeur du feutre
 const RIM = 0.75; // épaisseur du rebord
-const LIMIT_X = 4.2; // la chaîne tourne avant d'atteindre le rebord
 const TILE_H = 0.34; // épaisseur d'un domino
 
 type Props = {
@@ -31,6 +28,8 @@ type Props = {
   shuffleKey: string;
   players: number;
   reducedMotion: boolean;
+  /** Bouts où je peux jouer (mon tour) : un halo doré les signale. */
+  glowEnds: End[];
 };
 
 // ---------- matériaux partagés ----------
@@ -60,6 +59,46 @@ function shadowTexture(): THREE.CanvasTexture {
   g.fill();
   shadowTex = new THREE.CanvasTexture(c);
   return shadowTex;
+}
+
+/** Halo doré flou (dernière pierre posée, bouts jouables). */
+let glowTex: THREE.CanvasTexture | null = null;
+function glowTexture(): THREE.CanvasTexture {
+  if (glowTex) return glowTex;
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 160;
+  const g = c.getContext("2d") as CanvasRenderingContext2D;
+  g.filter = "blur(16px)";
+  g.fillStyle = "rgba(255,214,130,1)";
+  g.beginPath();
+  g.roundRect(40, 40, 176, 80, 26);
+  g.fill();
+  glowTex = new THREE.CanvasTexture(c);
+  return glowTex;
+}
+
+function Glow({ meshRef, opacity }: { meshRef?: React.Ref<THREE.Mesh>; opacity: number }) {
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} renderOrder={2}>
+      <planeGeometry args={[3.3, 2.1]} />
+      <meshBasicMaterial map={glowTexture()} transparent opacity={opacity} depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+    </mesh>
+  );
+}
+
+/** Un bout de la chaîne où je peux jouer : un halo doré qui respire sous la pierre. */
+function EndHalo({ p }: { p: Placement }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => {
+    const m = ref.current?.material as THREE.MeshBasicMaterial | undefined;
+    if (m) m.opacity = 0.45 + Math.sin(clock.elapsedTime * 4) * 0.2;
+  });
+  return (
+    <group position={[p.x, 0, p.z]} rotation={[0, p.rot, 0]}>
+      <Glow meshRef={ref} opacity={0.5} />
+    </group>
+  );
 }
 
 function BlobShadow({ shadowRef }: { shadowRef?: React.Ref<THREE.Mesh> }) {
@@ -225,7 +264,18 @@ const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 function Domino({ p, fresh, reducedMotion }: { p: Placement; fresh: boolean; reducedMotion: boolean }) {
   const ref = useRef<THREE.Group>(null);
   const shadow = useRef<THREE.Mesh>(null);
+  const glow = useRef<THREE.Mesh>(null);
   const born = useRef<number | null>(fresh && !reducedMotion ? -1 : null);
+  // La dernière pierre posée brille un instant, puis s'éteint (1,6 s).
+  const glowStart = useRef<number | null>(fresh ? -1 : null);
+  useFrame(({ clock }) => {
+    const m = glow.current?.material as THREE.MeshBasicMaterial | undefined;
+    if (!m || glowStart.current === null) return;
+    if (glowStart.current < 0) glowStart.current = clock.elapsedTime;
+    const t = (clock.elapsedTime - glowStart.current) / 1.6;
+    m.opacity = t >= 1 ? 0 : 0.85 * (1 - t);
+    if (t >= 1) glowStart.current = null;
+  });
   const tex = useMemo(() => faceTexture(p.a, p.b), [p.a, p.b]);
   useFrame(({ clock }) => {
     const g = ref.current;
@@ -256,6 +306,7 @@ function Domino({ p, fresh, reducedMotion }: { p: Placement; fresh: boolean; red
       <group position={[0, TILE_H / 2, 0]}>
         <BlobShadow shadowRef={shadow} />
       </group>
+      {fresh && <Glow meshRef={glow} opacity={0} />}
     <group ref={ref} position={[0, TILE_H / 2, 0]}>
       <mesh geometry={tileGeometry} material={ivory} />
       <mesh position={[0, TILE_H / 2 + 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -351,32 +402,63 @@ function Shuffle({ players, onDone }: { players: number; onDone: () => void }) {
 
 // ---------- caméra ----------
 
-/** Cadre la table selon la forme de l'écran : on voit toute la largeur du feutre. */
-function CameraRig() {
+const TILT = THREE.MathUtils.degToRad(28); // angle de la caméra depuis la verticale
+
+/**
+ * La caméra suit la chaîne : au début elle s'approche (les pierres sont bien lisibles), puis elle
+ * recule en douceur (~200 ms) pour que toute la chaîne tienne à l'écran, sans jamais aller plus loin
+ * que la table entière.
+ */
+function CameraRig({ bounds }: { bounds: Bounds }) {
   const { camera, size } = useThree();
-  useEffect(() => {
+  const current = useRef<{ dist: number; z: number } | null>(null);
+  const target = useMemo(() => {
     const cam = camera as THREE.PerspectiveCamera;
     const aspect = size.width / Math.max(size.height, 1);
-    // Marge en plus : avec la perspective, le bord proche de la table paraît plus large.
-    const halfW = FELT_W / 2 + RIM + 1.6;
-    const dist = halfW / (Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * aspect);
-    const tilt = THREE.MathUtils.degToRad(28); // angle depuis la verticale
-    cam.position.set(0, Math.cos(tilt) * dist, Math.sin(tilt) * dist + 0.6);
-    cam.lookAt(0, 0, 0.6);
-    cam.updateProjectionMatrix();
+    const tanH = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
+    // Toute la table (plus une marge : la perspective élargit le bord proche).
+    const tableHalfW = FELT_W / 2 + RIM + 1.6;
+    const tableDist = Math.max(tableHalfW / (tanH * aspect), ((FELT_D / 2 + RIM + 0.8) * Math.cos(TILT)) / tanH);
+    // La chaîne, avec une marge d'une pierre et demie.
+    // La chaîne est tournée d'un quart de tour : ses « z » vont en largeur, ses « x » en profondeur.
+    const S = CHAIN_SCALE;
+    const halfW = Math.max(Math.abs(bounds.minZ), Math.abs(bounds.maxZ)) * S + 1.6;
+    const halfD = ((bounds.maxX - bounds.minX) / 2) * S + 1.6;
+    const need = Math.max(halfW / (tanH * aspect), (halfD * Math.cos(TILT)) / tanH);
+    // Au plus près : environ les deux tiers de la table.
+    const dist = Math.min(tableDist, Math.max(need, tableDist * 0.6));
+    // De près, on vise le milieu de la chaîne ; de loin, le milieu de la table.
+    const centerZ = THREE.MathUtils.clamp((-(bounds.minX + bounds.maxX) / 2) * S, -2.5, 2.5);
+    const far = (dist - tableDist * 0.6) / (tableDist * 0.4);
+    const z = centerZ + (0.6 - centerZ) * THREE.MathUtils.clamp(far, 0, 1);
+    return { dist, z };
+  }, [camera, size.width, size.height, bounds]);
+  useFrame((_, dt) => {
+    const cam = camera as THREE.PerspectiveCamera;
+    const cur = current.current ?? { ...target };
+    const k = 1 - Math.exp(-dt / 0.07);
+    cur.dist += (target.dist - cur.dist) * k;
+    cur.z += (target.z - cur.z) * k;
+    current.current = cur;
+    cam.position.set(0, Math.cos(TILT) * cur.dist, Math.sin(TILT) * cur.dist + cur.z);
+    cam.lookAt(0, 0, cur.z);
+  });
+  useEffect(() => {
+    (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
   }, [camera, size.width, size.height]);
   return null;
 }
 
 // ---------- la scène ----------
 
-function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion }: Props) {
-  const { tiles, slots } = useMemo(() => layoutChain(chain, chainStart, LIMIT_X), [chain, chainStart]);
+function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds }: Props) {
+  const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
+  const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig />
+      <CameraRig bounds={bounds} />
       <ambientLight intensity={0.35} color="#ffe2b8" />
       <spotLight
         position={[1.5, 16, 3]}
@@ -394,16 +476,25 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
 
       <Table />
 
-      {tiles.map((p) => (
-        <Domino key={`${p.tile}`} p={p} fresh={p.tile === freshTile} reducedMotion={reducedMotion} />
-      ))}
-      {targets.map((end) =>
-        chain.length === 0 ? (
-          <Ghost key={end} x={0} z={0} rot={0} onPick={() => onPick(end)} />
-        ) : (
-          <Ghost key={end} x={slots[end].x} z={slots[end].z} rot={slots[end].rot} onPick={() => onPick(end)} />
-        ),
-      )}
+      {/* La chaîne, un peu plus petite et tournée d'un quart de tour : ses rangées suivent la longueur du feutre. */}
+      <group scale={[CHAIN_SCALE, CHAIN_SCALE, CHAIN_SCALE]} rotation={[0, Math.PI / 2, 0]}>
+        {tiles.map((p) => (
+          <Domino key={`${p.tile}`} p={p} fresh={p.tile === freshTile} reducedMotion={reducedMotion} />
+        ))}
+        {targets.length === 0 &&
+          chain.length > 0 &&
+          [...new Set(glowEnds)].map((end) => {
+            const p = endTile(end);
+            return p ? <EndHalo key={end} p={p} /> : null;
+          })}
+        {targets.map((end) =>
+          chain.length === 0 ? (
+            <Ghost key={end} x={0} z={0} rot={0} onPick={() => onPick(end)} />
+          ) : (
+            <Ghost key={end} x={slots[end].x} z={slots[end].z} rot={slots[end].rot} onPick={() => onPick(end)} />
+          ),
+        )}
+      </group>
       {showShuffle && (
         <Shuffle
           key={shuffleKey}

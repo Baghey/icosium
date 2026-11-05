@@ -49,6 +49,12 @@ function audio(): AudioContext | null {
 
 /** Le claquement d'un domino. `strong` : plus fort et plus grave, quand on ferme la manche. */
 export function playClack(strong = false): void {
+  // Petite vibration du téléphone, comme le choc de la pierre sur la table.
+  try {
+    navigator.vibrate?.(strong ? [18, 40, 28] : 14);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
   if (!isSoundOn()) return;
   const ac = audio();
   if (!ac) return;

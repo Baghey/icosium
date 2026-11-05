@@ -298,6 +298,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
                 shuffleKey={`${view.round}`}
                 players={players}
                 reducedMotion={reducedMotion}
+                glowEnds={selected ? [] : moves.map((m) => m.end)}
               />
             </div>
           ) : (
