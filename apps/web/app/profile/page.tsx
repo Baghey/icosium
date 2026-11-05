@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { LanguagePicker } from "@/components/language-picker";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
@@ -31,6 +32,10 @@ function Profile() {
           <dd className="font-medium">{user?.isGuest ? t("profile.guestAccount") : t("profile.emailAccount")}</dd>
         </div>
       </dl>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold text-ink-muted">{t("common.language")}</h2>
+        <LanguagePicker />
+      </section>
       <p className="text-sm text-ink-muted">{t("profile.navigateHint")}</p>
       <button
         type="button"

@@ -4,6 +4,7 @@ import { checkBirthdate } from "@icosium/shared";
 import type { MessageKey } from "@icosium/i18n";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { LanguagePicker } from "@/components/language-picker";
 import { useAuth } from "@/lib/auth-context";
 import { MIN_PASSWORD_LENGTH, USERNAME_PATTERN, authErrorKey, readNakamaError, type AuthMode } from "@/lib/auth-errors";
 import { useT } from "@/lib/i18n";
@@ -163,6 +164,8 @@ export default function LoginPage() {
                 : t("auth.continueAsGuest")}
         </button>
       </form>
+
+      <LanguagePicker />
     </main>
   );
 }

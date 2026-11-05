@@ -1,5 +1,12 @@
 # Journal d'avancement d'ICOSIUM
 
+## Ajout : le français (5 novembre 2026)
+
+- Toute l'interface existe en anglais et en français (`packages/i18n/src/locales/fr.json`).
+- L'app prend la langue du téléphone (français si le téléphone est en français), sinon l'anglais.
+- On peut changer de langue sur l'écran de connexion et dans Profil ; le choix est retenu.
+- Un test vérifie que le français a exactement les mêmes textes que l'anglais.
+
 ## Étape 1 : les fondations (5 novembre 2026)
 
 ### Ce qui marche
