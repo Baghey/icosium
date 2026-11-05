@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { MessageKey } from "@icosium/i18n";
 import { AppShell } from "@/components/app-shell";
+import { DominoTile } from "@/components/domino/tile";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
 
@@ -43,8 +44,19 @@ function Home() {
       </header>
 
       <Link
+        href="/play"
+        className="group relative flex min-h-36 items-end overflow-hidden rounded-card p-5 text-white shadow-md transition-transform duration-150 active:scale-[0.98] table-wood"
+      >
+        <span className="absolute end-5 top-4 flex rotate-12 gap-1 transition-transform duration-200 ease-icos group-hover:rotate-6" dir="ltr" aria-hidden="true">
+          <DominoTile a={6} b={6} orientation="vertical" size={24} />
+          <DominoTile a={5} b={2} orientation="vertical" size={24} />
+        </span>
+        <span className="relative text-xl font-semibold drop-shadow">{t("home.playDomino")}</span>
+      </Link>
+
+      <Link
         href="/voice"
-        className="flex min-h-14 items-center justify-center rounded-card bg-mint px-6 text-lg font-semibold text-mint-ink transition-transform duration-150 active:scale-[0.98]"
+        className="flex min-h-14 items-center justify-center rounded-card border border-line bg-surface px-6 font-semibold transition-transform duration-150 active:scale-[0.98]"
       >
         {t("home.openVoice")}
       </Link>

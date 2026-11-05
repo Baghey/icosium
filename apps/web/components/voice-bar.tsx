@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import { useVoice } from "@/lib/voice-context";
 import { MicButton } from "./mic-button";
@@ -14,7 +15,26 @@ export function VoiceBar() {
   const t = useT();
   const pathname = usePathname();
   const { status, peers, leave } = useVoice();
-  if (status === "idle" || status === "connecting") return null;
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = status !== "idle" && status !== "connecting";
+
+  // Les écrans plein écran (la table de jeu) retirent la hauteur de la barre via --voicebar.
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = ref.current;
+    if (!visible || !el) {
+      root.style.setProperty("--voicebar", "0px");
+      return;
+    }
+    const obs = new ResizeObserver(() => root.style.setProperty("--voicebar", `${el.offsetHeight}px`));
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+      root.style.setProperty("--voicebar", "0px");
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   const speakers = peers.filter((p) => p.isSpeaking && p.micOn);
   const label =
@@ -26,6 +46,7 @@ export function VoiceBar() {
 
   return (
     <div
+      ref={ref}
       role="region"
       aria-label={t("voice.inRoom")}
       className="sticky top-0 z-40 border-b border-line bg-surface/95 pt-[env(safe-area-inset-top)] backdrop-blur"

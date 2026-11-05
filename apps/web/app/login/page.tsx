@@ -15,6 +15,13 @@ const TABS: { mode: AuthMode; label: MessageKey }[] = [
   { mode: "guest", label: "auth.guest" },
 ];
 
+/** Après connexion, on revient à la table d'où l'on venait (lien de partage), sinon au café. */
+function nextPath(): string {
+  if (typeof window === "undefined") return "/";
+  const next = new URLSearchParams(window.location.search).get("next") ?? "";
+  return /^\/play\/[A-Za-z]{4}$/.test(next) ? next : "/";
+}
+
 export default function LoginPage() {
   const t = useT();
   const router = useRouter();
@@ -30,7 +37,7 @@ export default function LoginPage() {
   const [notice, setNotice] = useState<MessageKey | null>(null);
 
   useEffect(() => {
-    if (auth.ready && auth.user) router.replace("/");
+    if (auth.ready && auth.user) router.replace(nextPath());
   }, [auth.ready, auth.user, router]);
 
   /** Vérifications rapides côté app ; le serveur refait les mêmes et a le dernier mot. */
@@ -72,7 +79,7 @@ export default function LoginPage() {
       } else {
         await auth.signInAsGuest();
       }
-      router.replace("/");
+      router.replace(nextPath());
     } catch (err) {
       setError(authErrorKey(mode, readAuthError(err)));
     } finally {

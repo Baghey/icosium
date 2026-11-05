@@ -7,6 +7,7 @@ import { useT } from "@/lib/i18n";
 
 const ITEMS: { href: string; label: MessageKey }[] = [
   { href: "/", label: "nav.home" },
+  { href: "/play", label: "nav.play" },
   { href: "/voice", label: "nav.voice" },
   { href: "/profile", label: "nav.profile" },
 ];
@@ -22,7 +23,7 @@ export function BottomNav() {
     >
       <ul className="mx-auto flex max-w-xl">
         {ITEMS.map((item) => {
-          const active = pathname === item.href;
+          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return (
             <li key={item.href} className="flex-1">
               <Link
