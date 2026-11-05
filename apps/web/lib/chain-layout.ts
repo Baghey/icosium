@@ -37,7 +37,7 @@ export type ChainLayout = { tiles: Placement[]; slots: Record<End, Slot>; bounds
 export const FELT_W = 11;
 export const FELT_D = 15;
 /** La chaîne est dessinée un peu plus petite que les pierres de la main, pour tenir 7 à 8 pierres par rangée. */
-export const CHAIN_SCALE = 0.72;
+export const CHAIN_SCALE = 0.62;
 /**
  * Sur téléphone, la table est plus longue que large : la chaîne est tournée d'un quart de tour pour
  * que ses rangées courent dans la longueur du feutre. Ici, « x » (le sens des rangées) suit donc la
@@ -49,29 +49,38 @@ export const CHAIN_HALF_D = (FELT_W / 2 - 0.15) / CHAIN_SCALE;
 
 type Vec = { x: number; z: number };
 export const GAP = 0.06;
-/** Place gardée au bout d'une rangée : un double en travers puis un coin. */
+/** Place gardée au bout d'un segment : un double en travers puis un coin. */
 const RESERVE = 2 * (1 + GAP);
 const angleOf = (d: Vec) => Math.atan2(-d.z, d.x);
 
-/** Le bras droit tourne vers le joueur, le bras gauche vers le haut. */
-function turn(d: Vec, arm: End, rowsTurned: number): Vec {
-  // En revenant d'un tour vertical, une rangée sur deux repart en sens inverse.
-  const reversed = ((rowsTurned + 1) / 2) % 2 === 1;
-  if (d.z !== 0) return { x: reversed ? (arm === "right" ? -1 : 1) : arm === "right" ? 1 : -1, z: 0 };
-  return { x: 0, z: arm === "right" ? 1 : -1 };
+/**
+ * La chaîne tourne en spirale, comme sur une vraie table : chaque bras part du centre, tourne,
+ * puis longe le bord. Les deux bras tournent dans le même sens (la figure est symétrique par
+ * rapport au centre), si bien que chacun garde sa moitié de table et qu'ils ne se croisent jamais.
+ *
+ * Limites successives de chaque segment, mesurées dans le sens où le bras avance :
+ * 1. le tronc central (une pierre de chaque côté du premier domino, plus le coin) ;
+ * 2. un court retour vers le bord ;
+ * 3. une longue rangée qui longe la table ;
+ * 4. le long du dernier bord.
+ * Au-delà (très rare : presque toutes les pierres du même côté), le bras continue tout droit.
+ */
+function limits(halfW: number): number[] {
+  return [7.3, CHAIN_HALF_D, halfW];
 }
 
 type Cursor = { p: Vec; d: Vec; turns: number; arm: End };
 
 function place(c: Cursor, double: boolean, halfW: number): { center: Vec; rot: number } {
-  const vertical = c.d.z !== 0;
+  const limit = limits(halfW)[c.turns] ?? Number.POSITIVE_INFINITY;
+  const along = c.p.x * c.d.x + c.p.z * c.d.z;
   // Un double tient toujours (la réserve est là pour lui) ; une pierre simple doit laisser la réserve.
-  const tooFar = !vertical && !double && Math.abs(c.p.x + c.d.x * (2 + GAP)) + RESERVE > halfW;
-  if (vertical || tooFar) {
-    // La pierre qui tourne se pose en long dans la nouvelle direction, collée à la précédente.
-    const nd = turn(c.d, c.arm, c.turns);
+  const tooFar = !double && along + (2 + GAP) + RESERVE > limit;
+  if (tooFar) {
+    // Quart de tour, toujours dans le même sens. La pierre du coin se pose en long dans la
+    // nouvelle direction, collée à la précédente.
+    const nd = { x: -c.d.z, z: c.d.x };
     const center = { x: c.p.x + c.d.x * (0.5 + GAP) + nd.x * 0.5, z: c.p.z + c.d.z * (0.5 + GAP) + nd.z * 0.5 };
-    // Deux rangées sont à 2,12 l'une de l'autre : deux doubles en travers (2 de long) ne se touchent pas.
     c.p = { x: c.p.x + c.d.x * (0.5 + GAP) + nd.x * (1.5 + GAP), z: c.p.z + c.d.z * (0.5 + GAP) + nd.z * (1.5 + GAP) };
     c.d = nd;
     c.turns += 1;

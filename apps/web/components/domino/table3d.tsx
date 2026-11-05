@@ -7,7 +7,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
-import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
+import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
  * La table de domino en 3D : feutre vert, rebord en noyer verni, filet doré, rosette,
@@ -166,11 +166,6 @@ function Table() {
       </mesh>
       <mesh geometry={rimGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]}>
         <meshPhysicalMaterial map={wood} color="#ffffff" roughness={0.5} clearcoat={0.6} clearcoatRoughness={0.3} />
-      </mesh>
-      {/* le dessous de la table, pour qu'on ne voie pas à travers */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]}>
-        <planeGeometry args={[FELT_W + 2, FELT_D + 2]} />
-        <meshBasicMaterial color="#120a05" />
       </mesh>
     </group>
   );
@@ -397,36 +392,28 @@ function corners(minX: number, maxX: number, minZ: number, maxZ: number, height:
 }
 
 /**
- * La caméra suit la chaîne : au début elle s'approche (les pierres sont bien lisibles), puis elle
- * recule en douceur (~200 ms) pour que toute la chaîne tienne à l'écran. Le cadrage est calculé
- * exactement (chaque coin de la chaîne est projeté à l'écran) : aucune pierre ne sort du cadre.
+ * La caméra est fixe : toute la table, rebord compris, tient à l'écran, sans zoom ni mouvement
+ * pendant la partie (la chaîne tourne en spirale et reste sur le feutre). Elle ne se recalcule
+ * que si l'écran change de taille ou d'orientation, avec une transition douce.
  */
-function CameraRig({ bounds, tableRot, chainRot, margins, minZoom }: { bounds: Bounds; tableRot: number; chainRot: number; margins: Margins; minZoom: number }) {
+function CameraRig({ tableRot, margins }: { tableRot: number; margins: Margins }) {
   const { camera, size } = useThree();
   const current = useRef<{ dist: number; z: number } | null>(null);
   const target = useMemo(() => {
     const cam = (camera as THREE.PerspectiveCamera).clone();
     cam.aspect = size.width / Math.max(size.height, 1);
     cam.updateProjectionMatrix();
-    const tableHalfW = FELT_W / 2 + RIM;
-    const tableHalfD = FELT_D / 2 + RIM;
-    const table = corners(-tableHalfW, tableHalfW, -tableHalfD, tableHalfD, 0.3, tableRot);
-    const tableDist = fitDistance(cam, table, 0.4, { x: 0.02, top: margins.top * 0.5, bottom: 0.02 });
-    const chain = corners(bounds.minX - 0.6, bounds.maxX + 0.6, bounds.minZ - 0.6, bounds.maxZ + 0.6, TILE_H, chainRot, CHAIN_SCALE);
-    // On vise le milieu de la chaîne (en profondeur), sans trop s'écarter du centre.
-    const zs = chain.map((p) => p.z);
-    const centerZ = THREE.MathUtils.clamp((Math.min(...zs) + Math.max(...zs)) / 2, -3, 3);
-    const chainDist = fitDistance(cam, chain, centerZ, margins);
-    // Au plus près : environ les deux tiers de la table ; au plus loin, la table entière (sauf si la chaîne demande plus).
-    let dist = Math.max(chainDist, tableDist * minZoom);
-    if (dist > tableDist) dist = Math.max(tableDist, chainDist);
-    const far = THREE.MathUtils.clamp((dist - tableDist * minZoom) / (tableDist * (1 - minZoom) || 1), 0, 1);
-    const z = centerZ + (0.4 - centerZ) * far;
-    // En se recentrant, la chaîne pourrait déborder : on recule juste ce qu'il faut.
-    aim(cam, dist, z);
-    if (!fits(cam, chain, margins)) dist = fitDistance(cam, chain, z, margins);
-    return { dist, z };
-  }, [camera, size.width, size.height, bounds, tableRot, chainRot, margins, minZoom]);
+    const tableHalfW = FELT_W / 2 + RIM + 0.2;
+    const tableHalfD = FELT_D / 2 + RIM + 0.2;
+    const table = corners(-tableHalfW, tableHalfW, -tableHalfD, tableHalfD, 0.35, tableRot);
+    // On cherche le point visé qui permet la table la plus grande à l'écran.
+    let best = { dist: Number.POSITIVE_INFINITY, z: 0 };
+    for (let z = -1.5; z <= 1.5; z += 0.25) {
+      const dist = fitDistance(cam, table, z, margins);
+      if (dist < best.dist) best = { dist, z };
+    }
+    return best;
+  }, [camera, size.width, size.height, tableRot, margins]);
   useFrame((_, dt) => {
     const cam = camera as THREE.PerspectiveCamera;
     const cur = current.current ?? { ...target };
@@ -444,21 +431,21 @@ function CameraRig({ bounds, tableRot, chainRot, margins, minZoom }: { bounds: B
 
 // ---------- la scène ----------
 
-const PORTRAIT_MARGINS: Margins = { x: 0.05, top: 0.06, bottom: 0.06 };
-const LANDSCAPE_MARGINS: Margins = { x: 0.04, top: 0.3, bottom: 0.12 };
+const PORTRAIT_MARGINS: Margins = { x: 0.02, top: 0.02, bottom: 0.02 };
+const LANDSCAPE_MARGINS: Margins = { x: 0.02, top: 0.1, bottom: 0.01 };
 
 function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false }: Props) {
   // Portrait : la table est en long et la chaîne tournée d'un quart de tour pour suivre sa longueur.
   // Paysage : on tourne la table ; la chaîne court alors dans la largeur de l'écran.
   const tableRot = landscape ? Math.PI / 2 : 0;
   const chainRot = landscape ? 0 : Math.PI / 2;
-  const { tiles, slots, bounds } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
+  const { tiles, slots } = useMemo(() => layoutChain(chain, chainStart, CHAIN_HALF_W), [chain, chainStart]);
   const endTile = (end: End) => tiles.find((t) => t.index === (end === "left" ? 0 : chain.length - 1));
   const [shuffled, setShuffled] = useState<string | null>(null);
   const showShuffle = !reducedMotion && chain.length === 0 && shuffled !== shuffleKey;
   return (
     <>
-      <CameraRig bounds={bounds} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} minZoom={landscape ? 0.72 : 0.6} />
+      <CameraRig tableRot={tableRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       <ambientLight intensity={0.35} color="#ffe2b8" />
       <spotLight
         position={[1.5, 16, 3]}

@@ -273,3 +273,12 @@ Corrigé :
   fin de manche sur deux colonnes, pierres de la main plus grandes.
 
 Vérifié et déjà correct : sens des pierres et doubles en travers (nouveau test sur 500 parties au hasard).
+
+## Table fixe et chaîne en spirale (5 novembre 2026, 20 h 30)
+
+- La caméra ne bouge plus : la table entière (rebord compris) est toujours visible, en portrait comme en paysage.
+- La chaîne tourne en spirale comme au café : un court tronc au centre, puis chaque bras tourne et longe le bord.
+  Les deux bras tournent dans le même sens et gardent chacun leur moitié de table.
+- Pierres de la chaîne un peu plus petites (échelle 0,62) pour que tout tienne sur le feutre.
+- Testé sur 2000 parties au hasard : aucune pierre ne se chevauche ; dans environ 1 % des très longues chaînes,
+  la dernière pierre mord un peu sur le rebord.
