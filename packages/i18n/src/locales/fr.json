@@ -179,6 +179,12 @@
       "conflict": "La table a avancé. Réessaie.",
       "not_seated": "Tu n'es pas assis à cette table.",
       "unknown": "Impossible de poser ce domino. Réessaie."
-    }
+    },
+    "pts": "{n} pts",
+    "turnOf": "Tour de {name}",
+    "yourTurnShort": "À toi",
+    "game": "Dominos",
+    "table": "Table {code}",
+    "players": "Joueurs"
   }
 }

@@ -87,11 +87,16 @@ Gestionnaire de paquets : pnpm (workspaces).
 
 ## Design
 
-Ambiance « café contemporain » : chaleureuse, épurée, sans drapeaux ni motifs folkloriques
-décoratifs. L'identité passe par les sons, les mots et les détails.
+Ambiance « café algérien de nuit » (vision du propriétaire, 5 novembre 2026, image de référence
+dans le fil de l'étape 2) : riche et immersive, jamais générique ni « template ».
 
-- Fond crème chaud en mode clair, brun café en mode sombre.
-- Une seule couleur d'accent : vert menthe.
+- Écrans de jeu : fond de café sombre et flouté (lampes laiton, bois, plantes), table en feutre
+  vert émeraude avec rebord en noyer et filet doré, rosette géométrique dorée discrète au centre,
+  dominos ivoire en relief, dos dorés, avatars ronds avec anneau et badge micro, panneaux sombres
+  translucides bordés d'or, chrono doré, gros bouton micro vert en bas.
+- Accents : or (texte gravé, filets, boutons principaux) et vert (micro ouvert, feutre).
+- Les images (fond, table, logo, avatars, silhouette d'Alger) sont générées par le propriétaire
+  à partir de prompts précis ; l'app dessine les points des dominos, les icônes et les panneaux.
 - Animations courtes (150 à 250 ms).
 - Couleurs, rayons et espacements définis comme variables (tokens Tailwind), jamais en dur.
 

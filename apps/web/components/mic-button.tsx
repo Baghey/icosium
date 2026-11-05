@@ -11,7 +11,7 @@ const HOLD_MS = 350;
  * Gros bouton micro. Un appui = ouvert / coupé. Appui long = push-to-talk :
  * le micro s'ouvre tant qu'on garde le doigt dessus.
  */
-export function MicButton({ size = "large" }: { size?: "large" | "small" }) {
+export function MicButton({ size = "large", tone = "app" }: { size?: "large" | "small"; tone?: "app" | "cafe" }) {
   const t = useT();
   const { micOn, setMic, peers } = useVoice();
   const holdTimer = useRef<number | null>(null);
@@ -67,7 +67,13 @@ export function MicButton({ size = "large" }: { size?: "large" | "small" }) {
       aria-pressed={micOn}
       aria-label={micOn ? t("voice.micOn") : t("voice.micOff")}
       className={`${dims} relative inline-flex shrink-0 touch-none select-none items-center justify-center rounded-full transition-colors duration-200 ease-icos ${
-        micOn ? "bg-mint text-mint-ink" : "bg-surface-2 text-ink"
+        tone === "cafe"
+          ? micOn
+            ? "bg-mic-on text-white shadow-[0_0_0_3px_rgba(31,184,96,0.35),0_0_28px_rgba(31,184,96,0.55)]"
+            : "cafe-panel text-cafe-text"
+          : micOn
+            ? "bg-mint text-mint-ink"
+            : "bg-surface-2 text-ink"
       } ${speaking ? "animate-ring" : ""}`}
     >
       {micOn ? <MicIcon className={iconSize} /> : <MicOffIcon className={iconSize} />}

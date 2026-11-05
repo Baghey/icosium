@@ -19,6 +19,23 @@
   --icos-wood-light: #b47a4b;
   --icos-wood-edge: #6f4122;
   color-scheme: light;
+
+  /* Le café de nuit (écrans de jeu) : identique en clair et en sombre. */
+  --cafe-0: #0e0906;
+  --cafe-1: #1a120c;
+  --cafe-2: #2a1d13;
+  --cafe-panel: rgb(20 13 8 / 0.82);
+  --cafe-text: #f6ead2;
+  --cafe-muted: #c9b48f;
+  --gold: #d8a748;
+  --gold-light: #f6d68a;
+  --gold-dark: #8c6120;
+  --felt: #0f5c3d;
+  --felt-light: #1c7f55;
+  --felt-dark: #06301f;
+  --walnut: #4e2c14;
+  --walnut-light: #93602f;
+  --mic-on: #1fb860;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,6 +68,17 @@
   --color-mint-ink: var(--icos-mint-ink);
   --color-mint-soft: var(--icos-mint-soft);
   --color-danger: var(--icos-danger);
+  --color-cafe-0: var(--cafe-0);
+  --color-cafe-1: var(--cafe-1);
+  --color-cafe-2: var(--cafe-2);
+  --color-cafe-panel: var(--cafe-panel);
+  --color-cafe-text: var(--cafe-text);
+  --color-cafe-muted: var(--cafe-muted);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-felt: var(--felt);
+  --color-mic-on: var(--mic-on);
 
   --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
@@ -68,6 +96,8 @@
   --animate-sheet: icos-sheet 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-pop: icos-pop 250ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
   --animate-seat: icos-seat 220ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  --animate-turn: icos-turn 1.6s ease-in-out infinite;
+  --animate-speak: icos-speak 0.9s ease-out infinite;
 }
 
 @theme {
@@ -124,6 +154,68 @@
     0 6px 18px rgb(60 35 15 / 0.18);
 }
 
+/* Le café de nuit derrière la table : lampes ambrées floues et vignette. Remplacé par la photo
+   du café (public/assets/cafe-bg.webp) dès qu'elle existe. */
+@utility cafe-bg {
+  background-color: var(--cafe-0);
+  background-image:
+    radial-gradient(60% 40% at 50% 45%, transparent 0%, rgb(0 0 0 / 0.55) 100%),
+    radial-gradient(18% 10% at 14% 9%, rgb(255 178 82 / 0.38), transparent 70%),
+    radial-gradient(14% 9% at 86% 14%, rgb(255 190 100 / 0.32), transparent 70%),
+    radial-gradient(22% 14% at 92% 62%, rgb(255 160 70 / 0.18), transparent 70%),
+    radial-gradient(30% 18% at 6% 70%, rgb(40 90 50 / 0.35), transparent 70%),
+    radial-gradient(35% 22% at 95% 92%, rgb(40 90 50 / 0.3), transparent 70%),
+    linear-gradient(180deg, #2b1c11 0%, #1a110b 45%, #120c07 100%);
+}
+
+/* Panneau sombre translucide avec un filet doré : noms, chrono, barre du bas. */
+@utility cafe-panel {
+  background: linear-gradient(180deg, rgb(38 26 17 / 0.92), rgb(16 10 6 / 0.92));
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 230 170 / 0.12), 0 6px 18px rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(6px);
+}
+
+/* Texte doré gravé. */
+@utility text-gilded {
+  background: linear-gradient(180deg, var(--gold-light) 10%, var(--gold) 55%, var(--gold-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* La table : feutre vert émeraude, rebord en noyer verni et filet doré. */
+@utility felt-table {
+  background:
+    radial-gradient(80% 60% at 50% 45%, var(--felt-light) 0%, var(--felt) 55%, var(--felt-dark) 100%);
+  border: 14px solid var(--walnut);
+  border-image: none;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--gold) 75%, transparent),
+    inset 0 0 0 5px rgb(0 0 0 / 0.25),
+    inset 0 14px 40px rgb(0 0 0 / 0.45),
+    0 0 0 1px #2a170a,
+    0 2px 0 3px var(--walnut-light),
+    0 22px 40px rgb(0 0 0 / 0.6);
+}
+
+/* Le grain du feutre, très léger. */
+@utility felt-grain {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.04) 0 1px, transparent 1px 3px);
+}
+
+/* Le joueur qui joue : anneau doré qui respire. */
+@keyframes icos-turn {
+  0%, 100% { box-shadow: 0 0 0 2px var(--gold), 0 0 10px 2px color-mix(in srgb, var(--gold) 55%, transparent); }
+  50% { box-shadow: 0 0 0 2px var(--gold-light), 0 0 18px 5px color-mix(in srgb, var(--gold) 70%, transparent); }
+}
+@keyframes icos-speak {
+  0%, 100% { box-shadow: 0 0 0 3px var(--mic-on), 0 0 0 0 color-mix(in srgb, var(--mic-on) 60%, transparent); }
+  50% { box-shadow: 0 0 0 3px var(--mic-on), 0 0 0 7px transparent; }
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -140,4 +232,13 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Bouton principal doré (fin de manche, ouvrir une table). */
+@utility gold-button {
+  background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dark) 100%);
+  color: #2a1a08;
+  border: 1px solid #f9e2a8;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 6px 16px rgb(0 0 0 / 0.4);
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.5);
 }

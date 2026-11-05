@@ -179,6 +179,12 @@
       "conflict": "The table moved on. Try again.",
       "not_seated": "You are not seated at this table.",
       "unknown": "Couldn't play that tile. Try again."
-    }
+    },
+    "pts": "{n} pts",
+    "turnOf": "{name}'s turn",
+    "yourTurnShort": "Your turn",
+    "game": "Dominoes",
+    "table": "Table {code}",
+    "players": "Players"
   }
 }

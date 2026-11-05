@@ -40,7 +40,7 @@ export function DominoChain({ chain, targets, onPick, pickLabel, freshTile }: Pr
   // Taille d'un domino : plus petite quand la chaîne s'allonge, pour que tout reste visible.
   const unit = useMemo(() => {
     const n = chain.length;
-    const base = n <= 8 ? Math.min(36, Math.floor(width / 10)) : Math.min(30, Math.floor(width / 13));
+    const base = n <= 6 ? Math.min(42, Math.floor(width / 8)) : n <= 10 ? Math.min(36, Math.floor(width / 10)) : Math.min(30, Math.floor(width / 13));
     return n > 20 ? Math.max(16, base - 6) : n > 12 ? Math.max(18, base - 3) : base;
   }, [width, chain.length]);
 
