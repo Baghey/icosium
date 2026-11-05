@@ -1,0 +1,101 @@
+# ICOSIUM : tous les services locaux, lancés par `pnpm infra:up` depuis la racine du dépôt.
+# Les valeurs viennent du fichier .env à la racine (copie de .env.example).
+name: icosium
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nakama
+      POSTGRES_USER: nakama
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copie .env.example en .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nakama -d nakama"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  nakama:
+    image: heroiclabs/nakama:3.42.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -ecx
+      - >
+        /nakama/nakama migrate up --database.address "nakama:${POSTGRES_PASSWORD}@postgres:5432/nakama" &&
+        exec /nakama/nakama
+        --name icosium
+        --database.address "nakama:${POSTGRES_PASSWORD}@postgres:5432/nakama"
+        --logger.level INFO
+        --runtime.path /nakama/data/modules
+        --runtime.js_entrypoint index.js
+        --runtime.http_key "${NAKAMA_HTTP_KEY}"
+        --socket.server_key "${NAKAMA_SERVER_KEY}"
+        --session.token_expiry_sec 86400
+        --session.refresh_token_expiry_sec 2592000
+        --session.encryption_key "${NAKAMA_SESSION_KEY}"
+        --session.refresh_encryption_key "${NAKAMA_REFRESH_KEY}"
+        --console.username "${NAKAMA_CONSOLE_USERNAME}"
+        --console.password "${NAKAMA_CONSOLE_PASSWORD}"
+        --console.signing_key "${NAKAMA_CONSOLE_SIGNING_KEY}"
+    volumes:
+      - ./nakama/build:/nakama/data/modules:ro
+    ports:
+      - "127.0.0.1:7350:7350" # API (utilisée par le serveur Next.js pour vérifier les sessions)
+      - "127.0.0.1:7351:7351" # console d'administration : http://localhost:7351
+    healthcheck:
+      test: ["CMD", "/nakama/nakama", "healthcheck"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  livekit:
+    image: livekit/livekit-server:v1.13.11
+    restart: unless-stopped
+    command: ["--config", "/etc/livekit.yaml", "--node-ip", "${ICOSIUM_LAN_IP:?Indique l'IP de ton ordinateur dans .env}"]
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    depends_on:
+      - redis
+    ports:
+      - "127.0.0.1:7880:7880" # API (création de salons, utilisée par le serveur Next.js)
+      - "7881:7881/tcp" # média WebRTC en TCP (secours quand l'UDP est bloqué)
+      - "50000-50100:50000-50100/udp" # média WebRTC en UDP
+
+  # Porte d'entrée unique en HTTPS : le navigateur exige HTTPS pour le micro sur téléphone.
+  # https://localhost:8443 et https://<ICOSIUM_LAN_IP>:8443 servent l'app, Nakama, LiveKit
+  # et le serveur de jeu sur la même adresse.
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    environment:
+      ICOSIUM_LAN_IP: ${ICOSIUM_LAN_IP}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8443:8443"
+    depends_on:
+      - nakama
+      - livekit
+
+volumes:
+  postgres-data:
+  caddy-data:

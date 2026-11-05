@@ -1,0 +1,14 @@
+# Configuration de LiveKit pour le développement local.
+# Les clés viennent de la variable LIVEKIT_KEYS (voir docker-compose.yml et .env).
+port: 7880
+log_level: info
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50100
+  use_external_ip: false
+redis:
+  address: redis:6379
+room:
+  empty_timeout: 300
+  departure_timeout: 20

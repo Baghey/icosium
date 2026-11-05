@@ -1,0 +1,13 @@
+{
+  "name": "@icosium/nakama-modules",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Code serveur exécuté dans Nakama (vérification de l'âge à l'inscription).",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

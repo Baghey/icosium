@@ -1,0 +1,32 @@
+# Porte d'entrée HTTPS locale d'ICOSIUM.
+# Certificat auto-signé : le navigateur affichera un avertissement la première fois (normal en local).
+{
+	local_certs
+	skip_install_trust
+}
+
+localhost:8443, {$ICOSIUM_LAN_IP}:8443 {
+	tls internal
+
+	# Nakama (comptes, amis, chat)
+	@nakama path /v2/* /ws
+	handle @nakama {
+		reverse_proxy nakama:7350
+	}
+
+	# LiveKit (signalisation du vocal)
+	@livekit path /rtc /rtc/* /twirp/*
+	handle @livekit {
+		reverse_proxy livekit:7880
+	}
+
+	# Serveur de jeu Colyseus (tourne sur l'ordinateur, hors Docker)
+	handle_path /colyseus/* {
+		reverse_proxy host.docker.internal:2567
+	}
+
+	# L'app Next.js (tourne sur l'ordinateur, hors Docker)
+	handle {
+		reverse_proxy host.docker.internal:3000
+	}
+}
