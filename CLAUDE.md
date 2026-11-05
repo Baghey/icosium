@@ -95,6 +95,17 @@ décoratifs. L'identité passe par les sons, les mots et les détails.
 - Animations courtes (150 à 250 ms).
 - Couleurs, rayons et espacements définis comme variables (tokens Tailwind), jamais en dur.
 
+**Le design est une priorité du propriétaire (5 novembre 2026)** : « n'oublie pas le design,
+c'est important : de jolis assets, des animations ». À chaque étape :
+
+- Soigner les visuels du jeu : dominos ivoire, cartes dessinées maison, table en bois ou formica,
+  avatars, icônes. Assets légers (SVG ou dessinés en CSS de préférence, sinon images compressées),
+  jamais de placeholder brut laissé dans une étape livrée.
+- Animer ce qui vit : domino qui claque, carte qui glisse, chaise qui se remplit, transitions
+  entre écrans, micro qui pulse. Toujours court (150 à 250 ms) et respectant
+  `prefers-reduced-motion`.
+- Vérifier chaque écran en capture à 360 px, en clair et en sombre, avant de livrer.
+
 ## Façon de travailler
 
 - Une étape à la fois, comme demandé dans le message. Ne commence pas l'étape suivante sans

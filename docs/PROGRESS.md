@@ -20,6 +20,8 @@ sont retirés.
 - Tests, vérification TypeScript et build passent.
 
 Site en ligne : <https://icosium-rho.vercel.app> (Vercel, mis à jour à chaque push sur `main`).
+Vérifié par le propriétaire sur son téléphone : mode invité, profil, français, salon vocal, et
+Supabase et LiveKit « En ligne ».
 
 ### Ce qui reste
 
