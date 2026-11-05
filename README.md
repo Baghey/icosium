@@ -15,7 +15,7 @@ Le café du coin, en ligne : jeux de société algériens entre amis, avec le vo
 | Comptes et base | Supabase (projet `icosium`, Paris) | Inscription, invités, profils, plus tard les parties et le chat |
 | Vocal | LiveKit Cloud | Les salons audio |
 
-Rien à installer pour tester : on ouvre l'adresse Vercel sur l'ordinateur ou le téléphone.
+**Le site : <https://icosium-rho.vercel.app>** — rien à installer, on l'ouvre sur l'ordinateur ou le téléphone.
 
 ## Mettre en ligne (une seule fois)
 

@@ -19,6 +19,8 @@ sont retirés.
   Supabase, pour LiveKit Cloud (4 places, anti-spam inchangés).
 - Tests, vérification TypeScript et build passent.
 
+Site en ligne : <https://icosium-rho.vercel.app> (Vercel, mis à jour à chaque push sur `main`).
+
 ### Ce qui reste
 
 - Activer les invités anonymes dans Supabase (un interrupteur dans le tableau de bord).
