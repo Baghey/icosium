@@ -6,7 +6,7 @@ import { Canvas, type ThreeEvent, useFrame, useLoader, useThree } from "@react-t
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
 import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
@@ -16,7 +16,6 @@ import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement,
  */
 
 const RIM = 0.75; // épaisseur du rebord
-const TILE_H = 0.34; // épaisseur d'un domino
 
 type Props = {
   chain: PlacedTile[];
@@ -34,15 +33,8 @@ type Props = {
 
 // ---------- matériaux partagés ----------
 
-const tileGeometry = new RoundedBoxGeometry(2, TILE_H, 1, 4, 0.11);
-const ivory = new THREE.MeshPhysicalMaterial({
-  color: "#f3e6c9",
-  roughness: 0.33,
-  clearcoat: 0.7,
-  clearcoatRoughness: 0.22,
-  sheen: 0.3,
-  sheenColor: new THREE.Color("#fff4dc"),
-});
+const tileGeometry = stoneGeometry();
+const ivory = ivoryMaterial();
 
 /** Ombre douce sous un domino : un rectangle flou, léger et toujours net à l'écran. */
 let shadowTex: THREE.CanvasTexture | null = null;
@@ -108,81 +100,6 @@ function BlobShadow({ shadowRef }: { shadowRef?: React.Ref<THREE.Mesh> }) {
       <meshBasicMaterial map={shadowTexture()} transparent opacity={0.75} depthWrite={false} />
     </mesh>
   );
-}
-
-const faceCache = new Map<string, THREE.CanvasTexture>();
-const PIPS: Record<number, [number, number][]> = {
-  0: [],
-  1: [[0.5, 0.5]],
-  2: [[0.26, 0.26], [0.74, 0.74]],
-  3: [[0.26, 0.26], [0.5, 0.5], [0.74, 0.74]],
-  4: [[0.26, 0.26], [0.74, 0.26], [0.26, 0.74], [0.74, 0.74]],
-  5: [[0.26, 0.26], [0.74, 0.26], [0.5, 0.5], [0.26, 0.74], [0.74, 0.74]],
-  6: [[0.26, 0.22], [0.74, 0.22], [0.26, 0.5], [0.74, 0.5], [0.26, 0.78], [0.74, 0.78]],
-};
-
-/** La face d'un domino (points creusés, trait central, clou en laiton), dessinée une fois. */
-function faceTexture(a: number, b: number): THREE.CanvasTexture {
-  const key = `${a}-${b}`;
-  const hit = faceCache.get(key);
-  if (hit) return hit;
-  const W = 512;
-  const H = 256;
-  const c = document.createElement("canvas");
-  c.width = W;
-  c.height = H;
-  const g = c.getContext("2d") as CanvasRenderingContext2D;
-  g.clearRect(0, 0, W, H);
-  // trait central gravé
-  g.strokeStyle = "rgba(110,88,55,0.9)";
-  g.lineWidth = 7;
-  g.beginPath();
-  g.moveTo(W / 2, 30);
-  g.lineTo(W / 2, H - 30);
-  g.stroke();
-  g.strokeStyle = "rgba(255,255,255,0.7)";
-  g.lineWidth = 3;
-  g.beginPath();
-  g.moveTo(W / 2 + 6, 30);
-  g.lineTo(W / 2 + 6, H - 30);
-  g.stroke();
-  // clou en laiton
-  const pin = g.createRadialGradient(W / 2 - 4, H / 2 - 4, 1, W / 2, H / 2, 14);
-  pin.addColorStop(0, "#fff0c0");
-  pin.addColorStop(0.5, "#c8962f");
-  pin.addColorStop(1, "#5e3f0e");
-  g.fillStyle = pin;
-  g.beginPath();
-  g.arc(W / 2, H / 2, 13, 0, Math.PI * 2);
-  g.fill();
-  const half = (v: number, x0: number) => {
-    for (const [px, py] of PIPS[v] ?? []) {
-      const x = x0 + px * (W / 2);
-      const y = py * H;
-      const r = 22;
-      const grd = g.createRadialGradient(x + 5, y + 6, 2, x, y, r);
-      grd.addColorStop(0, "#4b3a2a");
-      grd.addColorStop(0.6, "#1a120b");
-      grd.addColorStop(1, "#0a0604");
-      g.fillStyle = grd;
-      g.beginPath();
-      g.arc(x, y, r, 0, Math.PI * 2);
-      g.fill();
-      // reflet sur le bord du creux
-      g.strokeStyle = "rgba(255,250,235,0.55)";
-      g.lineWidth = 3;
-      g.beginPath();
-      g.arc(x, y, r + 1, Math.PI * 0.1, Math.PI * 0.9);
-      g.stroke();
-    }
-  };
-  half(a, 0);
-  half(b, W / 2);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  faceCache.set(key, tex);
-  return tex;
 }
 
 // ---------- la table ----------
@@ -276,7 +193,6 @@ function Domino({ p, fresh, reducedMotion }: { p: Placement; fresh: boolean; red
     m.opacity = t >= 1 ? 0 : 0.85 * (1 - t);
     if (t >= 1) glowStart.current = null;
   });
-  const tex = useMemo(() => faceTexture(p.a, p.b), [p.a, p.b]);
   useFrame(({ clock }) => {
     const g = ref.current;
     if (!g || born.current === null) return;
@@ -308,11 +224,7 @@ function Domino({ p, fresh, reducedMotion }: { p: Placement; fresh: boolean; red
       </group>
       {fresh && <Glow meshRef={glow} opacity={0} />}
     <group ref={ref} position={[0, TILE_H / 2, 0]}>
-      <mesh geometry={tileGeometry} material={ivory} />
-      <mesh position={[0, TILE_H / 2 + 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[1.94, 0.94]} />
-        <meshStandardMaterial map={tex} transparent roughness={0.4} polygonOffset polygonOffsetFactor={-1} />
-      </mesh>
+      <Stone a={p.a} b={p.b} />
     </group>
     </group>
   );

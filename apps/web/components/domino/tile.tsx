@@ -6,11 +6,11 @@ import { useId } from "react";
 const PIPS: Record<number, [number, number][]> = {
   0: [],
   1: [[50, 50]],
-  2: [[27, 27], [73, 73]],
-  3: [[27, 27], [50, 50], [73, 73]],
-  4: [[27, 27], [73, 27], [27, 73], [73, 73]],
-  5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]],
-  6: [[27, 24], [73, 24], [27, 50], [73, 50], [27, 76], [73, 76]],
+  2: [[25, 25], [75, 75]],
+  3: [[25, 25], [50, 50], [75, 75]],
+  4: [[25, 25], [75, 25], [25, 75], [75, 75]],
+  5: [[25, 25], [75, 25], [50, 50], [25, 75], [75, 75]],
+  6: [[26, 21], [74, 21], [26, 50], [74, 50], [26, 79], [74, 79]],
 };
 
 export type TileProps = {
@@ -34,13 +34,20 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
   const half = (value: number, dx: number, dy: number) =>
     (PIPS[value] ?? []).map(([x, y], i) => {
       // À l'horizontale, on tourne les points d'un quart de tour pour garder le dessin classique.
-      const px = vertical ? x : y;
-      const py = vertical ? y : 100 - x;
-      return <circle key={`${dx}-${dy}-${i}`} cx={dx + px} cy={dy + py} r={10} fill={`url(#pip-${id})`} />;
+      const px = dx + (vertical ? x : y);
+      const py = dy + (vertical ? y : 100 - x);
+      // Un point creusé : fond noir brillant, paroi éclairée en bas à droite, rebord clair.
+      return (
+        <g key={`${dx}-${dy}-${i}`}>
+          <circle cx={px} cy={py} r={12.5} fill="#ffffff" fillOpacity="0.75" transform="translate(0.8 1.2)" />
+          <circle cx={px} cy={py} r={12} fill={`url(#pip-${id})`} />
+          <path d={`M ${px + 8.6} ${py - 3.5} A 9.3 9.3 0 0 1 ${px - 3.5} ${py + 8.6}`} fill="none" stroke="#ffe9c4" strokeOpacity="0.55" strokeWidth="1.8" strokeLinecap="round" />
+        </g>
+      );
     });
 
   // Le domino a une épaisseur : la face est un peu plus courte, la tranche dépasse en bas.
-  const E = 9;
+  const E = 12;
   const fh = h - E;
   const cx = vertical ? 50 : 100;
   const cy = vertical ? fh / 2 : fh / 2;
@@ -54,19 +61,25 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
       aria-label={title ?? `${a}-${b}`}
     >
       <defs>
-        <linearGradient id={`face-${id}`} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0" stopColor="#fffaf0" />
-          <stop offset="0.45" stopColor="#f5ead2" />
-          <stop offset="1" stopColor="#e3d2ad" />
+        <linearGradient id={`face-${id}`} x1="0" y1="0" x2="0.55" y2="1">
+          <stop offset="0" stopColor="#fffdf6" />
+          <stop offset="0.5" stopColor="#f7eedb" />
+          <stop offset="1" stopColor="#e6d6b4" />
         </linearGradient>
         <linearGradient id={`edge-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#cdb68a" />
-          <stop offset="1" stopColor="#8f7650" />
+          <stop offset="0" stopColor="#d9c49a" />
+          <stop offset="0.6" stopColor="#a88d60" />
+          <stop offset="1" stopColor="#6f5937" />
         </linearGradient>
-        <radialGradient id={`pip-${id}`} cx="0.62" cy="0.68" r="0.75">
-          <stop offset="0" stopColor="#5a4632" />
-          <stop offset="0.55" stopColor="#231910" />
-          <stop offset="1" stopColor="#0d0805" />
+        <radialGradient id={`gloss-${id}`} cx="0.25" cy="0.12" r="0.7">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.08" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`pip-${id}`} cx="0.38" cy="0.32" r="0.8">
+          <stop offset="0" stopColor="#3a2a1b" />
+          <stop offset="0.6" stopColor="#150d07" />
+          <stop offset="1" stopColor="#050302" />
         </radialGradient>
         <radialGradient id={`pin-${id}`} cx="0.35" cy="0.3" r="0.8">
           <stop offset="0" stopColor="#fbe3a2" />
@@ -74,21 +87,26 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
           <stop offset="1" stopColor="#6e4b14" />
         </radialGradient>
       </defs>
-      <rect x="1.5" y={E} width={w - 3} height={h - E - 1.5} rx="17" fill={`url(#edge-${id})`} />
-      <rect x="1.5" y="1.5" width={w - 3} height={fh} rx="17" fill={`url(#face-${id})`} stroke="#b9a274" strokeWidth="2" />
-      <rect x="6" y="5" width={w - 12} height={fh - 9} rx="13" fill="none" stroke="#ffffff" strokeOpacity="0.85" strokeWidth="2.5" />
+      {/* La tranche (épaisseur), puis la face d'ivoire avec son reflet verni. */}
+      <rect x="1.5" y={E} width={w - 3} height={h - E - 1.5} rx="18" fill={`url(#edge-${id})`} />
+      <rect x="1.5" y="1.5" width={w - 3} height={fh} rx="18" fill={`url(#face-${id})`} stroke="#b59c6c" strokeWidth="1.6" />
+      <rect x="5" y="4.5" width={w - 10} height={fh - 8} rx="14.5" fill="none" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="2.5" />
+      <rect x="5" y="4.5" width={w - 10} height={fh - 8} rx="14.5" fill={`url(#gloss-${id})`} />
       {vertical ? (
         <>
-          <line x1="14" y1={cy} x2="86" y2={cy} stroke="#8f7a55" strokeWidth="3" strokeLinecap="round" />
-          <line x1="14" y1={cy + 2.5} x2="86" y2={cy + 2.5} stroke="#ffffff" strokeOpacity="0.7" strokeWidth="1.5" strokeLinecap="round" />
+          <path d={`M 16 ${cy} H ${cx - 11} M ${cx + 11} ${cy} H 84`} stroke="#7d6744" strokeWidth="3.2" strokeLinecap="round" />
+          <path d={`M 16 ${cy + 2.6} H ${cx - 11} M ${cx + 11} ${cy + 2.6} H 84`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
         </>
       ) : (
         <>
-          <line x1={cx} y1="12" x2={cx} y2={fh - 12} stroke="#8f7a55" strokeWidth="3" strokeLinecap="round" />
-          <line x1={cx + 2.5} y1="12" x2={cx + 2.5} y2={fh - 12} stroke="#ffffff" strokeOpacity="0.7" strokeWidth="1.5" strokeLinecap="round" />
+          <path d={`M ${cx} 14 V ${cy - 11} M ${cx} ${cy + 11} V ${fh - 14}`} stroke="#7d6744" strokeWidth="3.2" strokeLinecap="round" />
+          <path d={`M ${cx + 2.6} 14 V ${cy - 11} M ${cx + 2.6} ${cy + 11} V ${fh - 14}`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
         </>
       )}
-      <circle cx={cx} cy={cy} r="5.5" fill={`url(#pin-${id})`} stroke="#5b3e10" strokeWidth="0.8" />
+      {/* Le clou en laiton, en relief. */}
+      <circle cx={cx} cy={cy + 1.2} r="7" fill="#5b3e10" fillOpacity="0.35" />
+      <circle cx={cx} cy={cy} r="6.5" fill={`url(#pin-${id})`} stroke="#6e4b14" strokeWidth="0.8" />
+      <circle cx={cx - 2} cy={cy - 2.2} r="1.8" fill="#fff6d8" fillOpacity="0.9" />
       <g transform={`scale(1 ${fh / (h)})`}>
         {half(a, 0, 0)}
         {vertical ? half(b, 0, 100) : half(b, 100, 0)}

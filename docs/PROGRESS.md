@@ -16,6 +16,49 @@
   début de chaque manche. Sans WebGL, la table en image reste affichée.
 - Page de contrôle visuel en développement : `/dev/table3d?n=12&start=3&ghost=1`.
 
+## Amis, messagerie, nouveau design et nouvelles pierres (5 novembre 2026)
+
+### Ce qui marche
+
+- **Chaîne de domino** : rangées dans la longueur de la table, rien ne sort du feutre, une pierre
+  posée ne bouge plus, les doubles en travers (jamais dans un coin), la caméra suit la chaîne,
+  halo doré sur les bouts jouables, vibration à la pose.
+- **Pierres refaites** : en 3D, ivoire verni au grain d'os léger, arêtes arrondies, points
+  vraiment creusés (relief), trait gravé et clou en laiton en relief ; dans la main, même style en
+  SVG (gros points creusés, reflet verni, tranche). Page de contrôle : `/dev/tiles` (en local).
+- **Design café sur toute l'app** : fond du café flouté partout, couleurs or et brun, navigation
+  à 5 onglets (Café, Jouer, Amis, Vocal, Profil) avec pastille de non-lus, nouvel accueil
+  (enseigne, grande table de domino, « seul contre des bots », « j'ai un code », amis en ligne,
+  derniers messages), pages Jouer, Profil, Vocal et Connexion restylées.
+- **Amis** (onglet Amis) : ajouter par pseudo, accepter ou refuser, annuler une demande, retirer,
+  bloquer, signaler (raison + détails). Pastille de présence : en ligne, à une table, en vocal.
+- **Messagerie façon Messenger** : liste des conversations, demandes de message des inconnus à
+  part (l'autre ne sait pas qu'on a lu tant qu'on ne répond pas), bulles groupées, « Vu »,
+  « écrit… », envoi immédiat avec réessai tout seul quand le réseau revient.
+- **Inviter un ami** depuis la table d'attente : il reçoit une carte « Table de domino » avec
+  le code et un bouton « Rejoindre ».
+- Sécurité : RLS sur les 6 nouvelles tables, aucune écriture directe (tout passe par des
+  fonctions qui vérifient amis, blocages et anti-spam : 30 demandes d'ami par heure,
+  20 messages par minute, 20 signalements par jour).
+
+### Vérifié
+
+- `pnpm test` : 92 tests passent ; `pnpm typecheck` et `next build` passent.
+- Test automatique à deux navigateurs (360 px) sur une copie locale de Supabase : demande
+  d'ami, acceptation, messages, « écrit… », « Vu », badge de non-lus, invitation à une table
+  puis « Rejoindre », menu signaler/bloquer.
+
+### Ce qui reste
+
+- Plus tard dans l'étape 4 : messages vocaux, appels privés, groupes, réactions, partage des
+  résultats de partie dans les messages, Cercles.
+- Signaler / bloquer directement depuis la table de jeu (aujourd'hui : depuis Amis et la
+  conversation).
+
+### Problèmes connus
+
+- La base « amis + messages » doit être approuvée dans Supabase avant la mise en ligne.
+
 ## Domino : bots, pseudo invité, nouvelles règles (5 novembre 2026)
 
 Demandé par le propriétaire après avoir joué sur son téléphone.
