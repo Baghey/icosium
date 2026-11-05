@@ -1,5 +1,21 @@
 # Journal d'avancement d'ICOSIUM
 
+## Domino : règles précisées et table en 3D (5 novembre 2026)
+
+- Règles précisées par le propriétaire : la partie se joue en **100 points** (choix 50, 100,
+  150). Première manche : le double-six ouvre. Ensuite, c'est le gagnant qui ouvre ; dès que son
+  équipe a **dépassé 50 points**, le gagnant et son partenaire se concertent (« ytchawro ») et
+  l'un ou l'autre ouvre. Tests ajoutés.
+- La chaîne reste d'un seul morceau et tourne au bord de la table (`apps/web/lib/chain-layout.ts`,
+  testé : jamais de chevauchement).
+- Nouvelle ambiance « café algérien de nuit » choisie par le propriétaire (image de référence),
+  avec ses images : fond du café, table, logo, 6 avatars (`apps/web/public/assets`).
+- **Table en vraie 3D** (three.js + react-three-fiber + drei + postprocessing, chargés seulement
+  sur l'écran de jeu) : feutre, rebord en noyer verni, filet doré, rosette, dominos ivoire en
+  relief, lumière de lampe, lueur dorée ; le domino tombe et claque ; mélange des 28 dominos au
+  début de chaque manche. Sans WebGL, la table en image reste affichée.
+- Page de contrôle visuel en développement : `/dev/table3d?n=12&start=3&ghost=1`.
+
 ## Étape 2 : le domino algérien (5 novembre 2026)
 
 ### Ce qui marche

@@ -2,6 +2,7 @@
 
 import { type End, type TileId, playableEnds, teamOf } from "@icosium/shared";
 import type { MessageKey } from "@icosium/i18n";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MicButton } from "@/components/mic-button";
@@ -27,6 +28,34 @@ type Props = {
   tick: () => Promise<void>;
   nextRound: () => Promise<void>;
 };
+
+const Table3D = dynamic(() => import("./table3d"), { ssr: false, loading: () => null });
+
+/** La 3D a besoin de WebGL ; sinon on garde la table en image. */
+function useWebGL(): boolean {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    try {
+      const c = document.createElement("canvas");
+      setOk(Boolean(c.getContext("webgl2") ?? c.getContext("webgl")));
+    } catch {
+      setOk(false);
+    }
+  }, []);
+  return ok;
+}
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return reduced;
+}
 
 function useNow(intervalMs: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -58,7 +87,11 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const [showScores, setShowScores] = useState(false);
 
   const nameOf = (seat: number) => seats.find((s) => s.seat === seat)?.username ?? null;
-  const myTurn = view.phase === "playing" && view.turn === mySeat;
+  // Début de manche après 50 points : le gagnant ou son partenaire peut ouvrir (« ytchawro »).
+  const openers = view.chain.length === 0 && view.phase === "playing" ? (view.openers ?? []) : [];
+  const consulting = openers.length > 1;
+  const isTurnOf = (seat: number) => view.phase === "playing" && (view.turn === seat || openers.includes(seat));
+  const myTurn = isTurnOf(mySeat);
 
   // Coups possibles pour moi (le serveur revérifie tout).
   const moves = useMemo(
@@ -143,6 +176,8 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const themScore = view.scores[myTeam === 0 ? 1 : 0];
 
   const { peers } = useVoice();
+  const webgl = useWebGL();
+  const reducedMotion = useReducedMotion();
   const avatars = useMemo(() => tableAvatars(seats.map((x) => x.userId)), [seats]);
   const info = (seat: number): PlayerInfo => {
     const s = seats.find((x) => x.seat === seat);
@@ -153,7 +188,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
       avatar: s ? (avatars[s.userId] ?? null) : null,
       score: view.scores[players === 2 ? (seat as 0 | 1) : teamOf(seat)],
       count: view.handCounts[seat] ?? 0,
-      active: view.phase === "playing" && view.turn === seat,
+      active: isTurnOf(seat),
       timeLeft: view.turn === seat ? fraction : null,
       bubble: bubbles[seat] ?? null,
       inVoice: Boolean(peer),
@@ -167,7 +202,16 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const hint = error ? t(error) : myTurn ? (view.mustOpenWith ? t("domino.mustOpen", { tile: view.mustOpenWith }) : selected ? t("domino.pickEnd") : null) : null;
   const secs = remainingMs === null ? null : Math.max(0, Math.ceil(remainingMs / 1000));
   const clock = secs === null ? null : `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
-  const turnLabel = view.phase !== "playing" ? t("domino.round", { n: view.round }) : myTurn ? t("domino.yourTurnShort") : t("domino.turnOf", { name: nameOf(view.turn) ?? "…" });
+  const turnLabel =
+    view.phase !== "playing"
+      ? t("domino.round", { n: view.round })
+      : consulting
+        ? myTurn
+          ? t("domino.consultUs")
+          : t("domino.consultThem")
+        : myTurn
+          ? t("domino.yourTurnShort")
+          : t("domino.turnOf", { name: nameOf(view.turn) ?? "…" });
 
   return (
     <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
@@ -208,6 +252,20 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
 
         {/* La table et les joueurs autour */}
         <div className="relative min-h-0 flex-1 px-2 pt-12 pb-1">
+          {webgl ? (
+            <div className="absolute inset-0">
+              <Table3D
+                chain={view.chain}
+                chainStart={view.chainStart ?? 0}
+                targets={targets}
+                onPick={(end) => selected && void doPlay(selected, end)}
+                freshTile={freshTile}
+                shuffleKey={`${view.round}`}
+                players={players}
+                reducedMotion={reducedMotion}
+              />
+            </div>
+          ) : (
           <div className="table-photo relative h-full">
             <img src="/assets/rosette.webp" alt="" aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 w-[72%] max-w-72 -translate-x-1/2 -translate-y-1/2 opacity-35" />
             <div className="absolute -inset-x-6 -top-3 -bottom-10 flex items-center justify-center">
@@ -223,6 +281,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
               </span>
             )}
           </div>
+          )}
           {around.map(({ seat, pos }) => (
             <div
               key={pos}

@@ -36,6 +36,8 @@ function state(partial: Partial<DominoState> & { hands: TileId[][] }): DominoSta
     scores: [0, 0],
     roundOpener: 0,
     nextOpener: null,
+    openers: [],
+    chainStart: 0,
     lastResult: null,
     winnerTeam: null,
     events: [],
@@ -261,7 +263,7 @@ describe("une partie complète", () => {
   for (const players of [2, 4] as const) {
     it(`se joue jusqu'au score cible à ${players} joueurs`, () => {
       const rng = seededRng(players * 7);
-      let s = createDominoGame(opts({ players, targetScore: 51 }), rng, NOW);
+      let s = createDominoGame(opts({ players, targetScore: 50 }), rng, NOW);
       let now = NOW;
       for (let i = 0; i < 2000 && s.phase !== "gameOver"; i++) {
         now += 31_000;
@@ -275,7 +277,7 @@ describe("une partie complète", () => {
         }
       }
       expect(s.phase).toBe("gameOver");
-      expect(Math.max(...s.scores)).toBeGreaterThanOrEqual(51);
+      expect(Math.max(...s.scores)).toBeGreaterThanOrEqual(50);
     });
   }
 });
@@ -297,9 +299,45 @@ describe("les informations secrètes", () => {
 
 describe("les réglages", () => {
   it("garde seulement les valeurs autorisées", () => {
-    expect(parseDominoOptions({ players: 3, targetScore: 101, turnSeconds: 15, botAllowed: "yes" })).toEqual({
+    expect(parseDominoOptions({ players: 3, targetScore: 100, turnSeconds: 15, botAllowed: "yes" })).toEqual({
       ...DEFAULT_DOMINO_OPTIONS,
       turnSeconds: 15,
     });
+  });
+});
+
+describe("l'équipe gagnante se concerte pour ouvrir", () => {
+  function wonByZero(scoreBefore = 40) {
+    const s = state({ hands: [["2-3"], ["6-6"], ["1-1"], ["4-5"]], chain: [placed("2-2", 2, 2)] });
+    s.scores = [scoreBefore, 0];
+    const r = applyDominoAction(s, 0, { type: "play", tile: "2-3", end: "right" }, NOW);
+    if (!r.ok) throw new Error("setup");
+    const next = startNextRound(r.state, seededRng(9), NOW);
+    if (!next.ok) throw new Error("setup");
+    return next.state;
+  }
+  it("avant 50 points, seul le gagnant ouvre", () => {
+    const g = wonByZero(10); // 10 + 21 = 31 points
+    expect(g.openers).toEqual([0]);
+  });
+  it("au-delà de 50 points, le gagnant et son partenaire peuvent ouvrir, pas les adversaires", () => {
+    const g = wonByZero();
+    expect(g.openers).toEqual([0, 2]);
+    expect(g.mustOpenWith).toBeNull();
+    const tile = (g.hands[1] as TileId[])[0] as TileId;
+    expect(applyDominoAction(g, 1, { type: "play", tile, end: "right" }, NOW)).toMatchObject({ ok: false, error: "not_your_turn" });
+  });
+  it("si le partenaire ouvre, le jeu continue après lui", () => {
+    const g = wonByZero();
+    const tile = (g.hands[2] as TileId[])[0] as TileId;
+    const r = applyDominoAction(g, 2, { type: "play", tile, end: "right" }, NOW);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.state.roundOpener).toBe(2);
+    expect(r.state.openers).toEqual([]);
+    expect(r.state.turn).not.toBe(2);
+    // Une fois la manche ouverte, l'autre membre de l'équipe ne peut plus jouer hors de son tour.
+    const other = (r.state.hands[0] as TileId[])[0] as TileId;
+    if (r.state.turn !== 0) expect(applyDominoAction(r.state, 0, { type: "play", tile: other, end: "right" }, NOW).ok).toBe(false);
   });
 });

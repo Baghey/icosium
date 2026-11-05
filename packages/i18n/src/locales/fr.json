@@ -185,6 +185,8 @@
     "yourTurnShort": "À toi",
     "game": "Dominos",
     "table": "Table {code}",
-    "players": "Joueurs"
+    "players": "Joueurs",
+    "consultUs": "Ytchawro : toi ou ton partenaire ouvre",
+    "consultThem": "L'autre équipe se concerte"
   }
 }

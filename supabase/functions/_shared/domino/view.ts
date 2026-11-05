@@ -11,10 +11,13 @@ export type DominoPublicView = {
   phase: DominoPhase;
   round: number;
   chain: PlacedTile[];
+  chainStart: number;
   handCounts: number[];
   boneyardCount: number;
   turn: number;
   mustOpenWith: TileId | null;
+  /** Qui peut ouvrir la manche (le gagnant ou son partenaire). Vide une fois la manche ouverte. */
+  openers: number[];
   scores: [number, number];
   lastResult: RoundResult | null;
   winnerTeam: Team | null;
@@ -31,10 +34,12 @@ export function publicView(state: DominoState): DominoPublicView {
     phase: state.phase,
     round: state.round,
     chain: state.chain,
+    chainStart: state.chainStart ?? 0,
     handCounts: state.hands.map((h) => h.length),
     boneyardCount: state.boneyard.length,
     turn: state.turn,
     mustOpenWith: state.mustOpenWith,
+    openers: state.openers ?? [],
     scores: state.scores,
     lastResult,
     winnerTeam: state.winnerTeam,

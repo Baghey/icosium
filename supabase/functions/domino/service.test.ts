@@ -23,12 +23,12 @@ async function fullTable(players: 2 | 4 = 4) {
 describe("créer et rejoindre une table", () => {
   it("crée une table avec un code de 4 lettres et assoit le Patron", async () => {
     const { deps, store } = setup();
-    const r = await handle(deps, "u0", { op: "create", options: { players: 4, targetScore: 51 } });
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4, targetScore: 50 } });
     expect(r.status).toBe(200);
     expect(r.body.code).toMatch(/^[A-HJ-NP-Z]{4}$/);
     const seats = await store.seats(r.body.tableId as string);
     expect(seats).toEqual([{ seat: 0, userId: "u0", username: "player_u0" }]);
-    expect((await store.tableById(r.body.tableId as string))?.options.targetScore).toBe(51);
+    expect((await store.tableById(r.body.tableId as string))?.options.targetScore).toBe(50);
   });
   it("accepte le code en minuscules", async () => {
     const { deps } = setup();
@@ -117,6 +117,6 @@ describe("jouer", () => {
     expect((await store.tableById(tableId))?.status).toBe("finished");
     const view = store.views.get(tableId)?.view;
     expect(view?.phase).toBe("gameOver");
-    expect(Math.max(...(view?.scores ?? [0]))).toBeGreaterThanOrEqual(101);
+    expect(Math.max(...(view?.scores ?? [0]))).toBeGreaterThanOrEqual(100);
   });
 });

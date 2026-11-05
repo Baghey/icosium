@@ -158,7 +158,7 @@ function Play() {
           label={t("play.target")}
           value={options.targetScore}
           onChange={(v) => set("targetScore", v)}
-          choices={[51, 101, 151].map((n) => ({ value: n as DominoOptions["targetScore"], label: String(n) }))}
+          choices={[50, 100, 150].map((n) => ({ value: n as DominoOptions["targetScore"], label: String(n) }))}
         />
         <Segmented
           label={t("play.turnTime")}

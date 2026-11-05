@@ -185,6 +185,8 @@
     "yourTurnShort": "Your turn",
     "game": "Dominoes",
     "table": "Table {code}",
-    "players": "Players"
+    "players": "Players",
+    "consultUs": "Your team opens: talk it over",
+    "consultThem": "The other team is deciding who opens"
   }
 }

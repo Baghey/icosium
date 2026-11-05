@@ -3,7 +3,7 @@ export type DominoOptions = {
   /** 2 joueurs (avec pioche) ou 4 en deux équipes. */
   players: 2 | 4;
   /** Score à atteindre pour gagner la partie. */
-  targetScore: 51 | 101 | 151;
+  targetScore: 50 | 100 | 150;
   /** Qui ouvre les manches suivantes : le gagnant de la manche, ou le double-six à chaque fois. */
   opener: "winner" | "doubleSix";
   /** Points du gagnant : mains des adversaires, ou toutes les mains (partenaire compris). */
@@ -16,7 +16,7 @@ export type DominoOptions = {
 
 export const DEFAULT_DOMINO_OPTIONS: DominoOptions = {
   players: 4,
-  targetScore: 101,
+  targetScore: 100,
   opener: "winner",
   scoring: "opponents",
   turnSeconds: 30,
@@ -30,7 +30,7 @@ export function parseDominoOptions(input: unknown): DominoOptions {
     allowed.includes(value as T) ? (value as T) : fallback;
   return {
     players: pick(o.players, [2, 4] as const, DEFAULT_DOMINO_OPTIONS.players),
-    targetScore: pick(o.targetScore, [51, 101, 151] as const, DEFAULT_DOMINO_OPTIONS.targetScore),
+    targetScore: pick(o.targetScore, [50, 100, 150] as const, DEFAULT_DOMINO_OPTIONS.targetScore),
     opener: pick(o.opener, ["winner", "doubleSix"] as const, DEFAULT_DOMINO_OPTIONS.opener),
     scoring: pick(o.scoring, ["opponents", "all"] as const, DEFAULT_DOMINO_OPTIONS.scoring),
     turnSeconds: pick(o.turnSeconds, [15, 30, 0] as const, DEFAULT_DOMINO_OPTIONS.turnSeconds),

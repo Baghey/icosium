@@ -41,6 +41,8 @@ export type DominoState = {
   hands: TileId[][];
   boneyard: TileId[];
   chain: PlacedTile[];
+  /** Position dans la chaîne du premier domino posé (pour que la chaîne reste fixe à l'écran). */
+  chainStart: number;
   turn: Seat;
   passesInRow: number;
   /** Domino imposé pour ouvrir la manche (le double-six à la première manche). */
@@ -49,6 +51,11 @@ export type DominoState = {
   roundOpener: Seat;
   /** Qui ouvrira la manche suivante (règle « gagnant de la manche »). */
   nextOpener: Seat | null;
+  /**
+   * Qui peut poser le premier domino de la manche. Après une manche gagnée à 4, l'équipe
+   * gagnante se concerte (« ytchawro ») : le gagnant ou son partenaire ouvre.
+   */
+  openers: Seat[];
   lastResult: RoundResult | null;
   winnerTeam: Team | null;
   events: DominoEvent[];
@@ -64,6 +71,8 @@ export type DominoError = "not_playing" | "not_your_turn" | "tile_not_in_hand" |
 export type ActionResult = { ok: true; state: DominoState } | { ok: false; error: DominoError };
 
 export const HAND_SIZE = 7;
+/** Au-delà de ce score, l'équipe gagnante choisit qui ouvre la manche suivante. */
+export const CONSULT_AFTER_POINTS = 50;
 /** Pause entre deux manches avant que la suivante démarre seule. */
 export const ROUND_BREAK_MS = 12_000;
 
@@ -144,6 +153,12 @@ function dealRound(state: DominoState, rng: Rng, now: number, round: number): Do
   const useForced = round === 1 || state.options.opener === "doubleSix" || state.nextOpener === null;
   const forced = useForced ? forcedOpener(hands) : null;
   const opener = forced ? forced.seat : (state.nextOpener as Seat);
+  const winnerTeam = state.lastResult?.winnerTeam ?? null;
+  // Dès que l'équipe gagnante a dépassé 50 points, le gagnant et son partenaire peuvent se
+  // concerter (« ytchawro ») : l'un ou l'autre ouvre. Avant, c'est le gagnant lui-même.
+  const canConsult = winnerTeam !== null && state.scores[winnerTeam] > CONSULT_AFTER_POINTS;
+  const openers =
+    !forced && players === 4 && canConsult && teamOf(opener) === winnerTeam ? [opener, (opener + 2) % 4] : [opener];
 
   return {
     ...state,
@@ -152,11 +167,13 @@ function dealRound(state: DominoState, rng: Rng, now: number, round: number): Do
     hands,
     boneyard,
     chain: [],
+    chainStart: 0,
     turn: opener,
     passesInRow: 0,
     mustOpenWith: forced ? forced.tile : null,
     roundOpener: opener,
     nextOpener: null,
+    openers,
     events: [{ type: "roundStart", round, opener }],
     eventSeq: state.eventSeq + 1,
     deadline: turnDeadline(state.options, now),
@@ -172,12 +189,14 @@ export function createDominoGame(options: DominoOptions, rng: Rng, now: number):
     hands: [],
     boneyard: [],
     chain: [],
+    chainStart: 0,
     turn: 0,
     passesInRow: 0,
     mustOpenWith: null,
     scores: [0, 0],
     roundOpener: 0,
     nextOpener: null,
+    openers: [],
     lastResult: null,
     winnerTeam: null,
     events: [],
@@ -270,7 +289,8 @@ function advance(state: DominoState, from: Seat, now: number): DominoState {
 
 function play(state: DominoState, seat: Seat, action: DominoAction, now: number, auto: boolean): ActionResult {
   if (state.phase !== "playing") return { ok: false, error: "not_playing" };
-  if (seat !== state.turn) return { ok: false, error: "not_your_turn" };
+  const opening = state.chain.length === 0 && (state.openers ?? []).includes(seat);
+  if (seat !== state.turn && !opening) return { ok: false, error: "not_your_turn" };
   const hand = state.hands[seat] ?? [];
   if (!hand.includes(action.tile)) return { ok: false, error: "tile_not_in_hand" };
   if (!playableEnds(action.tile, state.chain, state.mustOpenWith).includes(action.end)) {
@@ -288,12 +308,15 @@ function play(state: DominoState, seat: Seat, action: DominoAction, now: number,
     // Le côté droit du domino touche le bout gauche de la chaîne.
     const right = ends.left;
     next.chain.unshift({ tile: action.tile, left: a === right ? b : a, right, seat });
+    next.chainStart = (state.chainStart ?? 0) + 1;
   } else {
     const left = ends.right;
     next.chain.push({ tile: action.tile, left, right: a === left ? b : a, seat });
   }
   next.mustOpenWith = null;
   next.passesInRow = 0;
+  next.openers = [];
+  if (opening) next.roundOpener = seat;
 
   const closing = (next.hands[seat] as TileId[]).length === 0;
   next.events.push({ type: "play", seat, tile: action.tile, end: action.end, auto, closing });
