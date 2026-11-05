@@ -2,7 +2,8 @@ import type { DominoOptions, DominoPublicView, DominoState } from "../_shared/do
 
 export type TableStatus = "waiting" | "playing" | "finished";
 export type TableRow = { id: string; code: string; hostId: string; options: DominoOptions; status: TableStatus };
-export type SeatRow = { seat: number; userId: string; username: string };
+/** Une chaise : un humain (userId) ou un bot (userId null, isBot true). */
+export type SeatRow = { seat: number; userId: string | null; username: string; isBot?: boolean };
 
 /** Vue publique enregistrée, avec l'heure du serveur pour caler les chronomètres des téléphones. */
 export type StoredView = DominoPublicView & { sentAt: number };
@@ -20,6 +21,8 @@ export interface DominoStore {
   /** Assoit quelqu'un ; renvoie false si la chaise vient d'être prise. */
   insertSeat(tableId: string, seat: SeatRow): Promise<boolean>;
   setStatus(tableId: string, status: TableStatus): Promise<void>;
+  /** Le Patron a autorisé les bots à sa table. */
+  allowBots(tableId: string): Promise<void>;
   loadGame(tableId: string): Promise<{ version: number; state: DominoState } | null>;
   /** Enregistre d'un coup l'état, la vue publique et les mains. False si quelqu'un a joué entre-temps. */
   commit(

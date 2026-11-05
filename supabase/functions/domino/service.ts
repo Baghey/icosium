@@ -8,6 +8,7 @@ import {
   type Rng,
   applyDominoAction,
   applyTimeout,
+  chooseFamilyDeal,
   createDominoGame,
   isValidTileId,
   parseDominoOptions,
@@ -46,10 +47,35 @@ function statusOf(state: DominoState): TableStatus {
   return state.phase === "gameOver" ? "finished" : "playing";
 }
 
+/** Les mains des humains seulement : celle d'un bot reste dans l'état privé du serveur. */
 function handsByUser(state: DominoState, seats: SeatRow[]): Record<string, string[]> {
   const out: Record<string, string[]> = {};
-  for (const s of seats) out[s.userId] = [...(state.hands[s.seat] ?? [])];
+  for (const s of seats) if (s.userId) out[s.userId] = [...(state.hands[s.seat] ?? [])];
   return out;
+}
+
+/** Noms des bots : des habitués du café. */
+export const BOT_NAMES = ["Ammi Rachid", "Khalti Nouria", "Kader", "Djamel", "Hadj Saïd", "Lynda", "Mourad", "Yasmina"];
+
+/** Assoit des bots sur toutes les chaises libres, puis lance la partie. */
+async function fillWithBots(deps: Deps, table: TableRow): Promise<void> {
+  const players = table.options.players;
+  let seats = await deps.store.seats(table.id);
+  const names = BOT_NAMES.filter((n) => !seats.some((s) => s.username === n));
+  for (let seat = 0; seat < players; seat++) {
+    if (seats.some((s) => s.seat === seat)) continue;
+    const i = Math.floor(deps.rng() * names.length);
+    const [name] = names.splice(i, 1);
+    await deps.store.insertSeat(table.id, { seat, userId: null, username: name ?? `Bot ${seat + 1}`, isBot: true });
+  }
+  seats = await deps.store.seats(table.id);
+  if (seats.length === players) await startGame(deps, table, seats);
+}
+
+async function startGame(deps: Deps, table: TableRow, seats: SeatRow[]): Promise<void> {
+  const bots = seats.filter((s) => s.isBot).map((s) => s.seat);
+  const state = createDominoGame(table.options, deps.rng, deps.now(), bots);
+  await save(deps, table, seats, 0, state);
 }
 
 async function save(deps: Deps, table: TableRow, seats: SeatRow[], expected: number, state: DominoState): Promise<boolean> {
@@ -57,16 +83,20 @@ async function save(deps: Deps, table: TableRow, seats: SeatRow[], expected: num
   return deps.store.commit(table.id, expected, state, view, handsByUser(state, seats), statusOf(state));
 }
 
-/** Crée une table avec les réglages du Patron. */
-export async function createTable(deps: Deps, userId: string, rawOptions: unknown): Promise<ServiceResult> {
+/**
+ * Crée une table avec les réglages du Patron. `solo` : il joue seul, les autres chaises sont
+ * données à des bots (c'est lui qui le demande, donc les bots sont autorisés).
+ */
+export async function createTable(deps: Deps, userId: string, rawOptions: unknown, solo = false): Promise<ServiceResult> {
   const since = new Date(deps.now() - TABLE_CREATE_WINDOW_MS);
   if ((await deps.store.countTablesSince(userId, since)) >= TABLE_CREATE_LIMIT) return fail(429, "rate_limited");
-  const options = parseDominoOptions(rawOptions);
+  const options = { ...parseDominoOptions(rawOptions), ...(solo ? { botAllowed: true } : {}) };
   for (let attempt = 0; attempt < 8; attempt++) {
     const table = await deps.store.insertTable({ code: makeCode(deps.rng), hostId: userId, options });
     if (!table) continue;
     const username = await deps.store.username(userId);
     await deps.store.insertSeat(table.id, { seat: 0, userId, username });
+    if (solo) await fillWithBots(deps, table);
     return ok({ code: table.code, tableId: table.id });
   }
   return fail(503, "no_code_available");
@@ -90,12 +120,32 @@ export async function joinTable(deps: Deps, userId: string, rawCode: unknown): P
   if (!(await deps.store.insertSeat(table.id, { seat: free, userId, username }))) return fail(409, "seat_taken");
 
   seats = await deps.store.seats(table.id);
-  if (seats.length === players) {
-    // Toutes les chaises sont prises par des humains : la partie commence.
-    const state = createDominoGame(table.options, deps.rng, deps.now());
-    await save(deps, table, seats, 0, state);
-  }
+  // Toutes les chaises sont prises : la partie commence.
+  if (seats.length === players) await startGame(deps, table, seats);
   return ok({ code, tableId: table.id });
+}
+
+/** Le Patron, dans la salle d'attente, donne les chaises libres à des bots. Lui seul peut le faire. */
+export async function addBots(deps: Deps, userId: string, input: { tableId?: unknown }): Promise<ServiceResult> {
+  if (typeof input.tableId !== "string") return fail(400, "invalid_table");
+  const table = await deps.store.tableById(input.tableId);
+  if (!table) return fail(404, "table_not_found");
+  if (table.hostId !== userId) return fail(403, "not_host");
+  if (table.status !== "waiting") return fail(409, "table_started");
+  await deps.store.allowBots(table.id);
+  await fillWithBots(deps, { ...table, options: { ...table.options, botAllowed: true } });
+  return ok();
+}
+
+/** Le joueur qui a reçu 6 pierres d'une même famille choisit : redéclarer ou garder. */
+export async function declare(deps: Deps, userId: string, input: { tableId?: unknown; choice?: unknown }): Promise<ServiceResult> {
+  const loaded = await loadForMember(deps, userId, input.tableId);
+  if ("status" in loaded) return loaded;
+  if (input.choice !== "redeclare" && input.choice !== "keep") return fail(400, "invalid_choice");
+  const result = chooseFamilyDeal(loaded.state, loaded.mySeat, input.choice, deps.rng, deps.now());
+  if (!result.ok) return fail(409, result.error);
+  if (!(await save(deps, loaded.table, loaded.seats, loaded.version, result.state))) return fail(409, "conflict");
+  return ok();
 }
 
 type Loaded = { table: TableRow; seats: SeatRow[]; mySeat: number; version: number; state: DominoState };
@@ -146,11 +196,15 @@ export async function nextRound(deps: Deps, userId: string, input: { tableId?: u
   return ok();
 }
 
-/** Point d'entrée unique : { op: "create" | "join" | "play" | "tick" | "next", ... }. */
+/** Point d'entrée unique : { op: "create" | "join" | "bots" | "play" | "declare" | "tick" | "next", ... }. */
 export async function handle(deps: Deps, userId: string, body: Record<string, unknown>): Promise<ServiceResult> {
   switch (body.op) {
     case "create":
-      return createTable(deps, userId, body.options);
+      return createTable(deps, userId, body.options, body.solo === true);
+    case "bots":
+      return addBots(deps, userId, body);
+    case "declare":
+      return declare(deps, userId, body);
     case "join":
       return joinTable(deps, userId, body.code);
     case "play":
