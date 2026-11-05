@@ -1,7 +1,6 @@
 packages:
   - "apps/*"
   - "packages/*"
-  - "infra/nakama"
 onlyBuiltDependencies:
   - esbuild
   - sharp

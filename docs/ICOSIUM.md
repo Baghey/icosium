@@ -306,6 +306,12 @@ interface en miroir, prévue dans la structure.
 
 ## Architecture technique corrigée
 
+> **Mise à jour du 5 novembre 2026** : pour éviter toute installation (Docker), le projet passe
+> sur Supabase (comptes, base, temps réel, chat) + Vercel (hébergement) + LiveKit Cloud (vocal).
+> Domino, Ronda et Dama étant au tour par tour, les actions sont validées par le serveur et
+> l'état est diffusé par Supabase Realtime, sans Colyseus. Le tableau ci-dessous est la version
+> d'origine, gardée pour mémoire.
+
 Next.js + Colyseus + Nakama + LiveKit, quatre briques open source.
 
 | Couche | Choix | Rôle | Pourquoi |

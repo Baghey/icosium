@@ -7,63 +7,35 @@ Le café du coin, en ligne : jeux de société algériens entre amis, avec le vo
 - Les 10 étapes du MVP : [`docs/etapes/`](docs/etapes/)
 - Règles pour Claude Code : [`CLAUDE.md`](CLAUDE.md)
 
-## Lancer ICOSIUM sur ton ordinateur
+## Comment ça tourne
 
-### 1. Installer les outils (une seule fois)
+| Brique | Service | Rôle |
+| --- | --- | --- |
+| App web (PWA) | Vercel | Les pages et les routes serveur (`apps/web`) |
+| Comptes et base | Supabase (projet `icosium`, Paris) | Inscription, invités, profils, plus tard les parties et le chat |
+| Vocal | LiveKit Cloud | Les salons audio |
 
-- [Node.js 22 LTS](https://nodejs.org/)
-- pnpm : dans un terminal, tape `corepack enable`
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/), puis lance-le
-- [Git](https://git-scm.com/)
+Rien à installer pour tester : on ouvre l'adresse Vercel sur l'ordinateur ou le téléphone.
 
-### 2. Récupérer le code (une seule fois)
+## Mettre en ligne (une seule fois)
+
+1. **Supabase** : déjà créé. Dans Authentication → Sign In / Providers, activer
+   « Allow anonymous sign-ins » (mode invité).
+2. **LiveKit Cloud** : créer un projet gratuit sur <https://cloud.livekit.io>, puis noter
+   l'adresse `wss://…`, la clé et le secret (Settings → Keys).
+3. **Vercel** : « Add New → Project », importer le dépôt GitHub `icosium`, mettre
+   **Root Directory = `apps/web`**, et ajouter les variables de `.env.example`.
+4. Dans Supabase → Authentication → URL Configuration, mettre l'adresse Vercel comme Site URL.
+
+Chaque `git push` sur `main` remet automatiquement l'app à jour sur Vercel.
+
+## Pour les développeurs (facultatif)
 
 ```bash
-git clone https://github.com/Baghey/icosium.git
-cd icosium
+corepack enable
 pnpm install
+cp .env.example .env   # puis remplir les clés LiveKit
+pnpm dev               # http://localhost:3000
+pnpm test              # tous les tests
+pnpm typecheck         # vérification TypeScript
 ```
-
-### 3. Créer le fichier `.env` (une seule fois)
-
-```bash
-copy .env.example .env        # Windows
-cp .env.example .env          # Mac / Linux
-```
-
-Ouvre `.env` et :
-
-1. remplace `ICOSIUM_LAN_IP` par l'adresse IP de ton ordinateur sur le Wi-Fi
-   (Windows : tape `ipconfig` et prends la ligne « Adresse IPv4 », par exemple `192.168.1.23`) ;
-2. remplace chaque `change-me-…` par une longue phrase de ton choix
-   (`LIVEKIT_API_SECRET` doit faire au moins 32 caractères).
-
-### 4. Lancer
-
-Deux commandes, dans deux terminaux ouverts dans le dossier `icosium` :
-
-```bash
-pnpm infra:up   # lance les services (comptes, vocal, base de données)
-pnpm dev        # lance l'app et le serveur de jeu ; laisse ce terminal ouvert
-```
-
-Pour tout arrêter : `Ctrl + C` dans le terminal de `pnpm dev`, puis `pnpm infra:down`.
-
-### 5. Ouvrir l'app
-
-- Sur l'ordinateur : <https://localhost:8443>
-- Sur le téléphone (même Wi-Fi) : `https://<ton IP>:8443`, par exemple `https://192.168.1.23:8443`
-
-Au premier accès, le navigateur affiche un avertissement de sécurité (certificat local) :
-clique sur « Paramètres avancés » puis « Continuer vers le site ».
-
-## Commandes utiles
-
-| Commande | Ce qu'elle fait |
-| --- | --- |
-| `pnpm test` | Lance tous les tests |
-| `pnpm typecheck` | Vérifie le TypeScript partout |
-| `pnpm infra:logs` | Affiche les journaux des services |
-| `pnpm infra:down` | Arrête les services |
-
-Console d'administration Nakama : <http://localhost:7351> (identifiants dans `.env`).

@@ -1,5 +1,36 @@
 # Journal d'avancement d'ICOSIUM
 
+## Passage sur Supabase, sans Docker (5 novembre 2026)
+
+Décision du propriétaire : plus de Docker. Nakama, Colyseus, Redis, Caddy et le LiveKit local
+sont retirés.
+
+### Ce qui marche
+
+- Projet Supabase `icosium` créé à Paris (eu-west-3).
+- Base de données (`supabase/migrations/`) : table `profiles` (pseudo, invité ou non) lisible
+  par les personnes connectées ; date de naissance rangée dans un schéma `private` que l'app ne
+  peut pas lire ; un trigger refuse la création de compte sous 16 ans, avec une date invalide,
+  un pseudo invalide, ou un invité qui n'a pas coché « 16 ans ou plus ».
+- L'app utilise Supabase Auth : inscription (pseudo vérifié libre avant l'envoi), connexion,
+  invité anonyme, déconnexion, session gardée au rechargement.
+- Si Supabase demande de confirmer l'email, l'app affiche « ouvre l'email qu'on t'a envoyé ».
+- Le jeton vocal est donné par la route `/api/voice/token` après vérification de la session
+  Supabase, pour LiveKit Cloud (4 places, anti-spam inchangés).
+- Tests, vérification TypeScript et build passent.
+
+### Ce qui reste
+
+- Activer les invités anonymes dans Supabase (un interrupteur dans le tableau de bord).
+- Créer le projet LiveKit Cloud et le projet Vercel, puis tester en vrai sur deux appareils.
+- Les tests de bout en bout contre Supabase n'ont pas pu tourner depuis l'environnement de
+  Claude (accès réseau à supabase.co bloqué) : à faire sur l'adresse Vercel.
+
+### Problèmes connus
+
+- Avec l'email gratuit de Supabase, l'envoi des emails de confirmation est limité à quelques
+  emails par heure. Pour les tests, on peut désactiver « Confirm email » dans Supabase.
+
 ## Ajout : le français (5 novembre 2026)
 
 - Toute l'interface existe en anglais et en français (`packages/i18n/src/locales/fr.json`).

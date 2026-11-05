@@ -15,12 +15,16 @@ Le propriétaire du projet ne code pas. Il pilote, teste et décide.
 
 | Couche | Choix |
 | --- | --- |
-| Front | Next.js (App Router) + TypeScript + Tailwind CSS, livré en PWA installable |
-| Jeu temps réel | Colyseus (Node.js), serveur autoritaire |
-| Social | Nakama : comptes, amis, groupes (« Cercles »), chat, classements |
-| Vocal | LiveKit (salons audio WebRTC) |
-| Données | PostgreSQL (pour Nakama), Redis (présence, tables ouvertes) |
-| Local | Docker Compose pour Nakama, Postgres, LiveKit et Redis |
+| Front | Next.js (App Router) + TypeScript + Tailwind CSS, livré en PWA installable, hébergé sur Vercel |
+| Comptes et données | Supabase : Auth (email + invités anonymes), PostgreSQL avec RLS |
+| Jeu temps réel | Tour par tour : actions validées par le serveur (routes API Next.js ou fonctions Postgres), état dans Postgres, diffusion via Supabase Realtime |
+| Social | Supabase : amis, Cercles, chat (tables + Realtime), présence (Realtime Presence) |
+| Vocal | LiveKit Cloud (salons audio WebRTC) |
+| Local | Aucun Docker : `pnpm dev` utilise le projet Supabase en ligne |
+
+Décision du 5 novembre 2026 : Supabase + Vercel + LiveKit Cloud remplacent Nakama, Colyseus,
+Redis et Docker, pour que le propriétaire n'ait rien à installer. Le schéma de la base est
+versionné dans `supabase/migrations/`.
 
 Ne change pas de brique et n'ajoute aucune dépendance importante sans demander d'abord,
 en expliquant pourquoi en une ou deux phrases.
@@ -29,13 +33,12 @@ en expliquant pourquoi en une ou deux phrases.
 
 ```
 apps/
-  web/            PWA Next.js
-  game-server/    serveur Colyseus (une salle par jeu)
+  web/            PWA Next.js (pages + routes API serveur)
 packages/
   shared/         règles des jeux en TypeScript pur + types partagés
   i18n/           fichiers de traduction
-infra/
-  docker-compose.yml
+supabase/
+  migrations/     schéma SQL de la base (tables, RLS, triggers)
 docs/
   ICOSIUM.md      cahier des charges complet
   PROGRESS.md     journal d'avancement, mis à jour à chaque étape
@@ -55,7 +58,7 @@ Gestionnaire de paquets : pnpm (workspaces).
 4. **Micro coupé par défaut, pour tout le monde.** Chacun active son micro quand il veut parler.
    Le vocal vit dans une couche séparée du jeu : il ne se coupe pas quand on change de page.
 5. **Aucun texte en dur dans l'interface.** Tous les textes passent par `packages/i18n`.
-   Langue de lancement : anglais. La structure doit permettre d'ajouter le français et l'arabe
+   Langues livrées : anglais et français. La structure doit permettre d'ajouter l'arabe
    sans réécriture.
 6. **Prêt pour l'arabe (droite à gauche).** Utilise les propriétés CSS logiques
    (`ms-*`, `me-*`, `ps-*`, `pe-*`, `start`, `end`) plutôt que left / right.
@@ -74,9 +77,12 @@ Gestionnaire de paquets : pnpm (workspaces).
 - TypeScript en mode strict partout.
 - Les règles de chaque jeu sont des fonctions pures dans `packages/shared`, sans réseau ni UI,
   et couvertes par des tests Vitest (coups valides, coups interdits, score, fin de partie).
-- Une salle Colyseus par jeu, avec le même contrat : `minPlayers`, `maxPlayers`, `options`
-  (réglages du créateur de la table), validation des actions côté serveur, vue filtrée par
-  joueur, `botAllowed`.
+- Chaque jeu suit le même contrat : `minPlayers`, `maxPlayers`, `options` (réglages du créateur
+  de la table), validation des actions côté serveur, vue filtrée par joueur, `botAllowed`.
+  Les informations secrètes (mains, pioche) ne sont jamais lisibles par un autre joueur :
+  règles RLS strictes ou tables privées, jamais de filtrage seulement côté client.
+- Toute table Supabase a la RLS activée ; vérifier les conseils de sécurité Supabase après
+  chaque migration.
 - Petits commits, chacun avec un message clair.
 
 ## Design
