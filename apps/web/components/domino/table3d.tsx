@@ -551,7 +551,7 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
       <CameraRig bounds={bounds} chainLength={chain.length} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
       {/* La nuit : un peu de bleu partout, et le lampadaire qui éclaire la table d'un côté. */}
       <hemisphereLight args={["#b4c4e0", "#1a1714", 0.75]} />
-      <spotLight position={[-6, 22, -5]} angle={0.55} penumbra={0.9} intensity={700} decay={2} color="#fff0da" />
+      <spotLight position={[-6, 22, -5]} angle={0.55} penumbra={0.9} intensity={520} decay={2} color="#fff3e2" />
       <pointLight position={[8, 5, 9]} intensity={18} color="#7f9cd0" />
       <Environment resolution={128} frames={1}>
         <Lightformer form="rect" intensity={2} color="#ffe2b4" position={[-3, 7, -2]} rotation-x={Math.PI / 2} scale={[8, 5, 1]} />
@@ -591,7 +591,7 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
       )}
 
       <EffectComposer multisampling={4}>
-        <Bloom luminanceThreshold={0.82} luminanceSmoothing={0.2} intensity={0.55} mipmapBlur />
+        <Bloom luminanceThreshold={0.96} luminanceSmoothing={0.1} intensity={0.35} mipmapBlur />
         <Vignette offset={0.3} darkness={0.7} />
       </EffectComposer>
     </>
