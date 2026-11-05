@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MicButton } from "@/components/mic-button";
 import { useI18n } from "@/lib/i18n";
-import { playClack, playYourTurn } from "@/lib/sound";
+import { playClack, playYourTurn, preloadSounds } from "@/lib/sound";
 import { type DominoView, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { DominoChain } from "./chain";
 import { DominoHand } from "./hand";
@@ -105,6 +105,13 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   );
   const playable = useMemo(() => new Set(moves.map((m) => m.tile)), [moves]);
   const targets = selected ? playableEnds(selected, view.chain, view.mustOpenWith) : [];
+
+  // Les vrais sons se chargent au premier toucher (le navigateur exige un geste pour le son).
+  useEffect(() => {
+    const go = () => preloadSounds();
+    window.addEventListener("pointerdown", go, { once: true });
+    return () => window.removeEventListener("pointerdown", go);
+  }, []);
 
   // Sons, animations et bulles à chaque nouvel événement de la table.
   const lastSeq = useRef(view.eventSeq);

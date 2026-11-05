@@ -1,8 +1,11 @@
 "use client";
 
 /**
- * Sons d'ICOSIUM, fabriqués par le navigateur (Web Audio) : aucun fichier à télécharger.
- * Le claquement imite un domino posé sec sur une table en bois.
+ * Sons d'ICOSIUM.
+ * - Les dominos utilisent de vrais sons (public/sfx, 4 à 5 Ko chacun, volume égalisé),
+ *   chargés en arrière-plan au premier son joué.
+ * - Tant qu'ils ne sont pas arrivés (réseau lent, hors ligne), le navigateur fabrique
+ *   un claquement de secours (synthèse Web Audio), donc il y a toujours un son.
  */
 
 const STORAGE_KEY = "icosium.sound";
@@ -45,6 +48,56 @@ function audio(): AudioContext | null {
   }
   if (ctx.state === "suspended") void ctx.resume();
   return ctx;
+}
+
+/** Les vrais sons, chargés une seule fois. */
+const SAMPLE_FILES = {
+  clack: ["/sfx/clack1.mp3", "/sfx/clack2.mp3", "/sfx/clack3.mp3", "/sfx/clack4.mp3"],
+  slam: ["/sfx/slam.mp3"],
+} as const;
+type SampleName = keyof typeof SAMPLE_FILES;
+const samples: Partial<Record<SampleName, AudioBuffer[]>> = {};
+let loading = false;
+
+function loadSamples(ac: AudioContext): void {
+  if (loading) return;
+  loading = true;
+  for (const [name, urls] of Object.entries(SAMPLE_FILES) as [SampleName, readonly string[]][]) {
+    void Promise.all(
+      urls.map(async (url) => {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(url);
+        return ac.decodeAudioData(await res.arrayBuffer());
+      }),
+    )
+      .then((buffers) => {
+        samples[name] = buffers;
+      })
+      .catch(() => {
+        // On réessaiera au prochain son (coupure réseau courte).
+        loading = false;
+      });
+  }
+}
+
+/** Joue un vrai son s'il est prêt ; renvoie false sinon (on utilisera la synthèse). */
+function playSample(ac: AudioContext, name: SampleName, level: number, rate: number): boolean {
+  const list = samples[name];
+  if (!list?.length) return false;
+  const src = ac.createBufferSource();
+  src.buffer = list[Math.floor(Math.random() * list.length)] as AudioBuffer;
+  src.playbackRate.value = rate;
+  const gain = ac.createGain();
+  gain.gain.value = level;
+  src.connect(gain).connect(ac.destination);
+  src.start(ac.currentTime + 0.003);
+  return true;
+}
+
+/** Charge les vrais sons à l'avance (appelé dès qu'une partie s'affiche). */
+export function preloadSounds(): void {
+  const ac = audio();
+  if (ac) loadSamples(ac);
 }
 
 /** Une sortie commune, légèrement adoucie, pour que les sons ne soient jamais agressifs. */
@@ -127,8 +180,12 @@ export function playClack(strong = false): void {
   if (!isSoundOn()) return;
   const ac = audio();
   if (!ac) return;
+  loadSamples(ac);
+  // Un vrai son, avec une hauteur qui varie un tout petit peu à chaque pierre.
+  const rate = 0.95 + Math.random() * 0.1;
+  if (strong ? playSample(ac, "slam", 0.75, rate) : playSample(ac, "clack", 0.6, rate)) return;
   const t = ac.currentTime + 0.005;
-  // Jamais deux fois exactement le même son : on varie un peu la hauteur.
+  // Son de secours. Jamais deux fois exactement le même son : on varie un peu la hauteur.
   const detune = (strong ? 0.86 : 1) * (0.96 + Math.random() * 0.08);
   const level = strong ? 6 : 4;
   strike(ac, t, [...STONE, ...TABLE.map(([f, q, g]) => [f, q, g * (strong ? 1.6 : 1)] as [number, number, number])], level, detune);
