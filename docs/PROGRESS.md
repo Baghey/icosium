@@ -282,3 +282,13 @@ Vérifié et déjà correct : sens des pierres et doubles en travers (nouveau te
 - Pierres de la chaîne un peu plus petites (échelle 0,62) pour que tout tienne sur le feutre.
 - Testé sur 2000 parties au hasard : aucune pierre ne se chevauche ; dans environ 1 % des très longues chaînes,
   la dernière pierre mord un peu sur le rebord.
+
+## 5 novembre 2026 — Outils et skills pour Claude
+
+- Recherche complète : `docs/recherche/Skills et outils pour ICOSIUM.md`.
+- Skills officiels copiés dans `.claude/skills/` (Supabase, Postgres, React Vercel, règles d'interface
+  Vercel, frontend-design et webapp-testing d'Anthropic), versions figées dans `skills-lock.json`.
+  Les fils de projet les trouvent grâce à `.claude/rules/skills.md`.
+- `pnpm verify` = typecheck + tests + build. CI GitHub (`.github/workflows/ci.yml`) : la même
+  commande + scan de secrets gitleaks sur chaque PR.
+- Reste (côté propriétaire) : connecteurs Context7 et LiveKit Docs, rendre la CI obligatoire sur `main`.
