@@ -5,10 +5,10 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 /**
- * Une pierre de domino en 3D, dessinée maison :
- * - un bloc d'ivoire épais aux arêtes bien arrondies, au grain d'os très léger, verni ;
- * - des points creusés (vrai relief grâce à une carte de hauteur), noirs et brillants au fond ;
- * - un trait central gravé et un clou en laiton en relief.
+ * Une pierre de domino en 3D, dessinée maison, comme celles qu'on sort dans la rue :
+ * - un bloc de plastique blanc épais aux arêtes bien arrondies, légèrement brillant, un peu patiné ;
+ * - des points noirs creusés (vrai relief grâce à une carte de hauteur) ;
+ * - un trait central gravé.
  * Tout est généré au premier affichage (aucune image à télécharger).
  */
 
@@ -21,9 +21,9 @@ export function stoneGeometry(): THREE.BufferGeometry {
   return geometry;
 }
 
-/** Un léger grain d'os : taches douces et fines veines dans le sens de la longueur. */
+/** Un plastique blanc un peu patiné : taches très douces et fines rayures. */
 function drawGrain(g: CanvasRenderingContext2D, W: number, H: number) {
-  g.fillStyle = "#f7efdd";
+  g.fillStyle = "#f6f5f1";
   g.fillRect(0, 0, W, H);
   // Pseudo-hasard fixe : toutes les pierres ont le même grain, d'un écran à l'autre.
   let seed = 7;
@@ -34,7 +34,7 @@ function drawGrain(g: CanvasRenderingContext2D, W: number, H: number) {
     const r = 20 + rnd() * 70;
     const grd = g.createRadialGradient(x, y, 0, x, y, r);
     const warm = rnd() > 0.5;
-    grd.addColorStop(0, warm ? "rgba(214,190,140,0.045)" : "rgba(255,253,245,0.10)");
+    grd.addColorStop(0, warm ? "rgba(170,165,150,0.05)" : "rgba(255,255,255,0.12)");
     grd.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = grd;
     g.fillRect(x - r, y - r, r * 2, r * 2);
@@ -42,7 +42,7 @@ function drawGrain(g: CanvasRenderingContext2D, W: number, H: number) {
   g.lineCap = "round";
   for (let i = 0; i < 26; i++) {
     const y = rnd() * H;
-    g.strokeStyle = `rgba(190,165,115,${0.025 + rnd() * 0.035})`;
+    g.strokeStyle = `rgba(150,148,140,${0.02 + rnd() * 0.03})`;
     g.lineWidth = 0.6 + rnd() * 1.2;
     g.beginPath();
     g.moveTo(-10, y);
@@ -63,32 +63,17 @@ function grainTexture(): THREE.CanvasTexture {
 }
 
 let ivoryMat: THREE.MeshPhysicalMaterial | null = null;
-/** L'ivoire verni de la pierre. */
+/** Le plastique blanc de la pierre. */
 export function ivoryMaterial(): THREE.MeshPhysicalMaterial {
   ivoryMat ??= new THREE.MeshPhysicalMaterial({
-    color: "#fffaf0",
+    color: "#ffffff",
     map: grainTexture(),
-    roughness: 0.32,
-    clearcoat: 1,
-    clearcoatRoughness: 0.14,
-    sheen: 0.4,
-    sheenRoughness: 0.5,
-    sheenColor: new THREE.Color("#fff1d6"),
-    specularIntensity: 0.6,
+    roughness: 0.3,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.2,
+    specularIntensity: 0.5,
   });
   return ivoryMat;
-}
-
-let brassMat: THREE.MeshStandardMaterial | null = null;
-function brassMaterial(): THREE.MeshStandardMaterial {
-  brassMat ??= new THREE.MeshStandardMaterial({ color: "#e0b04f", metalness: 1, roughness: 0.22, emissive: "#3a2504", emissiveIntensity: 0.35 });
-  return brassMat;
-}
-let pinGeo: THREE.BufferGeometry | null = null;
-function pinGeometry(): THREE.BufferGeometry {
-  // Un petit dôme (demi-sphère aplatie) pour attraper la lumière.
-  pinGeo ??= new THREE.SphereGeometry(0.075, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.45, 1);
-  return pinGeo;
 }
 
 /** Positions des points dans une moitié (carré 0..1). */
@@ -142,20 +127,20 @@ function face(a: number, b: number): Face {
   for (const [x, y] of all) {
     // Couleur : le fond du creux, presque noir, avec une lueur chaude en bas à droite (la paroi éclairée).
     const body = g.createRadialGradient(x - R * 0.25, y - R * 0.3, R * 0.1, x, y, R);
-    body.addColorStop(0, "#2a1d12");
-    body.addColorStop(0.7, "#120b06");
-    body.addColorStop(1, "#060302");
+    body.addColorStop(0, "#26262a");
+    body.addColorStop(0.7, "#0d0d10");
+    body.addColorStop(1, "#040405");
     g.fillStyle = body;
     g.beginPath();
     g.arc(x, y, R, 0, Math.PI * 2);
     g.fill();
-    g.strokeStyle = "rgba(255,236,200,0.55)";
+    g.strokeStyle = "rgba(255,255,255,0.4)";
     g.lineWidth = R * 0.12;
     g.beginPath();
     g.arc(x, y, R * 0.8, Math.PI * 0.05, Math.PI * 0.6);
     g.stroke();
     // Ombre douce sur le bord haut-gauche du creux (le rebord cache la lumière).
-    g.strokeStyle = "rgba(60,40,20,0.35)";
+    g.strokeStyle = "rgba(40,40,44,0.3)";
     g.lineWidth = R * 0.18;
     g.beginPath();
     g.arc(x, y, R * 1.06, Math.PI * 1.05, Math.PI * 1.7);
@@ -172,16 +157,16 @@ function face(a: number, b: number): Face {
     h.fill();
   }
 
-  // Le trait central gravé (sombre, avec un liseré clair), interrompu par le clou.
+  // Le trait central gravé (sombre, avec un liseré clair).
   const top = H * 0.1;
   const bottom = H * 0.9;
-  const gap = H * 0.11;
+  const gap = 0;
   for (const [y0, y1] of [
     [top, H / 2 - gap],
     [H / 2 + gap, bottom],
   ] as const) {
     g.lineCap = "round";
-    g.strokeStyle = "rgba(96,72,42,0.85)";
+    g.strokeStyle = "rgba(40,40,44,0.85)";
     g.lineWidth = W * 0.007;
     g.beginPath();
     g.moveTo(half, y0);
@@ -220,14 +205,11 @@ export function Stone({ a, b }: { a: number; b: number }) {
       map: f.color,
       bumpMap: f.bump,
       bumpScale: 3.2,
-      color: "#fffaf0",
-      roughness: 0.32,
-      clearcoat: 1,
-      clearcoatRoughness: 0.14,
-      sheen: 0.4,
-      sheenRoughness: 0.5,
-      sheenColor: new THREE.Color("#fff1d6"),
-      specularIntensity: 0.6,
+      color: "#ffffff",
+      roughness: 0.3,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.2,
+      specularIntensity: 0.5,
       polygonOffset: true,
       polygonOffsetFactor: -2,
     });
@@ -238,7 +220,6 @@ export function Stone({ a, b }: { a: number; b: number }) {
       <mesh position={[0, TILE_H / 2 + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={material}>
         <planeGeometry args={[FACE_W, FACE_D]} />
       </mesh>
-      <mesh position={[0, TILE_H / 2 - 0.004, 0]} geometry={pinGeometry()} material={brassMaterial()} />
     </>
   );
 }

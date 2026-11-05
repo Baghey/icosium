@@ -39,7 +39,7 @@ function Preview() {
     } else chain.push({ tile: tileId(a, b), left: right, right: a === right ? b : a, seat: 0 });
   }
   return (
-    <div className="cafe-bg fixed inset-0">
+    <div className="street-bg fixed inset-0">
       <div className="absolute inset-x-0 top-24 bottom-48">
         <Table3D chain={chain} chainStart={start} targets={params.get("ghost") ? ["left", "right"] : []} onPick={() => undefined} freshTile={null} shuffleKey={params.get("shuffle") ?? "x"} players={4} reducedMotion={!params.get("shuffle")} glowEnds={params.get("glow") ? ["left", "right"] : []} />
       </div>

@@ -158,6 +158,19 @@
   background-position: center;
 }
 
+/* La rue le soir, autour de la table de domino : goudron sombre (grain dessiné par un filtre SVG,
+   rien à télécharger), lampadaire chaud en haut à gauche, un peu de bleu de nuit. */
+@utility street-bg {
+  background-color: #141416;
+  background-image:
+    radial-gradient(60% 34% at 18% 0%, rgb(255 214 150 / 0.22), transparent 70%),
+    radial-gradient(50% 40% at 100% 100%, rgb(70 95 150 / 0.16), transparent 70%),
+    radial-gradient(80% 60% at 50% 45%, transparent 40%, rgb(0 0 0 / 0.55) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.75 0 0 0 0 0.75 0 0 0 0 0.75 0 0 0 0.28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #232326 0%, #19191b 50%, #111113 100%);
+  background-size: auto, auto, auto, 220px 220px, auto;
+}
+
 /* La vraie table (photo du propriétaire), découpée en 9 morceaux : le rebord garde sa forme
    quelle que soit la taille de l'écran, seul le feutre s'étire. */
 @utility table-photo {

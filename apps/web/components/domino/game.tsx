@@ -424,7 +424,7 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   );
 
   return (
-    <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
+    <div className="street-bg fixed inset-x-0 bottom-0 overflow-hidden text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
       {landscape ? (
         // ---------- Paysage : la table au centre, les joueurs et les boutons sur les côtés ----------
         <div className="flex h-full gap-1 ps-[max(0.25rem,env(safe-area-inset-left))] pe-[max(0.25rem,env(safe-area-inset-right))]">

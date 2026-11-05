@@ -25,7 +25,7 @@ export type TileProps = {
   title?: string;
 };
 
-/** Un domino ivoire dessiné en SVG : léger, net à toutes les tailles. */
+/** Un domino en plastique blanc à points noirs, dessiné en SVG : léger, net à toutes les tailles. */
 export function DominoTile({ a, b, orientation = "vertical", size, className, title }: TileProps) {
   const id = useId().replace(/:/g, "");
   const vertical = orientation === "vertical";
@@ -41,7 +41,7 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
         <g key={`${dx}-${dy}-${i}`}>
           <circle cx={px} cy={py} r={12.5} fill="#ffffff" fillOpacity="0.75" transform="translate(0.8 1.2)" />
           <circle cx={px} cy={py} r={12} fill={`url(#pip-${id})`} />
-          <path d={`M ${px + 8.6} ${py - 3.5} A 9.3 9.3 0 0 1 ${px - 3.5} ${py + 8.6}`} fill="none" stroke="#ffe9c4" strokeOpacity="0.55" strokeWidth="1.8" strokeLinecap="round" />
+          <path d={`M ${px + 8.6} ${py - 3.5} A 9.3 9.3 0 0 1 ${px - 3.5} ${py + 8.6}`} fill="none" stroke="#ffffff" strokeOpacity="0.45" strokeWidth="1.8" strokeLinecap="round" />
         </g>
       );
     });
@@ -62,14 +62,14 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
     >
       <defs>
         <linearGradient id={`face-${id}`} x1="0" y1="0" x2="0.55" y2="1">
-          <stop offset="0" stopColor="#fffdf6" />
-          <stop offset="0.5" stopColor="#f7eedb" />
-          <stop offset="1" stopColor="#e6d6b4" />
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.55" stopColor="#f6f6f3" />
+          <stop offset="1" stopColor="#e3e3df" />
         </linearGradient>
         <linearGradient id={`edge-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#d9c49a" />
-          <stop offset="0.6" stopColor="#a88d60" />
-          <stop offset="1" stopColor="#6f5937" />
+          <stop offset="0" stopColor="#d6d6d1" />
+          <stop offset="0.6" stopColor="#a9a9a4" />
+          <stop offset="1" stopColor="#6e6e6a" />
         </linearGradient>
         <radialGradient id={`gloss-${id}`} cx="0.25" cy="0.12" r="0.7">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
@@ -77,36 +77,27 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
         <radialGradient id={`pip-${id}`} cx="0.38" cy="0.32" r="0.8">
-          <stop offset="0" stopColor="#3a2a1b" />
-          <stop offset="0.6" stopColor="#150d07" />
-          <stop offset="1" stopColor="#050302" />
-        </radialGradient>
-        <radialGradient id={`pin-${id}`} cx="0.35" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#fbe3a2" />
-          <stop offset="0.5" stopColor="#c8962f" />
-          <stop offset="1" stopColor="#6e4b14" />
+          <stop offset="0" stopColor="#2e2e33" />
+          <stop offset="0.6" stopColor="#0f0f12" />
+          <stop offset="1" stopColor="#030304" />
         </radialGradient>
       </defs>
-      {/* La tranche (épaisseur), puis la face d'ivoire avec son reflet verni. */}
+      {/* La tranche (épaisseur), puis la face en plastique blanc avec son reflet. */}
       <rect x="1.5" y={E} width={w - 3} height={h - E - 1.5} rx="18" fill={`url(#edge-${id})`} />
-      <rect x="1.5" y="1.5" width={w - 3} height={fh} rx="18" fill={`url(#face-${id})`} stroke="#b59c6c" strokeWidth="1.6" />
+      <rect x="1.5" y="1.5" width={w - 3} height={fh} rx="18" fill={`url(#face-${id})`} stroke="#b8b8b2" strokeWidth="1.6" />
       <rect x="5" y="4.5" width={w - 10} height={fh - 8} rx="14.5" fill="none" stroke="#ffffff" strokeOpacity="0.9" strokeWidth="2.5" />
       <rect x="5" y="4.5" width={w - 10} height={fh - 8} rx="14.5" fill={`url(#gloss-${id})`} />
       {vertical ? (
         <>
-          <path d={`M 16 ${cy} H ${cx - 11} M ${cx + 11} ${cy} H 84`} stroke="#7d6744" strokeWidth="3.2" strokeLinecap="round" />
-          <path d={`M 16 ${cy + 2.6} H ${cx - 11} M ${cx + 11} ${cy + 2.6} H 84`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
+          <path d={`M 16 ${cy} H 84`} stroke="#55555a" strokeWidth="3.2" strokeLinecap="round" />
+          <path d={`M 16 ${cy + 2.6} H 84`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
         </>
       ) : (
         <>
-          <path d={`M ${cx} 14 V ${cy - 11} M ${cx} ${cy + 11} V ${fh - 14}`} stroke="#7d6744" strokeWidth="3.2" strokeLinecap="round" />
-          <path d={`M ${cx + 2.6} 14 V ${cy - 11} M ${cx + 2.6} ${cy + 11} V ${fh - 14}`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
+          <path d={`M ${cx} 14 V ${fh - 14}`} stroke="#55555a" strokeWidth="3.2" strokeLinecap="round" />
+          <path d={`M ${cx + 2.6} 14 V ${fh - 14}`} stroke="#ffffff" strokeOpacity="0.8" strokeWidth="1.4" strokeLinecap="round" />
         </>
       )}
-      {/* Le clou en laiton, en relief. */}
-      <circle cx={cx} cy={cy + 1.2} r="7" fill="#5b3e10" fillOpacity="0.35" />
-      <circle cx={cx} cy={cy} r="6.5" fill={`url(#pin-${id})`} stroke="#6e4b14" strokeWidth="0.8" />
-      <circle cx={cx - 2} cy={cy - 2.2} r="1.8" fill="#fff6d8" fillOpacity="0.9" />
       <g transform={`scale(1 ${fh / (h)})`}>
         {half(a, 0, 0)}
         {vertical ? half(b, 0, 100) : half(b, 100, 0)}
@@ -115,22 +106,22 @@ export function DominoTile({ a, b, orientation = "vertical", size, className, ti
   );
 }
 
-/** Le dos d'un domino des autres joueurs : laiton doré avec une étoile à huit branches. */
+/** Le dos d'un domino des autres joueurs : plastique blanc, une étoile à huit branches moulée. */
 export function DominoBack({ size, className }: { size: number; className?: string }) {
   const id = useId().replace(/:/g, "");
   return (
     <svg viewBox="0 0 100 200" width={size} height={size * 2} className={className} aria-hidden="true">
       <defs>
         <linearGradient id={`back-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f6d98c" />
-          <stop offset="0.5" stopColor="#d4a446" />
-          <stop offset="1" stopColor="#a8762a" />
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.55" stopColor="#ecece8" />
+          <stop offset="1" stopColor="#cfcfca" />
         </linearGradient>
       </defs>
-      <rect x="2" y="8" width="96" height="190" rx="16" fill="#6e4b18" />
-      <rect x="2" y="2" width="96" height="188" rx="16" fill={`url(#back-${id})`} stroke="#8a5f1d" strokeWidth="3" />
-      <rect x="12" y="12" width="76" height="168" rx="10" fill="none" stroke="#fff3cf" strokeOpacity="0.6" strokeWidth="3" />
-      <g transform="translate(50 96)" fill="none" stroke="#7a5216" strokeWidth="5" strokeOpacity="0.75">
+      <rect x="2" y="8" width="96" height="190" rx="16" fill="#8a8a85" />
+      <rect x="2" y="2" width="96" height="188" rx="16" fill={`url(#back-${id})`} stroke="#a5a5a0" strokeWidth="3" />
+      <rect x="12" y="12" width="76" height="168" rx="10" fill="none" stroke="#ffffff" strokeOpacity="0.8" strokeWidth="3" />
+      <g transform="translate(50 96)" fill="none" stroke="#9a9a95" strokeWidth="5" strokeOpacity="0.7">
         <rect x="-20" y="-20" width="40" height="40" />
         <rect x="-20" y="-20" width="40" height="40" transform="rotate(45)" />
       </g>

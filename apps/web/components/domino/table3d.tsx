@@ -2,21 +2,22 @@
 
 import type { End, PlacedTile } from "@icosium/shared";
 import { Environment, Lightformer } from "@react-three/drei";
-import { Canvas, type ThreeEvent, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Stone, TILE_H, ivoryMaterial, stoneGeometry } from "./stone3d";
 import { playShuffle } from "@/lib/sound";
+import { drawCardboard, drawCardboardBump, drawPlastic, seeded } from "@/lib/street-textures";
 import { CHAIN_HALF_W, CHAIN_SCALE, FELT_D, FELT_W, type Bounds, type Placement, layoutChain } from "@/lib/chain-layout";
 
 /*
- * La table de domino en 3D : feutre vert, rebord en noyer verni, filet doré, rosette,
- * dominos ivoire en relief éclairés par la lampe du café. Les règles restent sur le serveur :
+ * La table de domino en 3D, comme dans la rue le soir : un carton déchiré posé sur une table de
+ * jardin en plastique, sur le goudron, sous un lampadaire. Dominos blancs à points noirs. Les règles restent sur le serveur :
  * cette scène ne fait qu'afficher la chaîne publique et renvoyer le bout choisi.
  */
 
-const RIM = 0.75; // épaisseur du rebord
+const RIM = 1.45; // la table de jardin dépasse du carton de tant
 
 type Props = {
   chain: PlacedTile[];
@@ -48,7 +49,7 @@ function shadowTexture(): THREE.CanvasTexture {
   c.height = 128;
   const g = c.getContext("2d") as CanvasRenderingContext2D;
   g.filter = "blur(14px)";
-  g.fillStyle = "rgba(0,12,6,0.85)";
+  g.fillStyle = "rgba(6,5,4,0.85)";
   g.beginPath();
   g.roundRect(34, 30, 188, 68, 18);
   g.fill();
@@ -123,56 +124,140 @@ function roundedRect(w: number, d: number, r: number): THREE.Shape {
   return s;
 }
 
-function Table() {
-  const [felt, wood, rosette] = useLoader(THREE.TextureLoader, ["/assets/felt.webp", "/assets/wood.webp", "/assets/rosette.webp"]) as [
-    THREE.Texture,
-    THREE.Texture,
-    THREE.Texture,
+/**
+ * Contour du carton déchiré : on longe chaque bord en reculant d'un peu au hasard (bord mâché),
+ * avec quelques vraies déchirures plus profondes et un coin arraché.
+ * `out` > 0 donne un contour un peu plus grand (la couche claire du papier arraché, dessous).
+ */
+function tornOutline(w: number, d: number, seed: number, out: number): THREE.Shape {
+  const rnd = seeded(seed);
+  const corners: [number, number][] = [
+    [-w / 2, -d / 2],
+    [w / 2, -d / 2],
+    [w / 2, d / 2],
+    [-w / 2, d / 2],
   ];
-  const { feltGeo, rimGeo, inlayGeo } = useMemo(() => {
-    felt.colorSpace = THREE.SRGBColorSpace;
-    wood.colorSpace = THREE.SRGBColorSpace;
-    rosette.colorSpace = THREE.SRGBColorSpace;
-    wood.wrapS = wood.wrapT = THREE.RepeatWrapping;
-    wood.repeat.set(0.12, 0.3);
-    const feltShape = roundedRect(FELT_W, FELT_D, 2.4);
-    const feltGeo = new THREE.ShapeGeometry(feltShape, 24);
-    // UV du feutre : on étire la photo sur toute la surface.
-    const pos = feltGeo.attributes.position as THREE.BufferAttribute;
-    const uv = new THREE.Float32BufferAttribute(pos.count * 2, 2);
-    for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) / FELT_W + 0.5, pos.getY(i) / FELT_D + 0.5);
-    feltGeo.setAttribute("uv", uv);
+  const pts: [number, number][] = [];
+  corners.forEach(([x0, y0], side) => {
+    const [x1, y1] = corners[(side + 1) % 4] as [number, number];
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    // Normale vers l'intérieur.
+    const nx = -(y1 - y0) / len;
+    const ny = (x1 - x0) / len;
+    const steps = Math.round(len / 0.16);
+    const phase = rnd() * 10;
+    // Une ou deux déchirures profondes par côté.
+    const bites = Array.from({ length: 1 + Math.floor(rnd() * 2) }, () => ({ at: 0.15 + rnd() * 0.7, half: 0.04 + rnd() * 0.07, depth: 0.25 + rnd() * 0.35 }));
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps;
+      // Le coin arraché (en haut à droite).
+      const corner = side === 1 && t < 0.12 ? (0.12 - t) * 9 : side === 0 && t > 0.9 ? (t - 0.9) * 9 : 0;
+      let inset = 0.08 + 0.06 * Math.sin(t * 23 + phase) + 0.04 * Math.sin(t * 61 + phase * 2) + rnd() * 0.07 + corner;
+      for (const b of bites) {
+        const k = 1 - Math.abs(t - b.at) / b.half;
+        if (k > 0) inset += b.depth * Math.sqrt(k) * (0.7 + rnd() * 0.3);
+      }
+      inset = Math.max(0, inset - out);
+      pts.push([x0 + (x1 - x0) * t + nx * inset, y0 + (y1 - y0) * t + ny * inset]);
+    }
+  });
+  const s = new THREE.Shape();
+  pts.forEach(([x, y], i) => (i ? s.lineTo(x, y) : s.moveTo(x, y)));
+  s.closePath();
+  return s;
+}
 
-    const outer = roundedRect(FELT_W + RIM * 2, FELT_D + RIM * 2, 2.4 + RIM);
-    outer.holes.push(roundedRect(FELT_W, FELT_D, 2.4) as unknown as THREE.Path);
-    const rimGeo = new THREE.ExtrudeGeometry(outer, { depth: 0.45, bevelEnabled: true, bevelThickness: 0.18, bevelSize: 0.16, bevelSegments: 6, curveSegments: 32 });
+const CARD_W = FELT_W + 0.5;
+const CARD_D = FELT_D + 0.5;
+const CARD_T = 0.1; // épaisseur du carton
+const TOP_W = FELT_W + 2.6; // la table de jardin
+const TOP_D = FELT_D + 2.6;
+const TOP_Y = -CARD_T - 0.01;
+const GROUND_Y = -9;
 
-    const inlayOuter = roundedRect(FELT_W - 0.5, FELT_D - 0.5, 2.15);
-    inlayOuter.holes.push(roundedRect(FELT_W - 0.58, FELT_D - 0.58, 2.11) as unknown as THREE.Path);
-    const inlayGeo = new THREE.ShapeGeometry(inlayOuter, 32);
-    return { feltGeo, rimGeo, inlayGeo };
-  }, [felt, wood, rosette]);
+function canvasTexture(c: HTMLCanvasElement, srgb = true): THREE.CanvasTexture {
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+
+/** Le carton déchiré, posé de travers sur la table de jardin en plastique. Le goudron autour est le fond de l'écran (street-bg). */
+function Table() {
+  const parts = useMemo(() => {
+    const card = canvasTexture(drawCardboard(CARD_W, CARD_D));
+    // Les UV du dessus d'un ExtrudeGeometry sont les coordonnées du plan : on les ramène à 0..1.
+    card.repeat.set(1 / CARD_W, 1 / CARD_D);
+    card.offset.set(0.5, 0.5);
+    const bump = canvasTexture(drawCardboardBump(), false);
+    bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
+    bump.repeat.set(1 / 4, 1 / 4);
+    const cardGeo = new THREE.ExtrudeGeometry(tornOutline(CARD_W, CARD_D, 11, 0), { depth: CARD_T, bevelEnabled: false });
+    // Sous le bord, la couche claire et fibreuse du papier arraché dépasse un peu.
+    const fiberGeo = new THREE.ShapeGeometry(tornOutline(CARD_W, CARD_D, 11, 0.07));
+
+    const plastic = canvasTexture(drawPlastic());
+    plastic.wrapS = plastic.wrapT = THREE.RepeatWrapping;
+    plastic.repeat.set(1 / 6, 1 / 6);
+    const topGeo = new THREE.ExtrudeGeometry(roundedRect(TOP_W, TOP_D, 1.1), { depth: 0.3, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.12, bevelSegments: 4, curveSegments: 20 });
+    // Le petit rebord moulé tout autour du plateau.
+    const lip = roundedRect(TOP_W, TOP_D, 1.1);
+    lip.holes.push(roundedRect(TOP_W - 0.5, TOP_D - 0.5, 0.9) as unknown as THREE.Path);
+    const lipGeo = new THREE.ExtrudeGeometry(lip, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 3, curveSegments: 20 });
+
+    return { card, bump, cardGeo, fiberGeo, plastic, topGeo, lipGeo };
+  }, []);
 
   return (
     <group>
-      <mesh geometry={feltGeo} rotation={[-Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial map={felt} roughness={0.95} color="#cfe8d6" />
+      {/* Le carton, un peu de travers comme posé à la main. */}
+      <group rotation={[0, 0.025, 0]}>
+        <mesh geometry={parts.cardGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, -CARD_T, 0]}>
+          <meshStandardMaterial attach="material-0" map={parts.card} bumpMap={parts.bump} bumpScale={0.6} roughness={0.96} />
+          <meshStandardMaterial attach="material-1" color="#8f6c42" roughness={1} />
+        </mesh>
+        <mesh geometry={parts.fiberGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, -CARD_T + 0.004, 0]}>
+          <meshStandardMaterial color="#e6d3ad" roughness={1} />
+        </mesh>
+      </group>
+      {/* La table de jardin en plastique blanc. */}
+      <mesh geometry={parts.topGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, TOP_Y - 0.42, 0]}>
+        <meshPhysicalMaterial attach="material-0" map={parts.plastic} roughness={0.42} clearcoat={0.35} clearcoatRoughness={0.4} />
+        <meshPhysicalMaterial attach="material-1" color="#e9e8e3" roughness={0.45} clearcoat={0.3} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
-        <planeGeometry args={[6.4, 7.1]} />
-        <meshStandardMaterial map={rosette} transparent opacity={0.42} roughness={0.6} metalness={0.4} depthWrite={false} />
+      <mesh geometry={parts.lipGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, TOP_Y, 0]}>
+        <meshPhysicalMaterial color="#f3f2ee" roughness={0.4} clearcoat={0.4} />
       </mesh>
-      <mesh geometry={inlayGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
-        <meshStandardMaterial color="#e2b65c" metalness={0.9} roughness={0.3} emissive="#5a3c08" emissiveIntensity={0.4} />
-      </mesh>
-      <mesh geometry={rimGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]}>
-        <meshPhysicalMaterial map={wood} color="#ffffff" roughness={0.5} clearcoat={0.6} clearcoatRoughness={0.3} />
+      {/* Les pieds, qui s'écartent vers le sol. */}
+      {[
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ].map(([sx, sz]) => (
+        <mesh key={`${sx}${sz}`} position={[(sx ?? 0) * (TOP_W / 2 - 1.2), (TOP_Y + GROUND_Y) / 2 - 0.3, (sz ?? 0) * (TOP_D / 2 - 1.2)]} rotation={[(sz ?? 0) * -0.08, 0, (sx ?? 0) * 0.08]}>
+          <boxGeometry args={[0.9, -GROUND_Y - 0.6, 0.9]} />
+          <meshStandardMaterial color="#d9d8d3" roughness={0.5} />
+        </mesh>
+      ))}
+      {/* L'ombre de la table sur le goudron, poussée par le lampadaire. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.6, GROUND_Y + 0.02, 1.4]}>
+        <planeGeometry args={[TOP_W * 1.5, TOP_D * 1.4]} />
+        <meshBasicMaterial map={shadowTexture()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
     </group>
   );
 }
 
 // ---------- les dominos ----------
+
+/** Petit décalage fixe d'une pierre, tiré de son nom : moins de 3° et de 4 % de sa largeur. */
+function handJitter(tile: string): { rot: number; dx: number; dz: number } {
+  let h = 0;
+  for (const ch of tile) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const rnd = seeded(h + 1);
+  return { rot: (rnd() - 0.5) * 0.09, dx: (rnd() - 0.5) * 0.06, dz: (rnd() - 0.5) * 0.06 };
+}
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
@@ -215,8 +300,10 @@ function Domino({ p, fresh, reducedMotion }: { p: Placement; fresh: boolean; red
       born.current = null;
     }
   });
+  // Posée à la main : chaque pierre est un peu de travers (toujours le même angle pour la même pierre).
+  const j = useMemo(() => handJitter(p.tile), [p.tile]);
   return (
-    <group position={[p.x, 0, p.z]} rotation={[0, p.rot, 0]}>
+    <group position={[p.x + j.dx, 0, p.z + j.dz]} rotation={[0, p.rot + j.rot, 0]}>
       <group position={[0, TILE_H / 2, 0]}>
         <BlobShadow shadowRef={shadow} />
       </group>
@@ -448,7 +535,7 @@ function CameraRig({ bounds, chainLength, tableRot, chainRot, margins }: { bound
 // ---------- la scène ----------
 
 const PORTRAIT_MARGINS: Margins = { x: 0.02, top: 0.24, bottom: 0.02 };
-const LANDSCAPE_MARGINS: Margins = { x: 0.02, top: 0.1, bottom: 0.01 };
+const LANDSCAPE_MARGINS: Margins = { x: 0.02, top: 0.18, bottom: 0.01 };
 
 function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, players, reducedMotion, glowEnds, landscape = false }: Props) {
   // Portrait : la table est en long et la chaîne tournée d'un quart de tour pour suivre sa longueur.
@@ -462,19 +549,14 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
   return (
     <>
       <CameraRig bounds={bounds} chainLength={chain.length} tableRot={tableRot} chainRot={chainRot} margins={landscape ? LANDSCAPE_MARGINS : PORTRAIT_MARGINS} />
-      <ambientLight intensity={0.35} color="#ffe2b8" />
-      <spotLight
-        position={[1.5, 16, 3]}
-        angle={0.62}
-        penumbra={0.8}
-        intensity={420}
-        color="#ffd59a"
-      />
-      <pointLight position={[-7, 4, -6]} intensity={30} color="#ff9d4d" />
+      {/* La nuit : un peu de bleu partout, et le lampadaire qui éclaire la table d'un côté. */}
+      <hemisphereLight args={["#b4c4e0", "#1a1714", 0.75]} />
+      <spotLight position={[-6, 22, -5]} angle={0.55} penumbra={0.9} intensity={700} decay={2} color="#fff0da" />
+      <pointLight position={[8, 5, 9]} intensity={18} color="#7f9cd0" />
       <Environment resolution={128} frames={1}>
-        <Lightformer form="rect" intensity={2.2} color="#ffd7a0" position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[10, 6, 1]} />
-        <Lightformer form="ring" intensity={1.4} color="#ffb060" position={[-6, 3, -4]} scale={3} />
-        <Lightformer form="rect" intensity={0.6} color="#2f8f63" position={[0, -2, 0]} rotation-x={-Math.PI / 2} scale={[12, 12, 1]} />
+        <Lightformer form="rect" intensity={2} color="#ffe2b4" position={[-3, 7, -2]} rotation-x={Math.PI / 2} scale={[8, 5, 1]} />
+        <Lightformer form="ring" intensity={0.8} color="#8fa8d8" position={[6, 3, 5]} scale={3} />
+        <Lightformer form="rect" intensity={0.25} color="#3a3836" position={[0, -2, 0]} rotation-x={-Math.PI / 2} scale={[12, 12, 1]} />
       </Environment>
 
       <group rotation={[0, tableRot, 0]}>
@@ -510,7 +592,7 @@ function Scene({ chain, chainStart, targets, onPick, freshTile, shuffleKey, play
 
       <EffectComposer multisampling={4}>
         <Bloom luminanceThreshold={0.82} luminanceSmoothing={0.2} intensity={0.55} mipmapBlur />
-        <Vignette offset={0.32} darkness={0.62} />
+        <Vignette offset={0.3} darkness={0.7} />
       </EffectComposer>
     </>
   );

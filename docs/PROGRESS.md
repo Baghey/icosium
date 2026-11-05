@@ -1,5 +1,25 @@
 # Journal d'avancement d'ICOSIUM
 
+## Domino : table « carton de rue » (5 novembre 2026, soir)
+
+D'après la vidéo TikTok du propriétaire (domino du quartier, dehors, le soir).
+
+Ce qui marche :
+- La table 3D est un carton beige déchiré (bords mâchés, coin arraché, taches d'humidité, ronds de
+  verre de thé, cannelures, traces d'impression, bout de scotch), posé un peu de travers sur une
+  table de jardin en plastique blanc, sous un lampadaire. Tout est dessiné au chargement
+  (`lib/street-textures.ts`), aucune image à télécharger.
+- Le fond de l'écran de jeu est le goudron la nuit (`street-bg`, grain en SVG, lueur du lampadaire).
+- Pierres en plastique blanc à points noirs, sans clou doré : sur la table, dans la main et au dos.
+- Chaque pierre de la chaîne est posée un peu de travers (moins de 3°, toujours le même angle pour
+  la même pierre), comme à la main ; la disposition calculée et ses tests ne changent pas.
+- Son du mélange : extrait du son « HQ Sounds » fourni par le propriétaire (`public/sfx/shuffle.mp3`).
+
+Reste à faire / problèmes connus :
+- Le repli sans WebGL garde l'ancienne table en feutre.
+- Les panneaux de l'interface restent dans le style café (sombre et or).
+- La demande « voix » du propriétaire reste à préciser.
+
 ## Domino : règles précisées et table en 3D (5 novembre 2026)
 
 - Règles précisées par le propriétaire : la partie se joue en **100 points** (choix 50, 100,
