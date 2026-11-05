@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de design d'ICOSIUM. Toutes les couleurs, rayons et durées passent par ici.
+ * Clair : crème chaud. Sombre : brun café. Une seule couleur d'accent : vert menthe.
+ */
+:root {
+  --icos-bg: #f6efe3;
+  --icos-surface: #fffaf2;
+  --icos-surface-2: #efe4d2;
+  --icos-ink: #2b2118;
+  --icos-ink-muted: #6e5d4b;
+  --icos-line: #e2d5c1;
+  --icos-mint: #2f9e78;
+  --icos-mint-ink: #ffffff;
+  --icos-mint-soft: #d5efe4;
+  --icos-danger: #b4432f;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --icos-bg: #1f1712;
+    --icos-surface: #2a201a;
+    --icos-surface-2: #362a22;
+    --icos-ink: #f3e9dc;
+    --icos-ink-muted: #bba891;
+    --icos-line: #47382d;
+    --icos-mint: #5cc9a2;
+    --icos-mint-ink: #10241c;
+    --icos-mint-soft: #234237;
+    --icos-danger: #e07a62;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--icos-bg);
+  --color-surface: var(--icos-surface);
+  --color-surface-2: var(--icos-surface-2);
+  --color-ink: var(--icos-ink);
+  --color-ink-muted: var(--icos-ink-muted);
+  --color-line: var(--icos-line);
+  --color-mint: var(--icos-mint);
+  --color-mint-ink: var(--icos-mint-ink);
+  --color-mint-soft: var(--icos-mint-soft);
+  --color-danger: var(--icos-danger);
+
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-card: 1.25rem;
+  --radius-control: 0.875rem;
+
+  --spacing-touch: 2.75rem; /* 44 px : zone tactile minimale */
+  --spacing-mic: 5.5rem;
+
+  --animate-ring: icos-ring 1.2s ease-out infinite;
+}
+
+@theme {
+  --ease-icos: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --default-transition-duration: 200ms;
+}
+
+@keyframes icos-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--icos-mint) 55%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--icos-bg);
+  color: var(--icos-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
