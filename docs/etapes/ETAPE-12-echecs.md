@@ -28,8 +28,13 @@ Objectif : un jeu à 2 joueurs, au public fidèle, avec la même table qui atten
    d'avance) écrite par nous, trois niveaux.
 8. Les échecs apparaissent dans le choix du jeu à la création d'une table.
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - `pnpm verify` passe ;
 - deux personnes jouent une partie complète avec roque, promotion et pendule ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

@@ -10,6 +10,8 @@ Ce qui est fait :
   « Tchekchayka » (règles déjà validées), les échecs, Yiwen, le Loup-Garou et le Vingt-et-un.
 - Jeu façon Monopoly : nom **Dzaïr** et règles choisis par le propriétaire le 6 novembre
   (durée au choix, enchères, échanges) ; règles classiques pour le reste.
+- « Apprendre à jouer » : une partie guidée et interactive pour chaque jeu sauf le domino
+  (demande du propriétaire), ajoutée à chaque fiche d'étape concernée.
 - Six nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
   `ETAPE-13-yiwen`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, `ETAPE-16-dzair` (jeu d'achat de quartiers façon Monopoly, sans
   rien reprendre de la marque), et le tableau de

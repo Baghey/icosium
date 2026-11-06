@@ -390,6 +390,26 @@ utiliser. Nom choisi par le propriétaire : « Dzaïr » (l'Algérie, ou Alger, 
 - Faillite envers un joueur : il reçoit tout ce qui reste ; envers la banque : les quartiers sont
   remis aux enchères.
 
+## Apprendre à jouer (tous les jeux sauf le domino)
+
+Demandé par le propriétaire le 6 novembre 2026. Chaque jeu, sauf le domino que tout le monde
+connaît, a un bouton « Apprendre à jouer » : sur la fiche du jeu, à la table d'attente, et proposé
+automatiquement la première fois qu'on ouvre ce jeu.
+
+- On apprend en jouant : une petite partie guidée, sur le vrai plateau du jeu, avec une donne
+  préparée à l'avance. Une bulle explique une seule chose à la fois et montre la pièce ou la carte
+  à toucher (cercle doré qui pulse) ; le reste de l'écran est un peu assombri.
+- On ne peut pas se tromper : un coup interdit est refusé avec une phrase qui explique pourquoi.
+- Les adversaires sont des personnages scénarisés, pas des bots de table : la règle « pas de
+  bots » ne change pas.
+- 5 à 8 étapes par jeu, 2 à 3 minutes en tout. Bouton « Passer » toujours visible, et on peut
+  reprendre plus tard là où on s'est arrêté.
+- À la fin : « Tu sais jouer ! » et un gros bouton « Ouvrir une table ».
+- La partie guidée tourne sur le téléphone seulement (aucune table créée, rien envoyé au
+  serveur), mais elle utilise les mêmes règles de `packages/shared` que le vrai jeu.
+- Tous les textes passent par `packages/i18n` (français et anglais).
+- Un résumé des règles reste lisible à tout moment pendant une vraie partie (bouton « ? »).
+
 ## UI/UX : simple, solide, jolie
 
 Une règle : chaque écran a une seule action principale, atteignable avec le pouce. Le reste est

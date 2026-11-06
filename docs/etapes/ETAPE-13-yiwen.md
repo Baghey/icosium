@@ -36,8 +36,13 @@ Avant de coder : faire répondre le propriétaire aux questions restantes de `re
 6. Bot simple, seulement si le créateur l'a activé.
 7. Yiwen apparaît dans le choix du jeu à la création d'une table.
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - `pnpm verify` passe ;
 - une partie à 4 se joue jusqu'au bout, en vocal, avec toutes les cartes spéciales ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

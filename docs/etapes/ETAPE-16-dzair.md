@@ -40,8 +40,13 @@ Le nom et les règles sont choisis (6 novembre 2026) : suivre la section de docs
 6. Bot simple, seulement si le créateur l'a activé.
 7. Dzaïr apparaît dans le choix du jeu à la création d'une table.
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - `pnpm verify` passe ;
 - une partie à 4 se joue jusqu'à la faillite de tous sauf un, en vocal ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

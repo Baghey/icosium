@@ -44,10 +44,15 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
    petit son. Pas de voix enregistrée sans l'accord du propriétaire.
 7. Le Loup-Garou apparaît dans le choix du jeu, avec un rappel « 6 joueurs minimum ».
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - `pnpm verify` passe ;
 - une partie à 6 personnes se joue jusqu'à la victoire d'un camp, avec le tour de parole au
   micro le jour et le vocal de nuit réservé aux loups ;
 - un joueur ne peut lire aucun autre rôle que le sien, même en interrogeant la base à la main ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

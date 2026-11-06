@@ -33,9 +33,14 @@ interdits en Algérie. Les mises se font en jetons fictifs, les « Louz » (aman
 6. Le Vingt-et-un apparaît dans le choix du jeu, avec la mention « jetons fictifs, pour le jeu
    seulement ».
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - `pnpm verify` passe ;
 - trois personnes jouent plusieurs mains contre la banque, en vocal ;
 - il est impossible de changer son solde de jetons autrement qu'en jouant ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.
