@@ -48,10 +48,10 @@ et trop de jeux dispersent les joueurs.
 | 2 | Yiwen (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
 | 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
 | 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
+| 2 | Houma, achat de quartiers (étape 16) | 2 à 6 | Notre jeu façon Monopoly, quartiers d'Algérie |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
 | 3 | Rami | 2 à 4 | Très joué en famille |
 | 3 | Belote / Coinche | 4 | Jouée en équipes de deux |
-| 3 | Monopoly (version maison) | 2 à 6 | Long et complexe : à faire une fois la base stable |
 | 3 | Pictionary (dessin) | 3 à 10 | Rires garantis en vocal |
 | 4 | Backgammon (Tawla) | 2 | Connu au Maghreb et au Moyen-Orient |
 | 4 | Codenames-like (mots en darija) | 4 à 8 | Jeu d'équipe, mots locaux |
@@ -72,7 +72,8 @@ un jeu de cartes de couleurs comme le jeu le plus connu du genre. Le Ludo « Tch
 **Monopoly : attention au nom.** Monopoly est une marque de Hasbro. Faire notre propre version
 (nom, plateau, cartes) avec des quartiers algériens (Bab El Oued, Hydra, Sidi El Houari…) et
 une monnaie fictive. Les mécaniques d'achat et de loyer ne sont pas protégées, le nom et le
-visuel le sont.
+visuel le sont. Notre version s'appelle « Houma » (proposition) : voir « Règles de Houma » et
+l'étape 16.
 
 ## Règles du domino algérien (double-six)
 
@@ -339,6 +340,43 @@ revient à 1 000 chaque jour s'il en a moins. Pas de classement des jetons, pas 
 
 > Ces règles sont le standard le plus courant ; à valider par le propriétaire.
 
+## Règles de Houma (jeu d'achat de quartiers)
+
+Ajouté le 6 novembre 2026 à la demande du propriétaire. Notre jeu de la même famille que le
+célèbre jeu d'achat de propriétés, avec notre nom, notre plateau et notre argent. Le nom, le logo,
+le plateau, les rues, les personnages et les cartes du jeu connu sont protégés : ne jamais les
+utiliser. « Houma » veut dire « le quartier » ; c'est une proposition, à valider.
+
+- 2 à 6 joueurs, dinars fictifs propres à la partie (aucun lien avec les Louz, rien à acheter).
+- Deux dés tirés par le serveur ; un double fait rejouer ; trois doubles : commissariat.
+- 40 cases. Les quartiers sont groupés par ville ; posséder toute la ville double les loyers et
+  permet de construire des maisons puis une villa.
+
+| Ville (du moins cher au plus cher) | Quartiers proposés |
+| --- | --- |
+| Tamanrasset | Centre, Assekrem |
+| Ghardaïa | Beni Isguen, El Atteuf, Melika |
+| Béjaïa | Yemma Gouraya, Aokas, Tichy |
+| Tizi Ouzou | Haute ville, Azazga, Tigzirt |
+| Sétif | Aïn Fouara, El Eulma, Aïn Arnat |
+| Constantine | Sidi M'Cid, Souika, Bab El Kantara |
+| Oran | Sidi El Houari, Front de mer, Santa Cruz |
+| Alger | Bab El Oued, La Casbah, Hydra |
+
+- Autres cases : départ, 4 transports (gare, tramway, téléphérique, port), 2 services (eau,
+  électricité), cartes « Mektoub » (chance), impôts, commissariat, « Kahwa » (pause au café).
+- Faillite : le joueur sort. Le dernier joueur qui reste gagne.
+
+**Questions pour le propriétaire (proposition par défaut en gras)**
+1. Nom : **Houma** · Bled · Dzaïr.
+2. Durée : partie complète jusqu'à la faillite · **le créateur choisit : complète, ou 60 minutes
+   et le plus riche gagne**.
+3. Quand un joueur refuse d'acheter un quartier : rien ne se passe · **enchères entre tous les
+   joueurs**.
+4. Case « Kahwa » : simple pause · **on ramasse les impôts et amendes payés depuis le début**.
+5. Échanges entre joueurs (quartiers contre argent) : **oui** · non.
+6. Construction : **maisons réparties de façon égale sur la ville** · libre.
+
 ## UI/UX : simple, solide, jolie
 
 Une règle : chaque écran a une seule action principale, atteignable avec le pouce. Le reste est
@@ -403,7 +441,7 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
-| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un, Houma en vague 2 | Étapes 11 à 16, après le MVP |
 | Jeu de cartes de couleurs | Notre version, nommée « Yiwen » | Aucun nom, logo ni visuel de la marque connue |
 | Blackjack | Jetons fictifs seulement, les « Louz » | Rien à acheter, rien à gagner, retour quotidien à 1 000 Louz |
 

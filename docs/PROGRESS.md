@@ -8,8 +8,9 @@ couleurs « comme Uno ». Aucun jeu n'est codé ici : c'est le plan.
 Ce qui est fait :
 - `docs/ICOSIUM.md` : catalogue mis à jour (vague 2) et règles écrites pour le Ludo
   « Tchekchayka » (règles déjà validées), les échecs, Yiwen, le Loup-Garou et le Vingt-et-un.
-- Cinq nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
-  `ETAPE-13-yiwen`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, et le tableau de
+- Six nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
+  `ETAPE-13-yiwen`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, `ETAPE-16-houma` (jeu d'achat de quartiers façon Monopoly, sans
+  rien reprendre de la marque), et le tableau de
   `docs/etapes/00-LISEZ-MOI.md`.
 - Jeu de cartes de couleurs : notre version s'appelle « Yiwen », avec nos familles (Chems,
   Nakhla, Najma, Qaws), des cartes spéciales aux noms simples (Passe, Sens inverse, +2, Joker,
@@ -24,7 +25,8 @@ pour le Loup-Garou, et les jeux Kharbga, Sig et Tawla plus tôt.
 - les règles du Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
 - pour les échecs : utiliser chess.js (BSD-2) ou écrire notre propre moteur ;
 - les questions encore ouvertes de Yiwen (`regles-cartes.md`) ;
-- l'ordre des étapes 11 à 15.
+- le nom et les règles de Houma (6 questions dans docs/ICOSIUM.md) ;
+- l'ordre des étapes 11 à 16.
 
 ## Domino : table « carton de rue » (5 novembre 2026, soir)
 

@@ -32,6 +32,7 @@ MVP ; l'ordre peut changer si le propriétaire le décide.
 | 13 | Yiwen (cartes de couleurs) | Jouer à 4 jusqu'au bout avec les cartes spéciales |
 | 14 | Loup-Garou | Jouer à 6 en vocal, la nuit réservée aux loups |
 | 15 | Vingt-et-un (blackjack) | Jouer contre la banque avec des jetons fictifs |
+| 16 | Houma (achat de quartiers) | Jouer à 4 jusqu'à la faillite, quartiers d'Algérie |
 
 Conseils :
 
