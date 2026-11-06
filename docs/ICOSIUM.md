@@ -265,8 +265,8 @@ en GPL, donc interdits dans l'app. Les pièces sont dessinées maison.
 
 Notre jeu de cartes de couleurs : même famille que le jeu le plus connu du genre, mais avec notre
 nom, notre paquet et nos dessins. Le nom, le logo et le visuel de ce jeu sont des marques
-protégées : ne jamais les utiliser. Le nom « Yiwen » (« un » en tamazight) a été choisi par le propriétaire le
-6 novembre 2026.
+protégées : ne jamais les utiliser. Le nom « Yiwen » (« un » en tamazight) a été choisi par le
+propriétaire le 6 novembre 2026.
 
 Proposition détaillée, maquettes et questions encore ouvertes :
 `/mnt/project-files/apercus-cartes/regles-cartes.md`.
