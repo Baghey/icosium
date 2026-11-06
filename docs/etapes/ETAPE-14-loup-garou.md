@@ -30,8 +30,7 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
    - les morts écoutent sans pouvoir parler jusqu'à la fin de la partie.
 5. L'écran : cercle de joueurs autour d'un feu, passage du jour à la nuit (ciel de la Casbah,
    lune), carte de rôle qu'on retourne en la gardant appuyée, vote en touchant un avatar.
-   Thème algérien proposé au propriétaire : les loups deviennent des « Ghouls » des contes de
-   grand-mère (à valider avant de coder).
+   Les loups restent des loups (le thème « Ghouls » a été refusé par le propriétaire).
 6. Un meneur vocal est-il nécessaire ? Non : le serveur annonce les phases à l'écran et par un
    petit son. Pas de voix enregistrée sans l'accord du propriétaire.
 7. Le Loup-Garou apparaît dans le choix du jeu, avec un rappel « 6 joueurs minimum ».

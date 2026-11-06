@@ -62,13 +62,6 @@ Ajout du 6 novembre 2026 : le propriétaire a demandé les échecs, le Loup-Garo
 un jeu de cartes de couleurs comme le jeu le plus connu du genre. Le Ludo « Tchekchayka »
 (règles validées le 5 novembre) rejoint la même vague.
 
-**Idées proposées, pas encore ajoutées (en attente de l'accord du propriétaire)** :
-- **Kharbga** : jeu de plateau traditionnel du Maghreb (5 × 5, pions qui se capturent en
-  sautant), joué par terre avec des cailloux. Très algérien, simple à coder, 2 joueurs.
-- **Sig** : jeu de bâtonnets du Sahara algérien (on lance des bâtonnets comme des dés et on
-  avance sur un parcours), joué en famille et pendant les fêtes. 2 à 4 joueurs.
-- **Tawla** plus tôt, en vague 2 : le backgammon est très joué dans les cafés.
-
 - **Ronda** : jeu de cartes (40 cartes) où l'on capture les cartes de même valeur sur la table ;
   les « ronda » (paires en main) et « tringa » (brelans) rapportent des points.
 - **Chkobba** : on capture des cartes dont la somme égale sa carte jouée ; vider la table
@@ -280,29 +273,30 @@ ne jamais les utiliser. Le nom « Zid » (« encore ! ») vient de la darija.
 
 | Carte | Effet | Points en fin de manche |
 | --- | --- | --- |
-| Zid 2 | Le suivant pioche 2 cartes et passe son tour | 20 |
-| Rjaa | Le sens du jeu change (à 2 joueurs, on rejoue) | 20 |
-| Fout | Le suivant passe son tour | 20 |
-| Bdel | On choisit la famille | 50 |
-| Bdel Zid 4 | On choisit la famille, le suivant pioche 4 et passe | 50 |
+| +2 | Le suivant pioche 2 cartes et passe son tour | 20 |
+| Retour | Le sens du jeu change (à 2 joueurs, on rejoue) | 20 |
+| Passe | Le suivant passe son tour | 20 |
+| Joker | On choisit la famille | 50 |
+| Joker +4 | On choisit la famille, le suivant pioche 4 et passe | 50 |
 | 0 à 9 | Aucun | Sa valeur |
 
 - On pose une carte de même famille, de même chiffre ou de même symbole ; sinon on pioche.
-- Avec une seule carte en main, on appuie sur « Wahda ! ». Oublié et remarqué par un autre
+- Avec une seule carte en main, on appuie sur « Dernière ! ». Oublié et remarqué par un autre
   joueur avant le coup suivant : on pioche 2 cartes.
 - Le premier qui n'a plus de carte gagne la manche et marque les points des mains adverses.
   Partie en 300 points (réglable : 200, 300, 500).
-- Réglages du créateur : cumuler les Zid (non par défaut) ; piocher jusqu'à pouvoir jouer ou une
+- Réglages du créateur : cumuler les +2 et +4 (non par défaut) ; piocher jusqu'à pouvoir jouer
+  ou une
   seule carte (une seule par défaut).
 
-> Les noms des cartes (Zid, Rjaa, Fout, Bdel, Wahda) sont une proposition, à valider par le
-> propriétaire.
+> Noms des cartes en mots simples (+2, Retour, Passe, Joker, Joker +4, « Dernière ! ») :
+> le propriétaire a refusé les noms en darija le 6 novembre 2026.
 
 ## Règles du Loup-Garou
 
 6 à 12 joueurs humains, jamais de bot. Le serveur est le meneur de jeu. Le nom « Les Loups-garous
 de Thiercelieux » est une marque : on garde seulement le mot « loup-garou » et le principe libre
-du jeu (comme « Mafia »). Thème algérien proposé : les « Ghouls » des contes (à valider).
+du jeu (comme « Mafia »).
 
 | Rôle | Pouvoir |
 | --- | --- |

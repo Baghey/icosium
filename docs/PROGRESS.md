@@ -12,15 +12,16 @@ Ce qui est fait :
   `ETAPE-13-zid`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, et le tableau de
   `docs/etapes/00-LISEZ-MOI.md`.
 - Jeu de cartes de couleurs : notre version s'appelle « Zid ! », avec nos familles (Menthe,
-  Henné, Safran, Indigo), nos cartes spéciales et le cri « Wahda ! ». Aucun nom, logo ni visuel
-  de la marque connue.
+  Henné, Safran, Indigo), nos cartes spéciales (+2, Retour, Passe, Joker,
+  Joker +4) et le cri « Dernière ! ». Aucun nom, logo ni visuel de la marque connue.
 - Blackjack (« Vingt-et-un ») : jetons fictifs seulement, rien à acheter ni à gagner.
 
+Refusé par le propriétaire le 6 novembre : les noms de cartes en darija, le thème « Ghouls »
+pour le Loup-Garou, et les jeux Kharbga, Sig et Tawla plus tôt.
+
 À valider par le propriétaire :
-- les noms des cartes de Zid ! ; le thème « Ghouls » pour le Loup-Garou ; les règles du
-  Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
+- les règles du Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
 - pour les échecs : utiliser chess.js (BSD-2) ou écrire notre propre moteur ;
-- trois idées de jeux proposées, pas encore ajoutées : Kharbga, Sig, Tawla plus tôt ;
 - l'ordre des étapes 11 à 15.
 
 ## Domino : table « carton de rue » (5 novembre 2026, soir)
