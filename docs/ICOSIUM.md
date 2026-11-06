@@ -43,9 +43,12 @@ et trop de jeux dispersent les joueurs.
 | 1 (MVP) | Domino algérien double-six | 2 ou 4 | Le jeu emblème, celui qui fait venir |
 | 1 (MVP) | Ronda | 2 ou 4 | Le jeu de cartes du café algérien, parties courtes |
 | 1 (MVP) | Dama | 2 | Simple à coder, très connu |
+| 2 | Ludo « Tchekchayka » (étape 11) | 2 à 4 | Règles validées, tout le monde connaît |
+| 2 | Échecs (étape 12) | 2 | Bibliothèques matures, public fidèle |
+| 2 | Zid ! (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
+| 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
+| 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
-| 2 | Loup-Garou | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
-| 2 | Échecs | 2 | Bibliothèques matures, public fidèle |
 | 3 | Rami | 2 à 4 | Très joué en famille |
 | 3 | Belote / Coinche | 4 | Jouée en équipes de deux |
 | 3 | Monopoly (version maison) | 2 à 6 | Long et complexe : à faire une fois la base stable |
@@ -54,6 +57,17 @@ et trop de jeux dispersent les joueurs.
 | 4 | Codenames-like (mots en darija) | 4 à 8 | Jeu d'équipe, mots locaux |
 | 4 | Quiz culturel algérien | 2 à 8 | Football, cuisine, wilayas, cinéma |
 | 4 | Puissance 4, Bataille navale | 2 | Faciles, pour les mini-pauses |
+
+Ajout du 6 novembre 2026 : le propriétaire a demandé les échecs, le Loup-Garou, le blackjack et
+un jeu de cartes de couleurs comme le jeu le plus connu du genre. Le Ludo « Tchekchayka »
+(règles validées le 5 novembre) rejoint la même vague.
+
+**Idées proposées, pas encore ajoutées (en attente de l'accord du propriétaire)** :
+- **Kharbga** : jeu de plateau traditionnel du Maghreb (5 × 5, pions qui se capturent en
+  sautant), joué par terre avec des cailloux. Très algérien, simple à coder, 2 joueurs.
+- **Sig** : jeu de bâtonnets du Sahara algérien (on lance des bâtonnets comme des dés et on
+  avance sur un parcours), joué en famille et pendant les fêtes. 2 à 4 joueurs.
+- **Tawla** plus tôt, en vague 2 : le backgammon est très joué dans les cafés.
 
 - **Ronda** : jeu de cartes (40 cartes) où l'on capture les cartes de même valeur sur la table ;
   les « ronda » (paires en main) et « tringa » (brelans) rapportent des points.
@@ -226,6 +240,106 @@ joueurs avant de coder.
 
 Autres jeux connus au Maghreb à explorer : Sota, Basra, Tawla (backgammon).
 
+## Règles du Ludo (Tchekchayka)
+
+Validées par le propriétaire le 5 novembre 2026. Disposition des joueurs aux quatre coins, en 2D,
+d'après la maquette `/mnt/project-files/apercus-ludo/maquette-ludo.html`.
+
+- 2 à 4 joueurs, 4 pions chacun ; 2 contre 2 possible, partenaires face à face.
+- Un pion sort de la maison seulement avec un 6. Un 6 fait rejouer ; trois 6 de suite, le tour
+  est perdu.
+- Tomber sur un pion adverse le renvoie à sa maison, et on rejoue. Les cases étoilées sont sûres.
+- Deux pions de même couleur sur une case ne bloquent rien (pas de mur).
+- Il faut le chiffre exact pour entrer au centre.
+- Le créateur choisit combien de pions il faut rentrer pour gagner (4 par défaut).
+- Le dé est tiré par le serveur.
+
+## Règles des échecs
+
+Règles internationales (FIDE) : roque, prise en passant, promotion, mat, pat, nulles (triple
+répétition, 50 coups, matériel insuffisant, accord), abandon.
+
+| Réglage | Options | Par défaut |
+| --- | --- | --- |
+| Pendule | 3 min + 2 s · 5 min · 10 min · 15 min + 10 s · sans pendule | 10 min |
+| Couleur | Au hasard · Le créateur choisit | Au hasard |
+| Bot | Non · 3 niveaux, écrit par nous | Non |
+
+Licences : chess.js (BSD-2) et react-chessboard (MIT) sont permis ; chessground et Stockfish sont
+en GPL, donc interdits dans l'app. Les pièces sont dessinées maison.
+
+## Règles de Zid !
+
+Notre jeu de cartes de couleurs : même famille que le jeu le plus connu du genre, mais avec notre
+nom, nos cartes et notre cri. Le nom, le logo et le visuel de ce jeu sont des marques protégées :
+ne jamais les utiliser. Le nom « Zid » (« encore ! ») vient de la darija.
+
+- 2 à 8 joueurs, 7 cartes chacun.
+- 4 familles : Menthe, Henné, Safran, Indigo, chacune avec un symbole (pour les daltoniens).
+- Cartes de 0 à 9 et cartes spéciales :
+
+| Carte | Effet | Points en fin de manche |
+| --- | --- | --- |
+| Zid 2 | Le suivant pioche 2 cartes et passe son tour | 20 |
+| Rjaa | Le sens du jeu change (à 2 joueurs, on rejoue) | 20 |
+| Fout | Le suivant passe son tour | 20 |
+| Bdel | On choisit la famille | 50 |
+| Bdel Zid 4 | On choisit la famille, le suivant pioche 4 et passe | 50 |
+| 0 à 9 | Aucun | Sa valeur |
+
+- On pose une carte de même famille, de même chiffre ou de même symbole ; sinon on pioche.
+- Avec une seule carte en main, on appuie sur « Wahda ! ». Oublié et remarqué par un autre
+  joueur avant le coup suivant : on pioche 2 cartes.
+- Le premier qui n'a plus de carte gagne la manche et marque les points des mains adverses.
+  Partie en 300 points (réglable : 200, 300, 500).
+- Réglages du créateur : cumuler les Zid (non par défaut) ; piocher jusqu'à pouvoir jouer ou une
+  seule carte (une seule par défaut).
+
+> Les noms des cartes (Zid, Rjaa, Fout, Bdel, Wahda) sont une proposition, à valider par le
+> propriétaire.
+
+## Règles du Loup-Garou
+
+6 à 12 joueurs humains, jamais de bot. Le serveur est le meneur de jeu. Le nom « Les Loups-garous
+de Thiercelieux » est une marque : on garde seulement le mot « loup-garou » et le principe libre
+du jeu (comme « Mafia »). Thème algérien proposé : les « Ghouls » des contes (à valider).
+
+| Rôle | Pouvoir |
+| --- | --- |
+| Villageois | Aucun, vote le jour |
+| Loup | La nuit, choisit une victime avec les autres loups |
+| Voyante | Chaque nuit, découvre le rôle d'un joueur |
+| Sorcière | Une potion pour sauver la victime, une pour tuer, une seule fois chacune |
+| Chasseur | En mourant, élimine un joueur de son choix |
+
+- La nuit : loups, puis Voyante, puis Sorcière. Le jour : on découvre qui est mort, on discute,
+  on vote. Égalité au vote : personne n'est éliminé.
+- Le village gagne quand tous les loups sont morts ; les loups gagnent quand ils sont aussi
+  nombreux que les autres.
+- Nombre de loups proposé : 1 loup pour 6 joueurs, 2 de 7 à 9, 3 de 10 à 12 (modifiable).
+- Vocal : le jour, tout le monde (micro coupé par défaut) ; la nuit, seuls les loups entre eux ;
+  les morts écoutent sans parler. Ces droits sont donnés par le serveur dans le jeton LiveKit.
+- Chaque joueur ne peut lire que son propre rôle (table privée, RLS stricte) ; les loups se
+  voient entre eux.
+
+## Règles du Vingt-et-un (blackjack)
+
+**Jetons fictifs seulement, aucun argent réel.** Les jetons ne s'achètent pas, ne se vendent pas,
+ne s'échangent pas entre joueurs et ne valent rien hors du jeu. Chaque joueur a 1 000 jetons, et
+revient à 1 000 chaque jour s'il en a moins. Pas de classement des jetons, pas de mot « casino ».
+
+- 1 à 6 joueurs contre la banque, tenue par le serveur (ce n'est pas un bot qui prend une place).
+- Sabot de 4 jeux de 52 cartes, remélangé quand il en reste moins d'un quart.
+- As = 1 ou 11, figures = 10. Blackjack (21 en deux cartes) payé 3 pour 2 ; victoire simple
+  payée 1 pour 1 ; égalité, la mise est rendue.
+- Actions : tirer, rester, doubler sur les deux premières cartes, séparer une paire une fois.
+  Pas d'assurance par défaut.
+- La banque tire jusqu'à 16 et reste à 17.
+- Réglages du créateur : mise minimale et maximale, nombre de jeux dans le sabot.
+- Le sabot et la carte cachée de la banque restent sur le serveur.
+
+> Ces règles sont le standard le plus courant ; à valider par le propriétaire.
+
 ## UI/UX : simple, solide, jolie
 
 Une règle : chaque écran a une seule action principale, atteignable avec le pouce. Le reste est
@@ -290,6 +404,9 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Zid !, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
+| Jeu de cartes de couleurs | Notre version, nommée « Zid ! » | Aucun nom, logo ni visuel de la marque connue |
+| Blackjack | Jetons fictifs seulement | Rien à acheter, rien à gagner, retour quotidien à 1 000 jetons |
 
 À confirmer : anglais seul au lancement, c'est voulu ? Le public est surtout algérien ; ajouter
 le français coûte peu si les textes sont dans des fichiers de traduction. L'arabe demande une

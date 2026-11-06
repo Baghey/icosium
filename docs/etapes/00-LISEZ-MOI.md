@@ -22,6 +22,17 @@ vraiment chez toi.
 | 09 | Sécurité et modération | Signaler, bannir, supprimer son compte |
 | 10 | Mise en ligne et test | 30 à 50 testeurs, mesures chaque semaine |
 
+Vague 2, ajoutée le 6 novembre 2026 à la demande du propriétaire. Ces étapes viennent après le
+MVP ; l'ordre peut changer si le propriétaire le décide.
+
+| Étape | Contenu | Tu dois pouvoir |
+| --- | --- | --- |
+| 11 | Ludo « Tchekchayka » | Jouer à 4 ou en 2 contre 2, avec le dé tiré par le serveur |
+| 12 | Échecs | Jouer une partie complète avec pendule |
+| 13 | Zid ! (cartes de couleurs) | Jouer à 4 jusqu'à 300 points avec les cartes spéciales |
+| 14 | Loup-Garou | Jouer à 6 en vocal, la nuit réservée aux loups |
+| 15 | Vingt-et-un (blackjack) | Jouer contre la banque avec des jetons fictifs |
+
 Conseils :
 
 - Si quelque chose ne marche pas, ne passe pas à la suite : décris le problème à Claude Code

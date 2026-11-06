@@ -1,5 +1,28 @@
 # Journal d'avancement d'ICOSIUM
 
+## Plan : nouveaux jeux en vague 2 (6 novembre 2026)
+
+Demande du propriétaire : ajouter les échecs, le Loup-Garou, le blackjack et un jeu de cartes de
+couleurs « comme Uno ». Aucun jeu n'est codé ici : c'est le plan.
+
+Ce qui est fait :
+- `docs/ICOSIUM.md` : catalogue mis à jour (vague 2) et règles écrites pour le Ludo
+  « Tchekchayka » (règles déjà validées), les échecs, Zid !, le Loup-Garou et le Vingt-et-un.
+- Cinq nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
+  `ETAPE-13-zid`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, et le tableau de
+  `docs/etapes/00-LISEZ-MOI.md`.
+- Jeu de cartes de couleurs : notre version s'appelle « Zid ! », avec nos familles (Menthe,
+  Henné, Safran, Indigo), nos cartes spéciales et le cri « Wahda ! ». Aucun nom, logo ni visuel
+  de la marque connue.
+- Blackjack (« Vingt-et-un ») : jetons fictifs seulement, rien à acheter ni à gagner.
+
+À valider par le propriétaire :
+- les noms des cartes de Zid ! ; le thème « Ghouls » pour le Loup-Garou ; les règles du
+  Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
+- pour les échecs : utiliser chess.js (BSD-2) ou écrire notre propre moteur ;
+- trois idées de jeux proposées, pas encore ajoutées : Kharbga, Sig, Tawla plus tôt ;
+- l'ordre des étapes 11 à 15.
+
 ## Domino : table « carton de rue » (5 novembre 2026, soir)
 
 D'après la vidéo TikTok du propriétaire (domino du quartier, dehors, le soir).
