@@ -15,7 +15,7 @@ import { visibilityHint, visibilityLabel } from "./table-tools";
 import { Sheet } from "@/components/sheet";
 import { GAMES, GAME_IDS, type GameId, isGameId, tablePath } from "@/lib/games";
 import { useT } from "@/lib/i18n";
-import { type LobbyTable, type Visibility, VISIBILITIES } from "@/lib/lobby";
+import { type LobbyTable, type Visibility, VISIBILITIES, setTableVisibility } from "@/lib/lobby";
 import { preloadSounds } from "@/lib/sound";
 
 const ERRORS: Record<string, MessageKey> = {
@@ -238,7 +238,11 @@ function NewTable({ solo, initialGame, onClose }: { solo: boolean; initialGame: 
     setBusy(true);
     setError(null);
     const res = await GAMES[game].call({ op: "create", options: game === "ludo" ? ludo : domino, solo, visibility });
-    if (res.ok) router.push(tablePath(game, res.data.code as string));
+    if (res.ok) {
+      // La visibilité est aussi réglée ici : ça marche même si le serveur du jeu ne la lit pas encore.
+      if (!solo && visibility !== "friends" && typeof res.data.tableId === "string") await setTableVisibility(game, res.data.tableId, visibility);
+      router.push(tablePath(game, res.data.code as string));
+    }
     else {
       setBusy(false);
       setError(errorKey(res.error));
