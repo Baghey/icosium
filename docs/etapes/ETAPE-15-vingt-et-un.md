@@ -4,10 +4,10 @@ docs/PROGRESS.md et la section « Règles du Vingt-et-un » de docs/ICOSIUM.md.
 Objectif : un jeu de cartes court, à plusieurs contre la banque, pour s'amuser ensemble en vocal.
 
 Règle absolue : **aucun argent réel**. Les joueurs ont 16 ans et plus, et les jeux d'argent sont
-interdits en Algérie. Les mises se font en jetons fictifs :
+interdits en Algérie. Les mises se font en jetons fictifs, les « Louz » (amandes) :
 - les jetons ne s'achètent jamais, ne se vendent jamais, ne s'échangent pas entre joueurs et ne
   se transforment en rien (ni argent, ni cadeau, ni cosmétique) ;
-- chaque joueur reçoit 1 000 jetons, et revient à 1 000 chaque jour s'il en a moins ;
+- chaque joueur reçoit 1 000 Louz, et revient à 1 000 chaque jour s'il en a moins ;
 - pas de classement public des jetons, pas de publicité de casino, pas de mot « casino » dans
   l'app.
 

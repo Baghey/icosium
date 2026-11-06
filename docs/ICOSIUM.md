@@ -45,7 +45,7 @@ et trop de jeux dispersent les joueurs.
 | 1 (MVP) | Dama | 2 | Simple à coder, très connu |
 | 2 | Ludo « Tchekchayka » (étape 11) | 2 à 4 | Règles validées, tout le monde connaît |
 | 2 | Échecs (étape 12) | 2 | Bibliothèques matures, public fidèle |
-| 2 | Zid ! (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
+| 2 | Kemmel (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
 | 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
 | 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
@@ -261,35 +261,38 @@ répétition, 50 coups, matériel insuffisant, accord), abandon.
 Licences : chess.js (BSD-2) et react-chessboard (MIT) sont permis ; chessground et Stockfish sont
 en GPL, donc interdits dans l'app. Les pièces sont dessinées maison.
 
-## Règles de Zid !
+## Règles de Kemmel
 
 Notre jeu de cartes de couleurs : même famille que le jeu le plus connu du genre, mais avec notre
-nom, nos cartes et notre cri. Le nom, le logo et le visuel de ce jeu sont des marques protégées :
-ne jamais les utiliser. Le nom « Zid » (« encore ! ») vient de la darija.
+nom, notre paquet et nos dessins. Le nom, le logo et le visuel de ce jeu sont des marques
+protégées : ne jamais les utiliser. « Kemmel » (كمّل) veut dire « termine ! » : finir sa main est
+le but du jeu.
 
-- 2 à 8 joueurs, 7 cartes chacun.
-- 4 familles : Menthe, Henné, Safran, Indigo, chacune avec un symbole (pour les daltoniens).
-- Cartes de 0 à 9 et cartes spéciales :
+Proposition détaillée, maquettes et questions encore ouvertes :
+`/mnt/project-files/apercus-cartes/regles-cartes.md`.
 
-| Carte | Effet | Points en fin de manche |
-| --- | --- | --- |
-| +2 | Le suivant pioche 2 cartes et passe son tour | 20 |
-| Retour | Le sens du jeu change (à 2 joueurs, on rejoue) | 20 |
-| Passe | Le suivant passe son tour | 20 |
-| Joker | On choisit la famille | 50 |
-| Joker +4 | On choisit la famille, le suivant pioche 4 et passe | 50 |
-| 0 à 9 | Aucun | Sa valeur |
+- 2 à 8 joueurs, 7 cartes chacun ; on retourne une carte chiffre pour commencer.
+- Paquet de 104 cartes, 4 familles aux motifs algériens : Chems (soleil, ambre doré), Nakhla
+  (palmier, vert jade), Najma (étoile de zellige, bleu faïence), Qaws (arcade de la Casbah, terre
+  cuite).
 
-- On pose une carte de même famille, de même chiffre ou de même symbole ; sinon on pioche.
-- Avec une seule carte en main, on appuie sur « Dernière ! ». Oublié et remarqué par un autre
-  joueur avant le coup suivant : on pioche 2 cartes.
-- Le premier qui n'a plus de carte gagne la manche et marque les points des mains adverses.
-  Partie en 300 points (réglable : 200, 300, 500).
-- Réglages du créateur : cumuler les +2 et +4 (non par défaut) ; piocher jusqu'à pouvoir jouer
-  ou une seule carte (une seule par défaut).
+| Carte | Effet | Nombre | Points |
+| --- | --- | --- | --- |
+| 1 à 9 | Aucun | 2 de chaque par famille (72) | Sa valeur |
+| Passe | Le suivant passe son tour | 2 par famille (8) | 20 |
+| Sens inverse | Le sens du jeu change (à 2 joueurs, on rejoue) | 2 par famille (8) | 20 |
+| +2 | Le suivant pioche 2 cartes et passe son tour | 2 par famille (8) | 20 |
+| Joker | On choisit la famille | 4 | 50 |
+| Joker +4 | On choisit la famille, le suivant pioche 4 et passe | 4 | 50 |
 
-> Noms des cartes en mots simples (+2, Retour, Passe, Joker, Joker +4, « Dernière ! ») :
-> le propriétaire a refusé les noms en darija le 6 novembre 2026.
+- On pose une carte de même famille, de même chiffre ou de même symbole ; les jokers se posent sur
+  tout ; sinon on pioche.
+- Avec une seule carte en main, on appuie sur « Dernière ! ».
+- Le premier qui vide sa main gagne la manche.
+
+> Noms des cartes en français simple : le propriétaire a refusé les noms en darija le
+> 6 novembre 2026. Les autres réglages (cumul des +2 et +4, oubli de l'annonce, pioche, partie
+> aux points) attendent ses réponses aux questions de `regles-cartes.md`.
 
 ## Règles du Loup-Garou
 
@@ -317,8 +320,9 @@ du jeu (comme « Mafia »).
 
 ## Règles du Vingt-et-un (blackjack)
 
-**Jetons fictifs seulement, aucun argent réel.** Les jetons ne s'achètent pas, ne se vendent pas,
-ne s'échangent pas entre joueurs et ne valent rien hors du jeu. Chaque joueur a 1 000 jetons, et
+**Jetons fictifs seulement, aucun argent réel.** Les jetons s'appellent des « Louz » (amandes).
+Ils ne s'achètent pas, ne se vendent pas,
+ne s'échangent pas entre joueurs et ne valent rien hors du jeu. Chaque joueur a 1 000 Louz, et
 revient à 1 000 chaque jour s'il en a moins. Pas de classement des jetons, pas de mot « casino ».
 
 - 1 à 6 joueurs contre la banque, tenue par le serveur (ce n'est pas un bot qui prend une place).
@@ -397,9 +401,9 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
-| Nouveaux jeux (6 novembre) | Ludo, échecs, Zid !, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
-| Jeu de cartes de couleurs | Notre version, nommée « Zid ! » | Aucun nom, logo ni visuel de la marque connue |
-| Blackjack | Jetons fictifs seulement | Rien à acheter, rien à gagner, retour quotidien à 1 000 jetons |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Kemmel, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
+| Jeu de cartes de couleurs | Notre version, nommée « Kemmel » | Aucun nom, logo ni visuel de la marque connue |
+| Blackjack | Jetons fictifs seulement, les « Louz » | Rien à acheter, rien à gagner, retour quotidien à 1 000 Louz |
 
 À confirmer : anglais seul au lancement, c'est voulu ? Le public est surtout algérien ; ajouter
 le français coûte peu si les textes sont dans des fichiers de traduction. L'arabe demande une

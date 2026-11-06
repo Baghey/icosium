@@ -7,14 +7,15 @@ couleurs « comme Uno ». Aucun jeu n'est codé ici : c'est le plan.
 
 Ce qui est fait :
 - `docs/ICOSIUM.md` : catalogue mis à jour (vague 2) et règles écrites pour le Ludo
-  « Tchekchayka » (règles déjà validées), les échecs, Zid !, le Loup-Garou et le Vingt-et-un.
+  « Tchekchayka » (règles déjà validées), les échecs, Kemmel, le Loup-Garou et le Vingt-et-un.
 - Cinq nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
-  `ETAPE-13-zid`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, et le tableau de
+  `ETAPE-13-kemmel`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, et le tableau de
   `docs/etapes/00-LISEZ-MOI.md`.
-- Jeu de cartes de couleurs : notre version s'appelle « Zid ! », avec nos familles (Menthe,
-  Henné, Safran, Indigo), nos cartes spéciales (+2, Retour, Passe, Joker,
-  Joker +4) et le cri « Dernière ! ». Aucun nom, logo ni visuel de la marque connue.
-- Blackjack (« Vingt-et-un ») : jetons fictifs seulement, rien à acheter ni à gagner.
+- Jeu de cartes de couleurs : notre version s'appelle « Kemmel », avec nos familles (Chems,
+  Nakhla, Najma, Qaws), des cartes spéciales aux noms simples (Passe, Sens inverse, +2, Joker,
+  Joker +4) et l'annonce « Dernière ! ». Aucun nom, logo ni visuel de la marque connue. Détails
+  et maquettes : `/mnt/project-files/apercus-cartes/`.
+- Blackjack (« Vingt-et-un ») : jetons fictifs seulement (les « Louz »), rien à acheter ni à gagner.
 
 Refusé par le propriétaire le 6 novembre : les noms de cartes en darija, le thème « Ghouls »
 pour le Loup-Garou, et les jeux Kharbga, Sig et Tawla plus tôt.
@@ -22,6 +23,7 @@ pour le Loup-Garou, et les jeux Kharbga, Sig et Tawla plus tôt.
 À valider par le propriétaire :
 - les règles du Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
 - pour les échecs : utiliser chess.js (BSD-2) ou écrire notre propre moteur ;
+- les questions encore ouvertes de Kemmel (`regles-cartes.md`) ;
 - l'ordre des étapes 11 à 15.
 
 ## Domino : table « carton de rue » (5 novembre 2026, soir)
