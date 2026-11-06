@@ -2,7 +2,7 @@
 
 import type { MessageKey } from "@icosium/i18n";
 import { useState } from "react";
-import { AddFriendIcon, BlockIcon, CheckIcon, CloseIcon, FlagIcon, SpeakerIcon, SpeakerOffIcon } from "@/components/cafe-icons";
+import { AddFriendIcon, BlockIcon, ChairIcon, CheckIcon, CloseIcon, FlagIcon, SpeakerIcon, SpeakerOffIcon } from "@/components/cafe-icons";
 import { Sheet } from "@/components/sheet";
 import { useT } from "@/lib/i18n";
 import { blockUser, removeFriend, reportUser, sendFriendRequest, useSocial } from "@/lib/social-context";
@@ -24,17 +24,19 @@ type Props = {
   messageId?: string;
   /** À la table : proposer aussi « Ajouter en ami » et « Couper son micro pour moi ». */
   atTable?: boolean;
+  /** Le Patron, avant la partie : « Retirer de la table ». */
+  onKick?: () => Promise<boolean>;
 };
 
 /**
  * Le menu d'une personne : retirer des amis, bloquer, signaler.
  * Accessible partout où l'on croise quelqu'un (liste d'amis, conversation).
  */
-export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialMode = "menu", messageId, atTable = false }: Props) {
+export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialMode = "menu", messageId, atTable = false, onKick }: Props) {
   const t = useT();
   const { refresh, presenceOf, friends } = useSocial();
   const { silenced, setSilenced, peers } = useVoice();
-  const [mode, setMode] = useState<"menu" | "remove" | "block" | "report" | "done">(initialMode);
+  const [mode, setMode] = useState<"menu" | "remove" | "block" | "kick" | "report" | "done">(initialMode);
   const pending = friends.some((f) => f.id === id && f.status === "pending");
   const [asked, setAsked] = useState(false);
   const inVoice = peers.some((p) => p.identity === id);
@@ -92,6 +94,12 @@ export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialM
               </span>
             </button>
           )}
+          {onKick && (
+            <button type="button" className={`${row} text-danger`} onClick={() => setMode("kick")}>
+              <ChairIcon className="size-5" />
+              {t("lobby.kick")}
+            </button>
+          )}
           {isFriend && (
             <button type="button" className={row} onClick={() => setMode("remove")}>
               <CloseIcon className="size-5 text-cafe-muted" />
@@ -127,6 +135,25 @@ export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialM
               className="min-h-touch flex-1 rounded-control bg-danger font-bold text-cafe-0 disabled:opacity-60"
             >
               {t(mode === "remove" ? "social.remove" : "social.block")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mode === "kick" && onKick && (
+        <div className="flex flex-col gap-4">
+          <p className="text-cafe-text/90">{t("lobby.kickConfirm", { name })}</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setMode("menu")} className="min-h-touch flex-1 rounded-control border border-gold/30 font-semibold">
+              {t("social.cancel")}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void run(onKick, "lobby.kickDone", onClose)}
+              className="min-h-touch flex-1 rounded-control bg-danger font-bold text-cafe-0 disabled:opacity-60"
+            >
+              {t("lobby.kickYes")}
             </button>
           </div>
         </div>

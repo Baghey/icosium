@@ -316,3 +316,37 @@ export function ChevronDownIcon({ className }: P) {
     </svg>
   );
 }
+
+/** Envoyer par WhatsApp : une bulle de conversation ronde avec un combiné (dessin maison). */
+export function WhatsAppIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M12 2.8a9.2 9.2 0 0 0-7.9 13.9L3 21l4.4-1.1A9.2 9.2 0 1 0 12 2.8z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path
+        d="M9.1 7.4c.2 0 .4 0 .5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3 0 .5.7 1.2 1.6 2 2.8 2.6.2.1.4.1.5-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.9.5-2.6-.6-4.9-2.7-5.8-5.2-.3-.8-.1-1.7.5-2.3.2-.2.5-.3.8-.3z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/** Chaise vue de profil (une place à prendre). */
+export function ChairIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 3v10h10" />
+      <path d="M7 13v8M17 13v8M7 17h10" />
+      <path d="M7 6h3" />
+    </svg>
+  );
+}
+
+/** Un œil : qui peut voir la table. */
+export function EyeIcon({ className }: P) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}

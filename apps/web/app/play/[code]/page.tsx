@@ -17,6 +17,7 @@ const JOIN_ERRORS: Record<string, MessageKey> = {
   table_full: "play.error.table_full",
   table_started: "play.error.table_started",
   seat_taken: "play.error.seat_taken",
+  kicked: "play.error.kicked",
 };
 
 export default function TablePage({ params }: { params: Promise<{ code: string }> }) {
@@ -58,7 +59,7 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
   if (table.joinError || table.mySeat === null || !table.table) {
     return (
       <Centered>
-        <p className="mb-4">{t(JOIN_ERRORS[table.joinError ?? ""] ?? "play.error.unknown")}</p>
+        <p className="mb-4">{t(table.joinError ? (JOIN_ERRORS[table.joinError] ?? "play.error.unknown") : "play.error.removed")}</p>
         <Link href="/play" className="inline-flex min-h-touch items-center rounded-control bg-mint px-5 font-semibold text-mint-ink">
           {t("nav.play")}
         </Link>
@@ -74,7 +75,10 @@ export default function TablePage({ params }: { params: Promise<{ code: string }
         seats={table.seats}
         mySeat={table.mySeat}
         isHost={table.table.hostId === user.id}
+        tableId={table.table.id}
+        hostId={table.table.hostId}
         addBots={table.addBots}
+        onSeatsChanged={() => void table.refreshSeats()}
       />
     );
   }

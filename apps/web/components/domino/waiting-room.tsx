@@ -1,20 +1,22 @@
 "use client";
 
 import type { DominoOptions } from "@icosium/shared";
-import Link from "next/link";
 import { useState } from "react";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { type CallResult, type SeatInfo, seatKey } from "@/lib/domino-client";
+import { kickFromTable } from "@/lib/lobby";
 import { SoundToggle } from "./sound-toggle";
-import { AddFriendIcon, BotIcon, Emblem } from "@/components/cafe-icons";
-import { InviteFriends } from "@/components/social/invite-friends";
+import { BotIcon, CrownIcon, Emblem } from "@/components/cafe-icons";
+import { CallSomeone, VisibilityPicker, useLeave } from "@/components/lobby/table-tools";
 import { PersonActions } from "@/components/social/person-actions";
 import { useSocial } from "@/lib/social-context";
 import { tableAvatars } from "./player-badge";
 
 type Props = {
   code: string;
+  tableId: string;
+  hostId: string;
   options: DominoOptions;
   seats: SeatInfo[];
   mySeat: number;
@@ -23,11 +25,10 @@ type Props = {
 };
 
 /** En attendant les amis : le code en grand, le bouton partager, et les chaises qui se remplissent. */
-export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: Props) {
+export function WaitingRoom({ code, tableId, hostId, options, seats, mySeat, isHost, addBots, onSeatsChanged }: Props & { onSeatsChanged?: () => void }) {
   const t = useT();
-  const [copied, setCopied] = useState(false);
   const [botsBusy, setBotsBusy] = useState(false);
-  const [inviting, setInviting] = useState(false);
+  const { leave, leaving } = useLeave("domino", tableId);
   const [person, setPerson] = useState<{ id: string; name: string } | null>(null);
   const { friends } = useSocial();
   const players = options.players;
@@ -37,22 +38,6 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
     setBotsBusy(true);
     const res = await addBots();
     if (!res.ok) setBotsBusy(false);
-  }
-
-  async function share() {
-    const text = t("domino.shareText", { code });
-    const url = `${window.location.origin}/play/${code}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ text, url });
-        return;
-      } catch {
-        // l'utilisateur a fermé le partage : on copie à la place
-      }
-    }
-    await navigator.clipboard?.writeText(`${text}\n${url}`).catch(() => undefined);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
   }
 
   // Les chaises autour de la table, vues depuis ma place (moi en bas).
@@ -73,10 +58,10 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
     <div className="cafe-bg fixed inset-x-0 bottom-0 overflow-y-auto text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
     <div className="mx-auto flex min-h-full max-w-xl flex-col px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-center justify-between">
-        <Link href="/play" className="flex min-h-touch items-center gap-2 rounded-control pe-2 text-sm text-cafe-muted">
+        <button type="button" onClick={() => void leave()} disabled={leaving} className="flex min-h-touch items-center gap-2 rounded-control pe-2 text-sm text-cafe-muted disabled:opacity-60">
           <Emblem className="size-9" />
-          {t("domino.leave")}
-        </Link>
+          {leaving ? t("lobby.leaving") : t("domino.leave")}
+        </button>
         <SoundToggle tone="cafe" />
       </header>
 
@@ -93,23 +78,8 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
             </span>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => void share()}
-          className="gold-button min-h-touch rounded-full px-6 text-sm font-bold transition-transform duration-150 active:scale-[0.97]"
-        >
-          {copied ? t("domino.copied") : t("domino.share")}
-        </button>
-        {seats.length < players && (
-          <button
-            type="button"
-            onClick={() => setInviting(true)}
-            className="cafe-panel flex min-h-touch items-center gap-2 rounded-full px-5 text-sm font-semibold text-gold-light transition-transform duration-150 active:scale-[0.97]"
-          >
-            <AddFriendIcon className="size-5" />
-            {t("social.inviteFriends")}
-          </button>
-        )}
+        <CallSomeone game="domino" code={code} players={players} free={players - seats.length} />
+        {isHost && <VisibilityPicker game="domino" tableId={tableId} />}
       </section>
 
       <div className="flex flex-1 items-center justify-center py-12">
@@ -141,6 +111,7 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {who ? <img src={avatars[seatKey(who)]} alt="" className="size-full rounded-full object-cover" /> : "·"}
                 </span>
+                {who?.userId === hostId && <CrownIcon className="absolute -top-3 size-4 text-gold-light drop-shadow" />}
                 <span className="cafe-panel max-w-28 truncate rounded-full px-2 text-xs">
                   {who ? (seat === mySeat ? t("domino.you") : who.username) : t("domino.freeSeat")}
                   {who && partner ? ` · ${t("domino.partner")}` : ""}
@@ -157,6 +128,7 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
           name={person.name}
           isFriend={friends.some((f) => f.id === person.id && f.status === "accepted")}
           atTable
+          onKick={isHost ? () => kickFromTable("domino", tableId, person.id).then((ok) => (onSeatsChanged?.(), ok)) : undefined}
           onClose={() => setPerson(null)}
         />
       )}
@@ -183,7 +155,6 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
         <MicButton tone="cafe" />
       </div>
     </div>
-    {inviting && <InviteFriends code={code} players={players} free={players - seats.length} onClose={() => setInviting(false)} />}
     </div>
   );
 }

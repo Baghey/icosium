@@ -3,11 +3,14 @@
 import type { LudoOptions } from "@icosium/shared";
 import Link from "next/link";
 import { useState } from "react";
+import { CallSomeone, VisibilityPicker, useLeave } from "@/components/lobby/table-tools";
+import { PersonActions } from "@/components/social/person-actions";
+import { kickFromTable } from "@/lib/lobby";
+import { useSocial } from "@/lib/social-context";
 import { MicButton } from "@/components/mic-button";
 import { SoundToggle } from "@/components/domino/sound-toggle";
 import { tableAvatars } from "@/components/domino/player-badge";
-import { AddFriendIcon, BotIcon, Emblem } from "@/components/cafe-icons";
-import { InviteFriends } from "@/components/social/invite-friends";
+import { BotIcon, CrownIcon, Emblem } from "@/components/cafe-icons";
 import { type CallResult, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { useT } from "@/lib/i18n";
 import { colorsFor } from "@icosium/shared";
@@ -15,6 +18,8 @@ import { LUDO_FILL, PawnArt } from "./board";
 
 type Props = {
   code: string;
+  tableId: string;
+  hostId: string;
   options: LudoOptions;
   seats: SeatInfo[];
   mySeat: number;
@@ -48,11 +53,12 @@ function MiniPawn({ color }: { color: ReturnType<typeof colorsFor>[number] }) {
 }
 
 /** En attendant les amis : le code en grand, partager, inviter, et les quatre coins du plateau qui se remplissent. */
-export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots }: Props) {
+export function LudoWaitingRoom({ code, tableId, hostId, options, seats, mySeat, isHost, addBots, onSeatsChanged }: Props & { onSeatsChanged?: () => void }) {
   const t = useT();
-  const [copied, setCopied] = useState(false);
   const [botsBusy, setBotsBusy] = useState(false);
-  const [inviting, setInviting] = useState(false);
+  const [person, setPerson] = useState<{ id: string; name: string } | null>(null);
+  const { friends } = useSocial();
+  const { leave, leaving } = useLeave("ludo", tableId);
   const players = options.players;
   const colors = colorsFor(players);
   const avatars = tableAvatars(seats.map((s) => ({ key: seatKey(s), botName: s.userId ? null : s.username })));
@@ -63,22 +69,6 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
     if (!res.ok) setBotsBusy(false);
   }
 
-  async function share() {
-    const text = t("ludo.waiting.shareText", { code });
-    const url = `${window.location.origin}/ludo/${code}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ text, url });
-        return;
-      } catch {
-        // l'utilisateur a fermé le partage : on copie à la place
-      }
-    }
-    await navigator.clipboard?.writeText(`${text}\n${url}`).catch(() => undefined);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
-  }
-
   // Les quatre coins, dans l'ordre de l'écran (haut-gauche, haut-droite, bas-gauche, bas-droite).
   const order = [0, 1, 3, 2];
 
@@ -86,10 +76,10 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
     <div className="ludo-bg fixed inset-x-0 bottom-0 overflow-y-auto text-cafe-text" style={{ top: "var(--voicebar, 0px)" }}>
       <div className="mx-auto flex min-h-full max-w-xl flex-col px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <header className="flex items-center justify-between">
-          <Link href="/play?game=ludo" className="flex min-h-touch items-center gap-2 rounded-control pe-2 text-sm text-cafe-muted">
+          <button type="button" onClick={() => void leave()} disabled={leaving} className="flex min-h-touch items-center gap-2 rounded-control pe-2 text-sm text-cafe-muted disabled:opacity-60">
             <Emblem className="size-9" />
-            {t("ludo.leave")}
-          </Link>
+            {leaving ? t("lobby.leaving") : t("ludo.leave")}
+          </button>
           <SoundToggle tone="cafe" />
         </header>
 
@@ -103,21 +93,8 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
               </span>
             ))}
           </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <button type="button" onClick={() => void share()} className="gold-button min-h-touch rounded-full px-6 text-sm font-bold transition-transform duration-150 active:scale-[0.97]">
-              {copied ? t("domino.copied") : t("domino.share")}
-            </button>
-            {seats.length < players && (
-              <button
-                type="button"
-                onClick={() => setInviting(true)}
-                className="cafe-panel flex min-h-touch items-center gap-2 rounded-full px-5 text-sm font-semibold text-gold-light transition-transform duration-150 active:scale-[0.97]"
-              >
-                <AddFriendIcon className="size-5" />
-                {t("social.inviteFriends")}
-              </button>
-            )}
-          </div>
+          <CallSomeone game="ludo" code={code} players={players} free={players - seats.length} />
+          {isHost && <VisibilityPicker game="ludo" tableId={tableId} />}
         </section>
 
         <div className="grid flex-1 grid-cols-2 content-center gap-3 py-8">
@@ -128,9 +105,19 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
             const who = seats.find((s) => s.seat === seat);
             const partner = options.teams && seat !== mySeat && seat % 2 === mySeat % 2;
             const fill = LUDO_FILL[color];
+            const other = who?.userId && seat !== mySeat ? { id: who.userId, name: who.username } : null;
             return (
               <div
                 key={corner}
+                {...(other
+                  ? {
+                      role: "button",
+                      tabIndex: 0,
+                      "aria-label": t("domino.playerMenu", { name: other.name }),
+                      onClick: () => setPerson(other),
+                      onKeyDown: (e: React.KeyboardEvent) => (e.key === "Enter" || e.key === " ") && setPerson(other),
+                    }
+                  : {})}
                 className={`relative flex h-28 flex-col items-center justify-center gap-1.5 overflow-hidden rounded-card border ${who ? "border-gold/60" : "border-dashed border-gold/30"}`}
                 style={{ background: `linear-gradient(160deg, color-mix(in srgb, ${fill.main} ${who ? 38 : 14}%, rgb(22 14 9 / 0.9)), rgb(18 11 7 / 0.92))` }}
               >
@@ -151,6 +138,7 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
                   {who && partner ? ` · ${t("ludo.partner")}` : ""}
                 </span>
                 {who?.isBot && <BotIcon className="absolute end-2 top-2 size-4 text-gold-light" />}
+                {who?.userId === hostId && <CrownIcon className="absolute end-2 top-2 size-4 text-gold-light drop-shadow" />}
                 <span className="absolute start-2 top-2 size-2.5 rounded-full" style={{ background: fill.main }} aria-hidden="true" />
               </div>
             );
@@ -185,7 +173,16 @@ export function LudoWaitingRoom({ code, options, seats, mySeat, isHost, addBots 
           <MicButton tone="cafe" />
         </div>
       </div>
-      {inviting && <InviteFriends game="ludo" code={code} players={players} free={players - seats.length} onClose={() => setInviting(false)} />}
+      {person && (
+        <PersonActions
+          id={person.id}
+          name={person.name}
+          isFriend={friends.some((f) => f.id === person.id && f.status === "accepted")}
+          atTable
+          onKick={isHost ? () => kickFromTable("ludo", tableId, person.id).then((ok) => (onSeatsChanged?.(), ok)) : undefined}
+          onClose={() => setPerson(null)}
+        />
+      )}
     </div>
   );
 }

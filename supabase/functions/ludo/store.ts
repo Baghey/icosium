@@ -1,6 +1,8 @@
 import type { LudoOptions, LudoPublicView, LudoState } from "../_shared/ludo/index.ts";
 
 export type TableStatus = "waiting" | "playing" | "finished";
+/** Qui voit la table dans le lobby : tout le café, les amis des joueurs assis, ou personne (code seulement). */
+export type Visibility = "public" | "friends" | "private";
 export type TableRow = { id: string; code: string; hostId: string; options: LudoOptions; status: TableStatus };
 /** Une chaise : un humain (userId) ou un bot (userId null, isBot true). */
 export type SeatRow = { seat: number; userId: string | null; username: string; isBot?: boolean };
@@ -16,12 +18,12 @@ export interface LudoStore {
   /** Ce code est-il déjà pris par une table d'un autre jeu ? (un code = une seule table) */
   codeUsedElsewhere(code: string): Promise<boolean>;
   /** Crée la table ; renvoie null si le code est déjà pris. */
-  insertTable(row: Omit<TableRow, "id" | "status">): Promise<TableRow | null>;
+  insertTable(row: Omit<TableRow, "id" | "status">, visibility: Visibility): Promise<TableRow | null>;
   tableByCode(code: string): Promise<TableRow | null>;
   tableById(id: string): Promise<TableRow | null>;
   seats(tableId: string): Promise<SeatRow[]>;
-  /** Assoit quelqu'un ; renvoie false si la chaise vient d'être prise. */
-  insertSeat(tableId: string, seat: SeatRow): Promise<boolean>;
+  /** Assoit quelqu'un ; false si la chaise vient d'être prise, "kicked" si le Patron l'a retiré de cette table. */
+  insertSeat(tableId: string, seat: SeatRow): Promise<boolean | "kicked">;
   /** Le Patron a autorisé les bots à sa table. */
   allowBots(tableId: string): Promise<void>;
   loadGame(tableId: string): Promise<{ version: number; state: LudoState } | null>;

@@ -1,9 +1,9 @@
 import type { LudoState } from "../_shared/ludo/index.ts";
-import type { LudoStore, SeatRow, StoredView, TableRow, TableStatus } from "./store.ts";
+import type { LudoStore, SeatRow, Visibility, StoredView, TableRow, TableStatus } from "./store.ts";
 
 /** Stockage en mémoire pour les tests : se comporte comme les tables Supabase. */
 export class MemoryStore implements LudoStore {
-  tables = new Map<string, TableRow & { createdAt: number }>();
+  tables = new Map<string, TableRow & { createdAt: number; visibility: Visibility; kicked: string[] }>();
   seatRows = new Map<string, SeatRow[]>();
   games = new Map<string, { version: number; state: LudoState }>();
   views = new Map<string, { version: number; view: StoredView }>();
@@ -23,9 +23,9 @@ export class MemoryStore implements LudoStore {
   async codeUsedElsewhere(code: string) {
     return this.otherCodes.has(code);
   }
-  async insertTable(row: Omit<TableRow, "id" | "status">) {
+  async insertTable(row: Omit<TableRow, "id" | "status">, visibility: Visibility) {
     if ([...this.tables.values()].some((t) => t.code === row.code)) return null;
-    const table = { ...row, id: `t${++this.seq}`, status: "waiting" as TableStatus, createdAt: this.now() };
+    const table = { ...row, id: `t${++this.seq}`, status: "waiting" as TableStatus, createdAt: this.now(), visibility, kicked: [] as string[] };
     this.tables.set(table.id, table);
     this.seatRows.set(table.id, []);
     return table;
@@ -40,6 +40,7 @@ export class MemoryStore implements LudoStore {
     return [...(this.seatRows.get(tableId) ?? [])].sort((a, b) => a.seat - b.seat);
   }
   async insertSeat(tableId: string, seat: SeatRow) {
+    if (seat.userId && this.tables.get(tableId)?.kicked.includes(seat.userId)) return "kicked" as const;
     const rows = this.seatRows.get(tableId) ?? [];
     if (rows.some((r) => r.seat === seat.seat || (seat.userId !== null && r.userId === seat.userId))) return false;
     rows.push(seat);
