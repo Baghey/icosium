@@ -23,12 +23,23 @@ export function livekitApiUrl(): string {
 
 export type Account = { id: string; username: string };
 
-/** Vérifie un jeton de session Supabase. Renvoie le compte, ou null si le jeton est refusé. */
-export async function verifySupabaseToken(token: string): Promise<Account | null> {
-  const client = createClient(serverEnv.supabaseUrl(), serverEnv.supabaseKey(), {
+/** Client Supabase qui agit au nom de la personne (la RLS et les fonctions vérifient ses droits). */
+function asUser(token: string) {
+  return createClient(serverEnv.supabaseUrl(), serverEnv.supabaseKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { authorization: `Bearer ${token}` } },
   });
+}
+
+/** Cette personne fait-elle partie de cet appel, et l'appel a-t-il décroché ? */
+export async function canJoinCall(token: string, callId: string): Promise<boolean> {
+  const { data, error } = await asUser(token).rpc("can_join_call", { p_call: callId });
+  return !error && data === true;
+}
+
+/** Vérifie un jeton de session Supabase. Renvoie le compte, ou null si le jeton est refusé. */
+export async function verifySupabaseToken(token: string): Promise<Account | null> {
+  const client = asUser(token);
   const { data, error } = await client.auth.getUser(token);
   if (error || !data.user) return null;
   const { data: profile } = await client.from("profiles").select("username").eq("id", data.user.id).maybeSingle();

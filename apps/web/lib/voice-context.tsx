@@ -38,6 +38,9 @@ type VoiceValue = {
   join: (roomName: string) => Promise<void>;
   leave: () => Promise<void>;
   setMic: (on: boolean) => Promise<void>;
+  /** Personnes dont j'ai coupé le son, pour moi seul (elles ne le savent pas). */
+  silenced: ReadonlySet<string>;
+  setSilenced: (identity: string, silenced: boolean) => void;
 };
 
 const VoiceContext = createContext<VoiceValue | null>(null);
@@ -61,6 +64,19 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   const [peers, setPeers] = useState<VoicePeer[]>([]);
   const [micOn, setMicOn] = useState(false);
   const [error, setError] = useState<VoiceError>(null);
+  const [silenced, setSilencedState] = useState<ReadonlySet<string>>(() => new Set());
+  const silencedRef = useRef(silenced);
+  silencedRef.current = silenced;
+
+  const setSilenced = useCallback((identity: string, on: boolean) => {
+    setSilencedState((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(identity);
+      else next.delete(identity);
+      return next;
+    });
+    roomRef.current?.remoteParticipants.get(identity)?.setVolume(on ? 0 : 1);
+  }, []);
 
   const refresh = useCallback(() => {
     const room = roomRef.current;
@@ -124,9 +140,10 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         roomRef.current = room;
 
         room
-          .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
+          .on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _pub, participant) => {
             // Un seul élément audio par piste, même si l'événement arrive deux fois.
             if (track.kind !== Track.Kind.Audio || track.attachedElements.length > 0) return;
+            if (silencedRef.current.has(participant.identity)) participant.setVolume(0);
             const el = track.attach();
             el.dataset.trackSid = track.sid;
             audioHostRef.current?.appendChild(el);
@@ -202,8 +219,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<VoiceValue>(
-    () => ({ status, roomName, peers, micOn, error, join, leave, setMic }),
-    [status, roomName, peers, micOn, error, join, leave, setMic],
+    () => ({ status, roomName, peers, micOn, error, join, leave, setMic, silenced, setSilenced }),
+    [status, roomName, peers, micOn, error, join, leave, setMic, silenced, setSilenced],
   );
 
   return (
