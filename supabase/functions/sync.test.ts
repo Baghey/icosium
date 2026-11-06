@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("règles copiées pour les fonctions", () => {
-  it.each(["domino", "ludo"])("%s : identiques à packages/shared (sinon : pnpm sync:functions)", (game) => {
+  it.each(["domino", "ludo", "ronda"])("%s : identiques à packages/shared (sinon : pnpm sync:functions)", (game) => {
     const src = join(__dirname, "../../packages/shared/src", game);
     const copy = join(__dirname, "_shared", game);
     expect(readdirSync(copy).sort()).toEqual(readdirSync(src).sort());

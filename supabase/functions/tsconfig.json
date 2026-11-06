@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "types": ["node"] },
-  "include": ["_shared", "domino/service.ts", "domino/store.ts", "domino/*.test.ts", "domino/memory-store.ts", "ludo/service.ts", "ludo/store.ts", "ludo/*.test.ts", "ludo/memory-store.ts", "sync.test.ts"]
+  "include": ["_shared", "domino/service.ts", "domino/store.ts", "domino/*.test.ts", "domino/memory-store.ts", "ludo/service.ts", "ludo/store.ts", "ludo/*.test.ts", "ludo/memory-store.ts", "ronda/service.ts", "ronda/store.ts", "ronda/*.test.ts", "ronda/memory-store.ts", "sync.test.ts"]
 }

@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-for (const game of ["domino", "ludo"]) {
+for (const game of ["domino", "ludo", "ronda"]) {
   const from = join(root, "packages/shared/src", game);
   const to = join(root, "supabase/functions/_shared", game);
   rmSync(to, { recursive: true, force: true });
