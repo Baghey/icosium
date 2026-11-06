@@ -120,6 +120,11 @@
   --animate-call-wiggle: icos-call-wiggle 1.3s ease-in-out infinite;
   --animate-rec: icos-rec 1s ease-in-out infinite;
   --animate-react: icos-react 240ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  --animate-card-in: ronda-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-card-out: ronda-out 250ms cubic-bezier(0.5, 0, 0.8, 0.4) both;
+  --animate-card-lift: ronda-lift 180ms ease-out both;
+  --animate-shout: ronda-shout 1.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  --animate-deal: ronda-deal 230ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @theme {
@@ -444,4 +449,36 @@ body {
     linear-gradient(180deg, #2b1a10 0%, #1b110a 45%, #120b07 100%);
   background-size: auto, auto, auto, auto, auto, auto, auto, cover, auto;
   background-position: center;
+}
+
+/* ---------- Ronda ---------- */
+
+/* Une carte arrive sur le feutre depuis la main de celui qui joue (--fx, --fy) et claque. */
+@keyframes ronda-in {
+  0% { transform: translate(var(--fx, 0), var(--fy, 120px)) rotate(var(--fr, -12deg)) scale(0.92); opacity: 0.4; }
+  80% { transform: translate(0, 0) rotate(0) scale(1.04); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+/* Des cartes ramassées glissent vers le tas de l'équipe (--tx, --ty). */
+@keyframes ronda-out {
+  0% { transform: none; opacity: 1; }
+  100% { transform: translate(var(--tx, 120px), var(--ty, 100px)) rotate(10deg) scale(0.5); opacity: 0; }
+}
+/* Une carte de ma main qu'on vient de toucher se soulève. */
+@keyframes ronda-lift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-18px); }
+}
+/* Une carte qu'on reçoit à la donne. */
+@keyframes ronda-deal {
+  from { transform: translate(-40px, -140px) rotate(-20deg) scale(0.7); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+/* Le mot crié au centre de la table : « Wahed ! », « Missa ! ». */
+@keyframes ronda-shout {
+  0% { transform: scale(0.4) rotate(-6deg); opacity: 0; }
+  18% { transform: scale(1.14) rotate(2deg); opacity: 1; }
+  30% { transform: scale(1) rotate(0); opacity: 1; }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.06) translateY(-10px); opacity: 0; }
 }
