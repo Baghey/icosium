@@ -94,7 +94,7 @@ function BigDie({ die, dieRef }: { die: LudoScreenProps["die"]; dieRef?: RefObje
       style={{ background: "radial-gradient(circle at 50% 40%, rgb(255 220 150 / 0.25), transparent 70%)" }}
     >
       {die.canRoll && <span className="animate-ring pointer-events-none absolute inset-2 rounded-[1.2rem]" aria-hidden="true" />}
-      <RollingDie value={die.value} rollKey={die.rollKey} size={58} dim={!die.canRoll} />
+      <RollingDie value={die.value ?? 6} rollKey={die.rollKey} size={58} dim={!die.canRoll} />
       <span className={`mt-0.5 text-[10px] font-semibold tracking-[0.14em] uppercase ${die.canRoll ? "text-gold-light" : "text-cafe-muted"}`}>{t("ludo.roll")}</span>
     </button>
   );

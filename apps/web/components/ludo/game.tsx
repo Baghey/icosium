@@ -213,7 +213,7 @@ export function LudoGame({ code, view, seats, mySeat, clockOffset, roll, move, t
         else if (near && near.seat === view.mover) setError("ludo.error.illegal_move");
       }}
       pawnLabel={(p) => t("ludo.pawn", { n: p.pawn + 1 })}
-      chip={{ label: myTurn ? t("ludo.yourTurnChip") : t("ludo.turnOf", { name: turnName }), seconds: secs, fraction, mine: myTurn }}
+      chip={{ label: view.phase === "over" ? t("ludo.gameOver") : myTurn ? t("ludo.yourTurnChip") : t("ludo.turnOf", { name: turnName }), seconds: secs, fraction, mine: myTurn }}
       status={status}
       die={{ value: myDie?.value ?? null, rollKey: myDie?.key ?? 0, canRoll, onRoll: () => void doRoll(), busy: pending }}
       leave={{ href: "/play", label: t("ludo.leave") }}

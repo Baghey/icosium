@@ -50,9 +50,16 @@ export function PlayerPanel({ p, align }: { p: LudoPlayer | null; align: "start"
           style={{ background: `conic-gradient(${fill.main} ${ring}%, rgb(255 255 255 / 0.12) 0)` }}
         >
           <div className="size-full overflow-hidden rounded-full" style={{ background: `radial-gradient(circle at 50% 30%, ${fill.main}, ${fill.dark})` }}>
-            {p.avatar && (
+            {p.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.avatar} alt="" className="size-full object-cover" />
+            ) : (
+              // Silhouette dessinée (comme sur la maquette) quand il n'y a pas de photo.
+              <svg viewBox="0 0 40 40" className="size-full" aria-hidden="true">
+                <circle cx="20" cy="20" r="19" fill="rgb(255 255 255 / 0.1)" />
+                <circle cx="20" cy="16" r="7" fill="#3a2a20" />
+                <path d="M6 40 Q8 26 20 26 Q32 26 34 40Z" fill="#3a2a20" />
+              </svg>
             )}
           </div>
         </div>
