@@ -308,13 +308,15 @@ du jeu (comme « Mafia »).
 | Sorcière | Une potion pour sauver la victime, une pour tuer, une seule fois chacune |
 | Chasseur | En mourant, élimine un joueur de son choix |
 
-- La nuit : loups, puis Voyante, puis Sorcière. Le jour : on découvre qui est mort, on discute,
-  on vote. Égalité au vote : personne n'est éliminé.
+- La nuit : loups, puis Voyante, puis Sorcière. Le jour : on découvre qui est mort, chacun parle à
+  son tour au micro, puis on vote. Égalité au vote : personne n'est éliminé.
 - Le village gagne quand tous les loups sont morts ; les loups gagnent quand ils sont aussi
   nombreux que les autres.
 - Nombre de loups proposé : 1 loup pour 6 joueurs, 2 de 7 à 9, 3 de 10 à 12 (modifiable).
-- Vocal : le jour, tout le monde (micro coupé par défaut) ; la nuit, seuls les loups entre eux ;
-  les morts écoutent sans parler. Ces droits sont donnés par le serveur dans le jeton LiveKit.
+- Le jeu se joue au micro, pas au chat écrit (choix du propriétaire, 6 novembre 2026).
+- Le jour, tour de parole : le serveur ouvre le micro d'un seul joueur à la fois, dans l'ordre du
+  cercle, avec un temps limité (45 s par défaut) ; le joueur peut « passer la parole » au suivant
+  plus tôt. La nuit, seuls les loups parlent, entre eux. Les morts écoutent sans parler. Ces droits sont donnés par le serveur dans le jeton LiveKit.
 - Chaque joueur ne peut lire que son propre rôle (table privée, RLS stricte) ; les loups se
   voient entre eux.
 

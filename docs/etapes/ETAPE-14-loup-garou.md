@@ -15,7 +15,7 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
      Chasseur (emporte quelqu'un en mourant) ; le créateur choisit les rôles et le nombre de
      loups (proposition automatique selon le nombre de joueurs) ;
    - la nuit : les loups choisissent une victime ensemble, la Voyante découvre un rôle, la
-     Sorcière agit ; le jour : discussion, puis vote ; égalité = personne n'est éliminé ;
+     Sorcière agit ; le jour : tour de parole au micro, puis vote ; égalité = personne n'est éliminé ;
    - victoire du village quand tous les loups sont morts, victoire des loups quand ils sont
      aussi nombreux que les autres.
 2. Des tests Vitest : distribution des rôles, chaque action de nuit, vote et égalité, potions
@@ -25,11 +25,20 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
    privée : un joueur ne lit que son propre rôle (RLS stricte). Les loups se voient entre eux.
 4. Le vocal suit les phases, décidé par le serveur (droits du jeton LiveKit, jamais seulement
    côté client) :
-   - le jour, tout le monde peut parler (micro coupé par défaut, comme partout) ;
+   - le jour, on parle à tour de rôle (choix du propriétaire, 6 novembre 2026) : le serveur
+     donne la parole à un seul joueur à la fois, dans l'ordre du cercle ; seul son micro est
+     ouvert, les autres écoutent ; il a un temps limité (45 s par défaut, réglable : 30, 45,
+     60 s) et un gros bouton « Je passe la parole » pour donner la main au suivant plus tôt ;
+     quand le temps est écoulé, le serveur passe la parole tout seul ;
+   - après un tour complet, le vote ; le joueur accusé peut avoir 20 s pour se défendre avant
+     le vote final ;
+   - pas de chat écrit pendant la partie : tout se dit au micro ;
    - la nuit, seuls les loups peuvent parler, et seulement entre eux ;
    - les morts écoutent sans pouvoir parler jusqu'à la fin de la partie.
 5. L'écran : cercle de joueurs autour d'un feu, passage du jour à la nuit (ciel de la Casbah,
-   lune), carte de rôle qu'on retourne en la gardant appuyée, vote en touchant un avatar.
+   lune), carte de rôle qu'on retourne en la gardant appuyée, vote en touchant un avatar ;
+   le joueur qui a la parole est mis en avant (anneau vert qui pulse, chrono doré), avec
+   l'ordre de passage visible autour du cercle.
    Les loups restent des loups (le thème « Ghouls » a été refusé par le propriétaire).
 6. Un meneur vocal est-il nécessaire ? Non : le serveur annonce les phases à l'écran et par un
    petit son. Pas de voix enregistrée sans l'accord du propriétaire.
@@ -38,7 +47,7 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
 C'est terminé quand :
 
 - `pnpm verify` passe ;
-- une partie à 6 personnes se joue jusqu'à la victoire d'un camp, avec le vocal de nuit réservé
-  aux loups ;
+- une partie à 6 personnes se joue jusqu'à la victoire d'un camp, avec le tour de parole au
+  micro le jour et le vocal de nuit réservé aux loups ;
 - un joueur ne peut lire aucun autre rôle que le sien, même en interrogeant la base à la main ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.
