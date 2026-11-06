@@ -286,8 +286,7 @@ ne jamais les utiliser. Le nom « Zid » (« encore ! ») vient de la darija.
 - Le premier qui n'a plus de carte gagne la manche et marque les points des mains adverses.
   Partie en 300 points (réglable : 200, 300, 500).
 - Réglages du créateur : cumuler les +2 et +4 (non par défaut) ; piocher jusqu'à pouvoir jouer
-  ou une
-  seule carte (une seule par défaut).
+  ou une seule carte (une seule par défaut).
 
 > Noms des cartes en mots simples (+2, Retour, Passe, Joker, Joker +4, « Dernière ! ») :
 > le propriétaire a refusé les noms en darija le 6 novembre 2026.
