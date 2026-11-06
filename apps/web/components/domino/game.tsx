@@ -18,6 +18,8 @@ import { DominoBack, DominoTile } from "./tile";
 import { Emblem, HourglassIcon, RotateIcon, TrophyIcon, UsersIcon } from "@/components/cafe-icons";
 import { useGameOrientation, useLandscapeLayout } from "@/lib/orientation";
 import { useVoice } from "@/lib/voice-context";
+import { PersonActions } from "@/components/social/person-actions";
+import { useSocial } from "@/lib/social-context";
 
 type Props = {
   code: string;
@@ -89,6 +91,9 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
   const [freshTile, setFreshTile] = useState<string | null>(null);
   const [showScores, setShowScores] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  // Toucher un autre joueur : l'ajouter en ami, couper son micro pour soi, le bloquer ou le signaler.
+  const [person, setPerson] = useState<{ id: string; name: string } | null>(null);
+  const { friends } = useSocial();
   const bots = view.bots ?? [];
   const botTurn = view.phase === "playing" && bots.includes(view.turn);
 
@@ -319,7 +324,22 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
     </button>
   );
 
-  const badge = (seat: number, size: number) => <PlayerBadge p={info(seat)} size={size} />;
+  const badge = (seat: number, size: number) => {
+    const p = info(seat);
+    const s = seats.find((x) => x.seat === seat);
+    if (!p.userId || p.me || p.bot || !s) return <PlayerBadge p={p} size={size} />;
+    const id = p.userId;
+    return (
+      <button
+        type="button"
+        onClick={() => setPerson({ id, name: s.username })}
+        aria-label={t("domino.playerMenu", { name: s.username })}
+        className="rounded-card transition-transform duration-150 active:scale-95"
+      >
+        <PlayerBadge p={p} size={size} />
+      </button>
+    );
+  };
   const seatAt = (pos: "left" | "top" | "right") => around.find((a) => a.pos === pos)?.seat;
   const topSeat = seatAt("top");
   const leftSeat = seatAt("left");
@@ -513,6 +533,15 @@ export function DominoGame({ code, view, seats, mySeat, hand, clockOffset, play,
         />
       )}
       {showScores && <ScoresSheet view={view} seats={seats} mySeat={mySeat} onClose={() => setShowScores(false)} />}
+      {person && (
+        <PersonActions
+          id={person.id}
+          name={person.name}
+          isFriend={friends.some((f) => f.id === person.id && f.status === "accepted")}
+          atTable
+          onClose={() => setPerson(null)}
+        />
+      )}
     </div>
   );
 }

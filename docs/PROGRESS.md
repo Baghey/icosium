@@ -350,9 +350,42 @@ Vérifié et déjà correct : sens des pierres et doubles en travers (nouveau te
   commande + scan de secrets gitleaks sur chaque PR.
 - Reste (côté propriétaire) : connecteurs Context7 et LiveKit Docs, rendre la CI obligatoire sur `main`.
 
+## 6 novembre 2026 — Fin de l'étape 4 : amis et messagerie
+
+Ce qui marche (testé avec deux navigateurs sur une copie locale de Supabase et de LiveKit) :
+- **Groupes** : « Nouveau groupe » dans Messages (un nom + jusqu'à 7 amis, 8 personnes au plus), ajouter des amis,
+  quitter. Messages « X a créé le groupe », « X a ajouté Y ». Le nom de l'auteur s'affiche au-dessus de ses bulles.
+- **Messages vocaux** : appui long sur le micro (60 s au plus), glisser vers la gauche pour annuler. Opus compressé
+  (~2,5 Ko par seconde), rangé dans un espace privé `voice-notes` que seuls les membres de la conversation lisent.
+  Lecture avec forme d'onde qui se remplit, toucher la forme pour avancer, vitesse 1× / 1,5× / 2×.
+- **Réactions** : appui long (ou clic droit) sur une bulle : ❤️ 😂 😮 😢 👍 🔥, et « Signaler ce message ».
+- **Appels vocaux privés** entre amis : bouton téléphone dans la conversation, écran d'appel (sonnerie en carillon,
+  vibration, Décrocher / Refuser), micro coupé au départ comme partout, barre « En appel avec… » en haut de toutes
+  les pages, raccrocher. Trace dans la conversation : « Appel vocal · 2:13 », « Appel manqué », avec « Rappeler ».
+  Le serveur vérifie : amis seulement, un appel à la fois (« occupé »), 10 appels par 10 minutes, salon LiveKit à
+  2 places ouvert seulement aux deux personnes de l'appel décroché.
+- **Résultat de partie** : quand une partie de domino se termine, une carte (vainqueurs, score) est postée
+  automatiquement dans chaque groupe qui contient tous les joueurs humains, et dans la conversation à deux.
+- **À la table** (salle d'attente et partie) : toucher un autre joueur ouvre « Ajouter en ami », « Couper son micro
+  pour moi » (il ne le sait pas), « Bloquer », « Signaler ».
+
+Corrigé au passage :
+- Jeton vocal refusé (401) : l'en-tête envoyé à Supabase était doublé. Le vocal des tables en profite aussi.
+- Une conversation ouverte se marquait « lue » en boucle (requêtes inutiles toutes les 250 ms).
+- En développement, les messages pouvaient s'afficher dans le désordre.
+- Les panneaux du bas (menus) s'affichent maintenant toujours en bas de l'écran.
+
+Base de données : migration `20261106010000_messaging_groups_voice_calls.sql` (à coller dans l'éditeur SQL de
+Supabase avant de mettre le code en ligne). `supabase db lint` : aucune erreur.
+
+Reste / limites connues :
+- Pas de notification quand l'app est fermée : on n'entend l'appel que si ICOSIUM est ouvert (notifications push à
+  prévoir avec l'étape 9).
+- Pas d'appel de groupe (seulement à deux).
+
 ## Étape 11 — Ludo « Tchekchayka » (6 novembre 2026)
 
-Ce qui marche (branche `claude/project-thread-qi4qmg`, pas encore sur le site) :
+Ce qui marche (en ligne sur le site depuis le 6 novembre) :
 - Règles en TypeScript pur (`packages/shared/src/ludo`) : sortie sur 6, un 6 fait rejouer, trois 6 = tour perdu,
   manger renvoie à la maison et fait rejouer, cases étoilées et cases de départ sûres, pas de mur, chiffre exact
   pour le centre, victoire avec 1 à 4 pions (choix du Patron), 2 à 4 joueurs, 2 contre 2 (celui qui a fini joue
@@ -370,7 +403,8 @@ Ce qui marche (branche `claude/project-thread-qi4qmg`, pas encore sur le site) :
   cercle doré sur ce qu'il faut toucher, erreurs expliquées, « Passer » et reprise là où on s'était arrêté.
 - Page de développement `/dev/ludo` (partie locale contre des bots, pour vérifier l'écran).
 
-Reste : appliquer la migration et déployer la fonction `ludo` sur Supabase, puis test réel à plusieurs téléphones
+Base et serveur : migration appliquée et fonction `ludo` déployée sur Supabase le 6 novembre.
+Reste : test réel à plusieurs téléphones
 (partie à 4 et à 2 contre 2 en vocal). Petites phrases rapides (« Saha ! ») de la maquette : pas encore faites.
 Problème connu : impossible de lancer Supabase en local dans ce conteneur (téléchargement des images bloqué) ;
 le serveur est testé avec un stockage en mémoire, l'écran avec la partie locale.

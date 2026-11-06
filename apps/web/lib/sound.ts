@@ -277,3 +277,36 @@ export function playCapture(): void {
   loadSamples(ac);
   if (!playSample(ac, "slam", 0.7, 1.15)) strike(ac, ac.currentTime + 0.003, [...STONE, ...TABLE], 6, 0.9);
 }
+
+/**
+ * Sonnerie d'appel : trois lames de bois qui montent (sol, si, ré), comme un carillon de porte
+ * de café. `soft` : la tonalité qu'entend celui qui appelle, plus discrète.
+ */
+export function playRing(soft = false): void {
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  const t = ac.currentTime + 0.01;
+  const dest = out(ac);
+  const level = soft ? 0.05 : 0.16;
+  const notes = soft ? [587] : [784, 988, 1175];
+  notes.forEach((f, i) => {
+    const at = t + i * 0.16;
+    for (const [mult, decay, g] of [
+      [1, 0.7, 1],
+      [2.76, 0.18, 0.3],
+      [5.4, 0.06, 0.12],
+    ] as const) {
+      const osc = ac.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = f * mult;
+      const gain = ac.createGain();
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(level * g, at + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
+      osc.connect(gain).connect(dest);
+      osc.start(at);
+      osc.stop(at + decay + 0.05);
+    }
+  });
+}

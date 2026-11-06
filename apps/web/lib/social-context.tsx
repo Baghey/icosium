@@ -10,19 +10,38 @@ import { useVoice } from "./voice-context";
 /** Un ami, une demande reçue ou envoyée. */
 export type Friend = { id: string; username: string; status: "pending" | "accepted"; incoming: boolean; since: string };
 
-/** Une conversation à deux, telle que la liste « Messages » l'affiche. */
+export type MessageKind = "text" | "invite" | "voice" | "result" | "call" | "system";
+
+/** Un membre d'un groupe (les autres que moi). */
+export type Member = { id: string; username: string };
+
+/** Une conversation (à deux ou en groupe), telle que la liste « Messages » l'affiche. */
 export type Conversation = {
   id: string;
+  kind: "direct" | "group";
+  /** Nom du groupe (null pour une conversation à deux). */
+  title: string | null;
   state: "active" | "request";
-  otherId: string;
-  otherUsername: string;
+  /** L'autre personne, pour une conversation à deux (null pour un groupe). */
+  otherId: string | null;
+  otherUsername: string | null;
+  /** Tous les autres membres. */
+  members: Member[];
   lastBody: string | null;
-  lastKind: "text" | "invite" | null;
+  lastKind: MessageKind | null;
   lastSender: string | null;
+  lastSenderName: string | null;
+  lastMeta: Record<string, unknown> | null;
   lastAt: string;
   unread: number;
+  /** Dernière lecture de l'autre (ou du membre le plus à jour, en groupe). */
   otherReadAt: string;
 };
+
+/** Nom affiché d'une conversation : le pseudo de l'autre, ou le nom du groupe. */
+export function conversationName(c: Conversation): string {
+  return c.kind === "group" ? (c.title ?? c.members.map((m) => m.username).join(", ")) : (c.otherUsername ?? "…");
+}
 
 /** Où est quelqu'un en ce moment (présence en temps réel, jamais enregistrée). */
 export type Presence = { status: "online" | "table" | "voice"; game?: "domino" | "ludo" };
@@ -43,12 +62,17 @@ const SocialContext = createContext<SocialValue | null>(null);
 
 type ConversationRow = {
   conversation_id: string;
+  kind: "direct" | "group";
+  title: string | null;
   state: "active" | "request";
-  other_id: string;
-  other_username: string;
+  other_id: string | null;
+  other_username: string | null;
+  members: Member[];
   last_body: string | null;
-  last_kind: "text" | "invite" | null;
+  last_kind: MessageKind | null;
   last_sender: string | null;
+  last_sender_name: string | null;
+  last_meta: Record<string, unknown> | null;
   last_at: string;
   unread: number;
   other_read_at: string;
@@ -83,12 +107,17 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       setConversations(
         (c.data as ConversationRow[]).map((r) => ({
           id: r.conversation_id,
+          kind: r.kind,
+          title: r.title,
           state: r.state,
           otherId: r.other_id,
           otherUsername: r.other_username,
+          members: r.members ?? [],
           lastBody: r.last_body,
           lastKind: r.last_kind,
           lastSender: r.last_sender,
+          lastSenderName: r.last_sender_name,
+          lastMeta: r.last_meta,
           lastAt: r.last_at,
           unread: r.unread,
           otherReadAt: r.other_read_at,
@@ -229,18 +258,91 @@ export async function openConversation(other: string): Promise<string | null> {
 
 export type InviteMeta = { game: "domino" | "ludo"; code: string; players: number; free: number };
 
-export async function sendMessage(conversation: string, body: string, invite?: InviteMeta): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+export type SendResult = { ok: true; id: string } | { ok: false; error: string };
+
+/** Traduit une erreur de la base en code court (blocked, rate_limited…), « network » si pas de réseau. */
+function errorCode(message: string, known: string[]): string {
+  return known.find((k) => message.includes(k)) ?? (/fetch|network|load failed/i.test(message) ? "network" : "error");
+}
+
+const SEND_KNOWN = ["blocked", "rate_limited", "invalid_body", "not_member", "invalid_voice"];
+
+export async function sendMessage(conversation: string, body: string, invite?: InviteMeta): Promise<SendResult> {
   const { data, error } = await supabase().rpc("send_message", {
     p_conversation: conversation,
     p_body: body,
     p_kind: invite ? "invite" : "text",
     p_meta: invite ?? null,
   });
-  if (error) {
-    const known = ["blocked", "rate_limited", "invalid_body", "not_member"].find((k) => error.message.includes(k));
-    return { ok: false, error: known ?? (error.message.toLowerCase().includes("fetch") ? "network" : "error") };
-  }
+  if (error) return { ok: false, error: errorCode(error.message, SEND_KNOWN) };
   return { ok: true, id: data as string };
+}
+
+/** Message vocal : l'enregistrement part d'abord dans l'espace privé, puis le message le cite. */
+export type VoiceMeta = { path: string; duration: number; peaks: number[] };
+
+export async function sendVoiceMessage(
+  conversation: string,
+  me: string,
+  note: { blob: Blob; duration: number; peaks: number[]; fileId: string },
+): Promise<SendResult> {
+  const type = note.blob.type.split(";")[0] || "audio/webm";
+  const ext = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : type.includes("aac") ? "aac" : type.includes("mpeg") ? "mp3" : "webm";
+  const path = `${conversation}/${me}/${note.fileId}.${ext}`;
+  const up = await supabase().storage.from("voice-notes").upload(path, note.blob, { contentType: type, upsert: true });
+  if (up.error) return { ok: false, error: errorCode(up.error.message, ["rate_limited"]) };
+  const { data, error } = await supabase().rpc("send_message", {
+    p_conversation: conversation,
+    p_body: "",
+    p_kind: "voice",
+    p_meta: { path, duration: note.duration, peaks: note.peaks },
+  });
+  if (error) return { ok: false, error: errorCode(error.message, SEND_KNOWN) };
+  return { ok: true, id: data as string };
+}
+
+/** Adresse temporaire (1 h) pour écouter un message vocal ; seuls les membres l'obtiennent. */
+const voiceUrls = new Map<string, Promise<string | null>>();
+export function voiceNoteUrl(path: string): Promise<string | null> {
+  let url = voiceUrls.get(path);
+  if (!url) {
+    url = supabase()
+      .storage.from("voice-notes")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => data?.signedUrl ?? null);
+    voiceUrls.set(path, url);
+    // Une adresse ratée (réseau) sera redemandée la prochaine fois.
+    void url.then((u) => u ?? voiceUrls.delete(path));
+    window.setTimeout(() => voiceUrls.delete(path), 50 * 60_000);
+  }
+  return url;
+}
+
+export const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "🔥"] as const;
+export type Reaction = (typeof REACTIONS)[number];
+
+/** Réagit à un message (le même emoji une deuxième fois retire la réaction). */
+export async function reactToMessage(message: string, emoji: Reaction | null): Promise<boolean> {
+  const { error } = await supabase().rpc("react_to_message", { p_message: message, p_emoji: emoji });
+  return !error;
+}
+
+export type GroupError = "invalid_title" | "invalid_members" | "not_friends" | "rate_limited" | "group_full" | "network" | "error";
+const GROUP_KNOWN = ["invalid_title", "invalid_members", "not_friends", "rate_limited", "group_full"];
+
+export async function createGroup(title: string, members: string[]): Promise<{ ok: true; id: string } | { ok: false; error: GroupError }> {
+  const { data, error } = await supabase().rpc("create_group", { p_title: title, p_members: members });
+  if (error) return { ok: false, error: errorCode(error.message, GROUP_KNOWN) as GroupError };
+  return { ok: true, id: data as string };
+}
+
+export async function addGroupMembers(conversation: string, members: string[]): Promise<GroupError | null> {
+  const { error } = await supabase().rpc("add_group_members", { p_conversation: conversation, p_members: members });
+  return error ? (errorCode(error.message, GROUP_KNOWN) as GroupError) : null;
+}
+
+export async function leaveGroup(conversation: string): Promise<void> {
+  await supabase().rpc("leave_group", { p_conversation: conversation });
 }
 
 export async function markRead(conversation: string): Promise<void> {
