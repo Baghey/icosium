@@ -29,7 +29,7 @@ export function useCallClock(since: number | null): string {
 export function CallScreen() {
   const t = useT();
   const { call, expanded, setExpanded, accept, decline, hangUp, error, clearError } = useCall();
-  const { peers } = useVoice();
+  const { peers, micOn } = useVoice();
   const clock = useCallClock(call?.phase === "active" ? call.answeredAt : null);
 
   // Une erreur (occupé, pas amis…) s'affiche un instant puis s'efface.
@@ -122,6 +122,7 @@ export function CallScreen() {
             {call.phase === "active" && (
               <div className="flex flex-col items-center gap-2">
                 <MicButton />
+                <span className={`text-sm font-semibold ${micOn ? "text-online" : "text-cafe-text/90"}`}>{t(micOn ? "voice.micOn" : "voice.micOff")}</span>
               </div>
             )}
             <RoundAction label={t("call.hangUp")} tone="danger" onClick={() => void hangUp()}>

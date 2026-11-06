@@ -27,7 +27,9 @@ export type Account = { id: string; username: string };
 function asUser(token: string) {
   return createClient(serverEnv.supabaseUrl(), serverEnv.supabaseKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { authorization: `Bearer ${token}` } },
+    // « Authorization » avec une majuscule : en minuscule, supabase-js envoie le jeton deux fois et
+    // Supabase le refuse.
+    global: { headers: { Authorization: `Bearer ${token}` } },
   });
 }
 

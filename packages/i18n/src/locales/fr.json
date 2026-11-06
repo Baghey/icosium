@@ -389,7 +389,8 @@
       "created": "{name} a créé le groupe « {title} »",
       "added": "{name} a ajouté {names}",
       "left": "{name} a quitté le groupe"
-    }
+    },
+    "addFriend": "Ajouter en ami"
   },
   "call": {
     "title": "Appel ICOSIUM",

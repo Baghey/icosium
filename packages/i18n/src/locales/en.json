@@ -389,7 +389,8 @@
       "created": "{name} created the group “{title}”",
       "added": "{name} added {names}",
       "left": "{name} left the group"
-    }
+    },
+    "addFriend": "Add friend"
   },
   "call": {
     "title": "ICOSIUM call",

@@ -1,16 +1,22 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 /** Panneau qui monte du bas de l'écran (à portée de pouce). Toucher le fond ou Échap le ferme. */
 export function Sheet({ children, onClose, label, wide = false }: { children: ReactNode; onClose?: () => void; label?: string; wide?: boolean }) {
+  // Rendu directement dans <body> : un parent animé (transform) ne doit pas l'empêcher de
+  // couvrir tout l'écran.
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setHost(document.body), []);
   useEffect(() => {
     if (!onClose) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  return (
+  if (!host) return null;
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 animate-fade" onClick={onClose}>
       <div
         role="dialog"
@@ -24,6 +30,7 @@ export function Sheet({ children, onClose, label, wide = false }: { children: Re
         <span aria-hidden="true" className={`mx-auto -mt-2 block h-1 w-10 rounded-full bg-gold/35 ${wide ? "mb-2" : "mb-3"}`} />
         {children}
       </div>
-    </div>
+    </div>,
+    host,
   );
 }

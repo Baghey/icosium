@@ -127,7 +127,7 @@ function Conversation({ id }: { id: string }) {
         .limit(80);
       if (!alive || !data) return;
       setMessages((prev) => {
-        const server = (data as Row[]).reverse().map(fromRow);
+        const server = [...(data as Row[])].reverse().map(fromRow);
         const pending = prev.filter((m) => m.local && !server.some((s) => s.id === m.id));
         return [...server, ...pending];
       });
@@ -171,10 +171,13 @@ function Conversation({ id }: { id: string }) {
 
   // Lu : dès qu'on voit la conversation, et à chaque nouveau message reçu.
   const lastIncoming = [...messages].reverse().find((m) => m.sender !== me && !m.local)?.id;
+  // (Pas l'objet `conv` en dépendance : il change à chaque mise à jour de la liste, et marquer
+  // « lu » met la liste à jour : ça tournerait en boucle.)
+  const convState = conv?.state;
   useEffect(() => {
-    if (!lastIncoming || !conv || conv.state === "request") return;
+    if (!lastIncoming || !convState || convState === "request") return;
     void markRead(id).then(refresh);
-  }, [id, lastIncoming, conv, refresh]);
+  }, [id, lastIncoming, convState, refresh]);
 
   // Toujours collé en bas quand un message arrive.
   const typingCount = Object.keys(typing).length;
@@ -573,9 +576,9 @@ function Composer({
           }}
           onContextMenu={(e) => e.preventDefault()}
           className={`relative flex size-touch shrink-0 touch-none items-center justify-center rounded-full transition-all duration-200 select-none ${
-            recording ? "scale-125 bg-[#e0533d] text-white shadow-[0_0_0_8px_rgb(224_83_61/0.18)]" : "gold-button active:scale-90"
+            recording ? "bg-[#e0533d] text-white shadow-[0_0_0_8px_rgb(224_83_61/0.18)]" : "gold-button active:scale-90"
           }`}
-          style={recording ? { transform: `translateX(${-Math.min(drag, CANCEL_DRAG + 20)}px) scale(1.25)` } : undefined}
+          style={recording ? { transform: `translateX(${-Math.min(drag, CANCEL_DRAG + 20)}px) scale(1.12)` } : undefined}
         >
           <MicIcon className="size-5" />
         </button>
@@ -750,18 +753,17 @@ function Bubble({
       </div>
     );
   } else {
-    content = (
-      <button
-        type="button"
-        disabled={!failed}
-        onClick={onRetry}
-        className={`max-w-[78vw] rounded-[1.25rem] px-3.5 py-2 text-start text-[15px] leading-snug break-words whitespace-pre-wrap select-text sm:max-w-sm ${corners} ${skin} ${
-          m.local === "sending" ? "opacity-70" : ""
-        } ${failed ? "ring-2 ring-danger" : ""} ${last ? "animate-pop" : ""} disabled:cursor-default`}
-      >
+    // Un bouton seulement pour réessayer : un bouton désactivé ne reçoit pas l'appui long.
+    const cls = `max-w-[78vw] rounded-[1.25rem] px-3.5 py-2 text-start text-[15px] leading-snug break-words whitespace-pre-wrap sm:max-w-sm ${corners} ${skin} ${
+      m.local === "sending" ? "opacity-70" : ""
+    } ${failed ? "ring-2 ring-danger" : ""} ${last ? "animate-pop" : ""}`;
+    content = failed ? (
+      <button type="button" onClick={onRetry} className={cls}>
         {m.body}
-        {failed && <span className="mt-1 block text-[11px] font-semibold text-[#8a1f10]">{t("social.failed")}</span>}
+        <span className="mt-1 block text-[11px] font-semibold text-[#8a1f10]">{t("social.failed")}</span>
       </button>
+    ) : (
+      <div className={cls}>{m.body}</div>
     );
   }
 

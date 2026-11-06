@@ -80,7 +80,7 @@ export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialM
               }}
             >
               {pending || asked ? <CheckIcon className="size-5" /> : <AddFriendIcon className="size-5" />}
-              {t(pending || asked ? "social.add.sentShort" : "social.addButton")}
+              {t(pending || asked ? "social.add.sentShort" : "social.addFriend")}
             </button>
           )}
           {atTable && inVoice && (

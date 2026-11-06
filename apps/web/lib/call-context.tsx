@@ -62,6 +62,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const me = user?.id ?? null;
   const voice = useVoice();
+  // La couche vocale change souvent (qui parle…) : on la lit par une référence, pour que
+  // l'abonnement aux appels ne soit pas recréé à chaque fois.
+  const voiceRef = useRef(voice);
+  voiceRef.current = voice;
   const [call, setCall] = useState<CallState | null>(null);
   const [error, setError] = useState<CallError>(null);
   const [expanded, setExpanded] = useState(false);
@@ -80,17 +84,18 @@ export function CallProvider({ children }: { children: ReactNode }) {
     joinedRoom.current = null;
     setCall(null);
     setExpanded(false);
-    if (room && voice.roomName === room) void voice.leave();
-  }, [voice]);
+    const v = voiceRef.current;
+    if (room && v.roomName === room) void v.leave();
+  }, []);
 
   const enterRoom = useCallback(
     async (c: CallState) => {
       const room = callRoomName(c.id);
       joinedRoom.current = room;
       setCall({ ...c, phase: "connecting" });
-      await voice.join(room);
+      await voiceRef.current.join(room);
     },
-    [voice],
+    [],
   );
 
   // Les changements d'appels (sonnerie, décroché, raccroché) arrivent en temps réel ; la RLS ne
