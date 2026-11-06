@@ -7,8 +7,7 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 /**
  * Une pierre de domino en 3D, dessinée maison :
  * - un bloc d'ivoire épais aux arêtes bien arrondies, au grain d'os très léger, verni ;
- * - des points creusés (vrai relief grâce à une carte de hauteur), noirs et brillants au fond ;
- * - un trait central gravé et un clou en laiton en relief.
+ * - sur le dessus, exactement le dessin des pierres de la main (gros points noirs, trait, clou doré).
  * Tout est généré au premier affichage (aucune image à télécharger).
  */
 
@@ -80,18 +79,6 @@ export function ivoryMaterial(): THREE.MeshPhysicalMaterial {
   return ivoryMat;
 }
 
-let brassMat: THREE.MeshStandardMaterial | null = null;
-function brassMaterial(): THREE.MeshStandardMaterial {
-  brassMat ??= new THREE.MeshStandardMaterial({ color: "#e0b04f", metalness: 1, roughness: 0.22, emissive: "#3a2504", emissiveIntensity: 0.35 });
-  return brassMat;
-}
-let pinGeo: THREE.BufferGeometry | null = null;
-function pinGeometry(): THREE.BufferGeometry {
-  // Un petit dôme (demi-sphère aplatie) pour attraper la lumière.
-  pinGeo ??= new THREE.SphereGeometry(0.095, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.45, 1);
-  return pinGeo;
-}
-
 /** Positions des points dans une moitié (carré 0..1). */
 const PIPS: Record<number, [number, number][]> = {
   0: [],
@@ -103,172 +90,84 @@ const PIPS: Record<number, [number, number][]> = {
   6: [[0.27, 0.22], [0.73, 0.22], [0.27, 0.5], [0.73, 0.5], [0.27, 0.78], [0.73, 0.78]],
 };
 
-/** Face visible : la zone plate du dessus (sans les arêtes arrondies). */
-const FACE_W = 2 - 2 * RADIUS;
-const FACE_D = 1 - 2 * RADIUS;
-
-type Face = { color: THREE.CanvasTexture; bump: THREE.CanvasTexture; pips: THREE.CanvasTexture };
-const faces = new Map<string, Face>();
+/** Le dessus de la pierre (presque toute la face, coins arrondis compris). */
+const TOP_W = 2 - 0.1;
+const TOP_D = 1 - 0.1;
 
 /**
- * Dessine la face a|b deux fois : en couleur (points noirs brillants, trait gravé) et en hauteur
- * (blanc = surface, noir = creux) pour que la lumière creuse vraiment les points.
+ * Le même dessin que les pierres de la main (components/domino/tile.tsx), couché à l'horizontale :
+ * ivoire dégradé, liseré blanc, reflet verni, gros points noirs avec leur reflet, trait et clou doré.
  */
-function face(a: number, b: number): Face {
-  const key = `${a}-${b}`;
-  const hit = faces.get(key);
-  if (hit) return hit;
-  const W = 1024;
-  const H = Math.round((W * FACE_D) / FACE_W);
+function faceSvg(a: number, b: number): string {
+  const H = 100;
+  const W = (100 * TOP_W) / TOP_D;
   const half = W / 2;
-  const R = H * 0.14; // rayon d'un point (gros points, comme sur les pierres de la main)
-  const make = () => {
-    const c = document.createElement("canvas");
-    c.width = W;
-    c.height = H;
-    return [c, c.getContext("2d") as CanvasRenderingContext2D] as const;
+  const cx = W / 2;
+  const cy = H / 2;
+  const pips = (v: number, x0: number) =>
+    (PIPS[v] ?? [])
+      .map(([px, py]) => {
+        // Même placement que la main : rangées de trois dans la longueur.
+        const x = x0 + (half - 100) / 2 + (0.04 + py * 0.92) * 100;
+        const y = (0.02 + (1 - px) * 0.96) * 100;
+        return `<circle cx="${x + 0.8}" cy="${y + 1.2}" r="12.5" fill="#fff" fill-opacity="0.75"/><circle cx="${x}" cy="${y}" r="12" fill="url(#pip)"/><path d="M ${x + 8.6} ${y - 3.5} A 9.3 9.3 0 0 1 ${x - 3.5} ${y + 8.6}" fill="none" stroke="#ffe9c4" stroke-opacity="0.55" stroke-width="1.8" stroke-linecap="round"/>`;
+      })
+      .join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${Math.round(W * 6)}" height="${H * 6}">
+<defs>
+<linearGradient id="face" x1="0" y1="0" x2="0.55" y2="1"><stop offset="0" stop-color="#fffdf6"/><stop offset="0.5" stop-color="#f7eedb"/><stop offset="1" stop-color="#e6d6b4"/></linearGradient>
+<radialGradient id="gloss" cx="0.25" cy="0.12" r="0.7"><stop offset="0" stop-color="#fff" stop-opacity="0.55"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.08"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="pip" cx="0.38" cy="0.32" r="0.8"><stop offset="0" stop-color="#3a2a1b"/><stop offset="0.6" stop-color="#150d07"/><stop offset="1" stop-color="#050302"/></radialGradient>
+<radialGradient id="pin" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#fbe3a2"/><stop offset="0.5" stop-color="#c8962f"/><stop offset="1" stop-color="#6e4b14"/></radialGradient>
+</defs>
+<rect x="1.5" y="1.5" width="${W - 3}" height="${H - 3}" rx="16" fill="url(#face)" stroke="#b59c6c" stroke-width="1.6"/>
+<rect x="5" y="4.5" width="${W - 10}" height="${H - 9}" rx="13" fill="none" stroke="#fff" stroke-opacity="0.9" stroke-width="2.5"/>
+<rect x="5" y="4.5" width="${W - 10}" height="${H - 9}" rx="13" fill="url(#gloss)"/>
+<path d="M ${cx} 14 V ${cy - 11} M ${cx} ${cy + 11} V ${H - 14}" stroke="#7d6744" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M ${cx + 2.6} 14 V ${cy - 11} M ${cx + 2.6} ${cy + 11} V ${H - 14}" stroke="#fff" stroke-opacity="0.8" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="${cx}" cy="${cy + 1.2}" r="7" fill="#5b3e10" fill-opacity="0.35"/>
+<circle cx="${cx}" cy="${cy}" r="6.5" fill="url(#pin)" stroke="#6e4b14" stroke-width="0.8"/>
+<circle cx="${cx - 2}" cy="${cy - 2.2}" r="1.8" fill="#fff6d8" fill-opacity="0.9"/>
+${pips(a, 0)}${pips(b, half)}
+</svg>`;
+}
+
+const tops = new Map<string, THREE.CanvasTexture>();
+/** Le dessin de la face, rendu une fois par pierre (28 au plus) dans une texture. */
+function topTexture(a: number, b: number): THREE.CanvasTexture {
+  const key = `${a}-${b}`;
+  const hit = tops.get(key);
+  if (hit) return hit;
+  const c = document.createElement("canvas");
+  c.width = 1024;
+  c.height = Math.round((1024 * TOP_D) / TOP_W);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 16;
+  const img = new Image();
+  img.onload = () => {
+    (c.getContext("2d") as CanvasRenderingContext2D).drawImage(img, 0, 0, c.width, c.height);
+    tex.needsUpdate = true;
   };
-  const [cc, g] = make();
-  const [bc, h] = make();
-  // Les points, seuls sur fond transparent : posés par-dessus sans éclairage, ils restent d'un noir
-  // franc quel que soit le reflet de la lampe (comme sur les pierres de la main).
-  const [pc, q] = make();
-  h.fillStyle = "#fff";
-  h.fillRect(0, 0, W, H);
-  // Même ivoire que le reste de la pierre, pour que la face ne se voie pas comme une étiquette.
-  drawGrain(g, W, H);
-
-  const pipsOf = (v: number, x0: number) =>
-    // Quart de tour : les rangées de trois points suivent la longueur de la pierre, comme sur un vrai domino.
-    (PIPS[v] ?? []).map(([px, py]) => [x0 + (0.04 + py * 0.92) * half, (0.02 + (1 - px) * 0.96) * H] as const);
-  const all = [...pipsOf(a, 0), ...pipsOf(b, half)];
-
-  for (const [x, y] of all) {
-    const ink = q.createRadialGradient(x - R * 0.25, y - R * 0.3, R * 0.1, x, y, R);
-    ink.addColorStop(0, "#2a1d12");
-    ink.addColorStop(0.7, "#0c0805");
-    ink.addColorStop(1, "#020100");
-    q.fillStyle = ink;
-    q.beginPath();
-    q.arc(x, y, R, 0, Math.PI * 2);
-    q.fill();
-    // Le reflet de la paroi éclairée, comme sur le dessin de la main.
-    q.strokeStyle = "rgba(255,233,196,0.5)";
-    q.lineCap = "round";
-    q.lineWidth = R * 0.14;
-    q.beginPath();
-    q.arc(x, y, R * 0.76, Math.PI * 0.05, Math.PI * 0.55);
-    q.stroke();
-    // Couleur : le fond du creux, presque noir, avec une lueur chaude en bas à droite (la paroi éclairée).
-    const body = g.createRadialGradient(x - R * 0.25, y - R * 0.3, R * 0.1, x, y, R);
-    body.addColorStop(0, "#1c140c");
-    body.addColorStop(0.7, "#0a0604");
-    body.addColorStop(1, "#000000");
-    g.fillStyle = body;
-    g.beginPath();
-    g.arc(x, y, R, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = "rgba(255,236,200,0.55)";
-    g.lineWidth = R * 0.12;
-    g.beginPath();
-    g.arc(x, y, R * 0.8, Math.PI * 0.05, Math.PI * 0.6);
-    g.stroke();
-    // Ombre douce sur le bord haut-gauche du creux (le rebord cache la lumière).
-    g.strokeStyle = "rgba(60,40,20,0.35)";
-    g.lineWidth = R * 0.18;
-    g.beginPath();
-    g.arc(x, y, R * 1.06, Math.PI * 1.05, Math.PI * 1.7);
-    g.stroke();
-    // Hauteur : un creux en cuvette.
-    const cup = h.createRadialGradient(x, y, 0, x, y, R * 1.08);
-    cup.addColorStop(0, "#000");
-    cup.addColorStop(0.72, "#222");
-    cup.addColorStop(0.92, "#aaa");
-    cup.addColorStop(1, "#fff");
-    h.fillStyle = cup;
-    h.beginPath();
-    h.arc(x, y, R * 1.08, 0, Math.PI * 2);
-    h.fill();
-  }
-
-  // Le trait central gravé (sombre, avec un liseré clair), interrompu par le clou.
-  const top = H * 0.1;
-  const bottom = H * 0.9;
-  const gap = H * 0.11;
-  for (const [y0, y1] of [
-    [top, H / 2 - gap],
-    [H / 2 + gap, bottom],
-  ] as const) {
-    g.lineCap = "round";
-    g.strokeStyle = "rgba(80,60,34,0.95)";
-    g.lineWidth = W * 0.007;
-    g.beginPath();
-    g.moveTo(half, y0);
-    g.lineTo(half, y1);
-    g.stroke();
-    g.strokeStyle = "rgba(255,255,255,0.65)";
-    g.lineWidth = W * 0.003;
-    g.beginPath();
-    g.moveTo(half + W * 0.006, y0);
-    g.lineTo(half + W * 0.006, y1);
-    g.stroke();
-    h.lineCap = "round";
-    h.strokeStyle = "#555";
-    h.lineWidth = W * 0.008;
-    h.beginPath();
-    h.moveTo(half, y0);
-    h.lineTo(half, y1);
-    h.stroke();
-  }
-
-  const color = new THREE.CanvasTexture(cc);
-  color.colorSpace = THREE.SRGBColorSpace;
-  color.anisotropy = 8;
-  const bump = new THREE.CanvasTexture(bc);
-  bump.anisotropy = 8;
-  const pips = new THREE.CanvasTexture(pc);
-  pips.colorSpace = THREE.SRGBColorSpace;
-  pips.anisotropy = 16;
-  const out = { color, bump, pips };
-  faces.set(key, out);
-  return out;
+  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(faceSvg(a, b))}`;
+  tops.set(key, tex);
+  return tex;
 }
 
 /** La pierre posée à plat, face visible (le groupe est centré sur la pierre). */
 export function Stone({ a, b }: { a: number; b: number }) {
-  const material = useMemo(() => {
-    const f = face(a, b);
-    return new THREE.MeshPhysicalMaterial({
-      map: f.color,
-      bumpMap: f.bump,
-      bumpScale: 0.9,
-      color: "#fffaf0",
-      roughness: 0.4,
-      clearcoat: 0.35,
-      clearcoatRoughness: 0.3,
-      envMapIntensity: 0.6,
-      sheen: 0.4,
-      sheenRoughness: 0.5,
-      sheenColor: new THREE.Color("#fff1d6"),
-      specularIntensity: 0.4,
-      polygonOffset: true,
-      polygonOffsetFactor: -2,
-    });
-  }, [a, b]);
-  const pipMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ map: face(a, b).pips, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
+  // Sans éclairage : la face est exactement celle de la main, quelle que soit la lampe.
+  // Un peu moins que le blanc pur, pour que le halo (bloom) ne la fasse pas briller.
+  const material = useMemo(
+    () => new THREE.MeshBasicMaterial({ map: topTexture(a, b), transparent: true, alphaTest: 0.02, color: "#f0f0f0", toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }),
     [a, b],
   );
   return (
     <>
       <mesh geometry={stoneGeometry()} material={ivoryMaterial()} />
-      <mesh position={[0, TILE_H / 2 + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={material}>
-        <planeGeometry args={[FACE_W, FACE_D]} />
+      <mesh position={[0, TILE_H / 2 + 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]} material={material}>
+        <planeGeometry args={[TOP_W, TOP_D]} />
       </mesh>
-      <mesh position={[0, TILE_H / 2 + 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]} material={pipMaterial}>
-        <planeGeometry args={[FACE_W, FACE_D]} />
-      </mesh>
-      <mesh position={[0, TILE_H / 2 - 0.004, 0]} geometry={pinGeometry()} material={brassMaterial()} />
     </>
   );
 }

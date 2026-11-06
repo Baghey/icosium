@@ -11,7 +11,7 @@ Ce qui marche :
   (`lib/street-textures.ts`), aucune image à télécharger.
 - Le fond de l'écran de jeu est le goudron la nuit (`street-bg`, grain en SVG, lueur du lampadaire).
 - Pierres ivoire au clou doré (choix du propriétaire, 5/11 23 h), sur la table comme dans la main ;
-  sur la table, les points sont dessinés par-dessus sans éclairage pour rester d'un noir franc.
+  sur la table, le dessus de chaque pierre est le même dessin SVG que la main, posé sans éclairage.
 - Pierres plus grosses sur la table : la caméra montre toujours toutes les pierres posées, d'aussi
   près que possible (environ 36 px par pierre en début de manche), et ne recule que quand la chaîne
   grandit, sans jamais revenir en avant avant la manche suivante. (Une version qui suivait la
