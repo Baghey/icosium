@@ -45,7 +45,7 @@ et trop de jeux dispersent les joueurs.
 | 1 (MVP) | Dama | 2 | Simple à coder, très connu |
 | 2 | Ludo « Tchekchayka » (étape 11) | 2 à 4 | Règles validées, tout le monde connaît |
 | 2 | Échecs (étape 12) | 2 | Bibliothèques matures, public fidèle |
-| 2 | Kemmel (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
+| 2 | Yiwen (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
 | 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
 | 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
@@ -261,12 +261,12 @@ répétition, 50 coups, matériel insuffisant, accord), abandon.
 Licences : chess.js (BSD-2) et react-chessboard (MIT) sont permis ; chessground et Stockfish sont
 en GPL, donc interdits dans l'app. Les pièces sont dessinées maison.
 
-## Règles de Kemmel
+## Règles de Yiwen
 
 Notre jeu de cartes de couleurs : même famille que le jeu le plus connu du genre, mais avec notre
 nom, notre paquet et nos dessins. Le nom, le logo et le visuel de ce jeu sont des marques
-protégées : ne jamais les utiliser. « Kemmel » (كمّل) veut dire « termine ! » : finir sa main est
-le but du jeu.
+protégées : ne jamais les utiliser. Le nom « Yiwen » (« un » en tamazight) a été choisi par le propriétaire le
+6 novembre 2026.
 
 Proposition détaillée, maquettes et questions encore ouvertes :
 `/mnt/project-files/apercus-cartes/regles-cartes.md`.
@@ -403,8 +403,8 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
-| Nouveaux jeux (6 novembre) | Ludo, échecs, Kemmel, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
-| Jeu de cartes de couleurs | Notre version, nommée « Kemmel » | Aucun nom, logo ni visuel de la marque connue |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un en vague 2 | Étapes 11 à 15, après le MVP |
+| Jeu de cartes de couleurs | Notre version, nommée « Yiwen » | Aucun nom, logo ni visuel de la marque connue |
 | Blackjack | Jetons fictifs seulement, les « Louz » | Rien à acheter, rien à gagner, retour quotidien à 1 000 Louz |
 
 À confirmer : anglais seul au lancement, c'est voulu ? Le public est surtout algérien ; ajouter

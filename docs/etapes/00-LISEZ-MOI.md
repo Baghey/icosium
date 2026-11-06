@@ -29,7 +29,7 @@ MVP ; l'ordre peut changer si le propriétaire le décide.
 | --- | --- | --- |
 | 11 | Ludo « Tchekchayka » | Jouer à 4 ou en 2 contre 2, avec le dé tiré par le serveur |
 | 12 | Échecs | Jouer une partie complète avec pendule |
-| 13 | Kemmel (cartes de couleurs) | Jouer à 4 jusqu'au bout avec les cartes spéciales |
+| 13 | Yiwen (cartes de couleurs) | Jouer à 4 jusqu'au bout avec les cartes spéciales |
 | 14 | Loup-Garou | Jouer à 6 en vocal, la nuit réservée aux loups |
 | 15 | Vingt-et-un (blackjack) | Jouer contre la banque avec des jetons fictifs |
 
