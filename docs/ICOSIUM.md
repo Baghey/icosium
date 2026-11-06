@@ -48,7 +48,7 @@ et trop de jeux dispersent les joueurs.
 | 2 | Yiwen (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
 | 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
 | 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
-| 2 | Houma, achat de quartiers (étape 16) | 2 à 6 | Notre jeu façon Monopoly, quartiers d'Algérie |
+| 2 | Dzaïr, achat de quartiers (étape 16) | 2 à 6 | Notre jeu façon Monopoly, quartiers d'Algérie |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
 | 3 | Rami | 2 à 4 | Très joué en famille |
 | 3 | Belote / Coinche | 4 | Jouée en équipes de deux |
@@ -72,7 +72,7 @@ un jeu de cartes de couleurs comme le jeu le plus connu du genre. Le Ludo « Tch
 **Monopoly : attention au nom.** Monopoly est une marque de Hasbro. Faire notre propre version
 (nom, plateau, cartes) avec des quartiers algériens (Bab El Oued, Hydra, Sidi El Houari…) et
 une monnaie fictive. Les mécaniques d'achat et de loyer ne sont pas protégées, le nom et le
-visuel le sont. Notre version s'appelle « Houma » (proposition) : voir « Règles de Houma » et
+visuel le sont. Notre version s'appelle « Dzaïr » : voir « Règles de Dzaïr » et
 l'étape 16.
 
 ## Règles du domino algérien (double-six)
@@ -340,12 +340,12 @@ revient à 1 000 chaque jour s'il en a moins. Pas de classement des jetons, pas 
 
 > Ces règles sont le standard le plus courant ; à valider par le propriétaire.
 
-## Règles de Houma (jeu d'achat de quartiers)
+## Règles de Dzaïr (jeu d'achat de quartiers)
 
 Ajouté le 6 novembre 2026 à la demande du propriétaire. Notre jeu de la même famille que le
 célèbre jeu d'achat de propriétés, avec notre nom, notre plateau et notre argent. Le nom, le logo,
 le plateau, les rues, les personnages et les cartes du jeu connu sont protégés : ne jamais les
-utiliser. « Houma » veut dire « le quartier » ; c'est une proposition, à valider.
+utiliser. Nom choisi par le propriétaire : « Dzaïr » (l'Algérie, ou Alger, en darija).
 
 - 2 à 6 joueurs, dinars fictifs propres à la partie (aucun lien avec les Louz, rien à acheter).
 - Deux dés tirés par le serveur ; un double fait rejouer ; trois doubles : commissariat.
@@ -367,15 +367,28 @@ utiliser. « Houma » veut dire « le quartier » ; c'est une proposition, à va
   électricité), cartes « Mektoub » (chance), impôts, commissariat, « Kahwa » (pause au café).
 - Faillite : le joueur sort. Le dernier joueur qui reste gagne.
 
-**Questions pour le propriétaire (proposition par défaut en gras)**
-1. Nom : **Houma** · Bled · Dzaïr.
-2. Durée : partie complète jusqu'à la faillite · **le créateur choisit : complète, ou 60 minutes
-   et le plus riche gagne**.
-3. Quand un joueur refuse d'acheter un quartier : rien ne se passe · **enchères entre tous les
-   joueurs**.
-4. Case « Kahwa » : simple pause · **on ramasse les impôts et amendes payés depuis le début**.
-5. Échanges entre joueurs (quartiers contre argent) : **oui** · non.
-6. Construction : **maisons réparties de façon égale sur la ville** · libre.
+**Choix du propriétaire (6 novembre 2026)**
+- Nom : **Dzaïr**.
+- Durée : le créateur de la table choisit : partie complète jusqu'à la faillite, ou 60 minutes et
+  le plus riche gagne (argent + valeur des quartiers et des maisons).
+- Un quartier refusé part aux enchères entre tous les joueurs.
+- Les joueurs peuvent s'échanger des quartiers, de l'argent et des cartes « sortie du
+  commissariat ».
+
+**Règles classiques retenues (le propriétaire a demandé les règles habituelles)**
+- Case « Kahwa » : simple pause, rien à gagner (la cagnotte au centre est une règle maison, pas
+  la règle officielle).
+- Construction égale : posséder toute la ville ; une maison de plus sur un quartier seulement si
+  chaque autre quartier de la ville en a au moins autant ; 4 maisons puis une villa ; on vend
+  aussi de façon égale. Stock limité : 32 maisons et 12 villas pour la partie.
+- Pas de construction sur une ville dont un quartier est hypothéqué ; pas de loyer sur un quartier
+  hypothéqué ; lever l'hypothèque coûte son montant plus 10 %.
+- Départ : on touche une prime à chaque passage.
+- Commissariat : on y va par la case « Va au commissariat », une carte, ou trois doubles. Pour
+  sortir : payer l'amende, une carte de sortie, ou faire un double (3 essais, puis on paie). En
+  prison, on touche quand même ses loyers.
+- Faillite envers un joueur : il reçoit tout ce qui reste ; envers la banque : les quartiers sont
+  remis aux enchères.
 
 ## UI/UX : simple, solide, jolie
 
@@ -441,7 +454,7 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
-| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un, Houma en vague 2 | Étapes 11 à 16, après le MVP |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un, Dzaïr en vague 2 | Étapes 11 à 16, après le MVP |
 | Jeu de cartes de couleurs | Notre version, nommée « Yiwen » | Aucun nom, logo ni visuel de la marque connue |
 | Blackjack | Jetons fictifs seulement, les « Louz » | Rien à acheter, rien à gagner, retour quotidien à 1 000 Louz |
 
