@@ -235,7 +235,8 @@
     "viewAll": "Voir toute la table",
     "viewFollow": "Suivre le jeu de près",
     "roundClosedYou": "Tu fermes la manche !",
-    "youPass": "Rien à jouer : tu passes ton tour"
+    "youPass": "Rien à jouer : tu passes ton tour",
+    "playerMenu": "Options pour {name}"
   },
   "social": {
     "title": "Amis",
@@ -254,7 +255,8 @@
       "self": "C'est toi !",
       "blocked": "Impossible d'ajouter cette personne.",
       "rate_limited": "Trop de demandes, réessaie plus tard.",
-      "error": "Ça n'a pas marché, réessaie."
+      "error": "Ça n'a pas marché, réessaie.",
+      "sentShort": "Demande envoyée"
     },
     "noMessages": "Pas encore de message. Écris à un ami depuis l'onglet Amis.",
     "noFriends": "Pas encore d'amis. Ajoute quelqu'un avec son pseudo, ou depuis une table.",
@@ -324,6 +326,89 @@
     "newMessages": "{n} non lu(s)",
     "youPrefix": "Toi : ",
     "invitePreview": "🁫 Invitation à une table",
-    "guestNotice": "Les invités peuvent écrire à leurs amis. Crée un compte pour garder tes amis."
+    "guestNotice": "Les invités peuvent écrire à leurs amis. Crée un compte pour garder tes amis.",
+    "typingName": "{name} écrit…",
+    "react": "Réagir",
+    "reportMessage": "Signaler ce message",
+    "reportMessageTitle": "Signaler le message de {name}",
+    "voicePreview": "🎤 Message vocal",
+    "resultPreview": "🏆 Résultat de partie",
+    "callPreview": "📞 Appel vocal",
+    "missedCallPreview": "📞 Appel manqué",
+    "silence": "Couper son micro pour moi",
+    "unsilence": "Remettre son micro",
+    "silenceHint": "Il ne le saura pas.",
+    "voice": {
+      "record": "Message vocal",
+      "hold": "Maintiens le micro pour enregistrer.",
+      "slide": "Glisse pour annuler",
+      "release": "Lâche pour annuler",
+      "play": "Écouter",
+      "pause": "Pause",
+      "position": "Position dans le message vocal",
+      "speed": "Vitesse de lecture",
+      "failed": "Indisponible",
+      "micDenied": "Micro refusé. Autorise-le dans les réglages du navigateur.",
+      "unsupported": "Ce navigateur ne sait pas enregistrer. Essaie Chrome."
+    },
+    "group": {
+      "new": "Nouveau groupe",
+      "name": "Nom du groupe",
+      "namePlaceholder": "Les cousins, le café du coin…",
+      "pick": "Amis à ajouter",
+      "create": "Créer le groupe",
+      "count": "{n} membres",
+      "add": "Ajouter des amis",
+      "addConfirm": "Ajouter ({n})",
+      "leave": "Quitter le groupe",
+      "confirmLeave": "Quitter « {title} » ? Tu ne verras plus les messages.",
+      "noFriendsLeft": "Aucun ami à ajouter pour l'instant.",
+      "error": {
+        "invalid_title": "Donne un nom au groupe (40 caractères au plus).",
+        "invalid_members": "Choisis entre 1 et 7 amis.",
+        "not_friends": "On ne peut ajouter que ses amis.",
+        "rate_limited": "Trop de groupes créés aujourd'hui.",
+        "group_full": "Le groupe est plein (8 personnes au plus)."
+      }
+    },
+    "result": {
+      "title": "Domino · fin de partie",
+      "youWon": "Victoire !",
+      "youLost": "Perdu, revanche ?",
+      "finished": "Partie terminée",
+      "footer": "Partie en {target} points · table {code}"
+    },
+    "call": {
+      "ended": "Appel vocal · {duration}",
+      "missed": "Appel manqué",
+      "noAnswer": "Pas de réponse",
+      "declined": "Appel refusé",
+      "callBack": "Rappeler"
+    },
+    "system": {
+      "created": "{name} a créé le groupe « {title} »",
+      "added": "{name} a ajouté {names}",
+      "left": "{name} a quitté le groupe"
+    },
+    "addFriend": "Ajouter en ami"
+  },
+  "call": {
+    "title": "Appel ICOSIUM",
+    "start": "Appeler {name}",
+    "with": "En appel avec {name}",
+    "incoming": "t'appelle…",
+    "ringing": "Ça sonne…",
+    "connecting": "Connexion…",
+    "accept": "Décrocher",
+    "decline": "Refuser",
+    "hangUp": "Raccrocher",
+    "minimize": "Réduire l'appel",
+    "micHint": "Ton micro est coupé : touche-le pour parler.",
+    "error": {
+      "busy": "Déjà en ligne. Réessaie dans un moment.",
+      "not_friends": "Vous devez être amis pour vous appeler.",
+      "rate_limited": "Trop d'appels, attends un peu.",
+      "error": "L'appel n'a pas pu partir. Réessaie."
+    }
   }
 }

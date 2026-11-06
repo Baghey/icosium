@@ -2,10 +2,11 @@
 
 import type { MessageKey } from "@icosium/i18n";
 import { useState } from "react";
-import { BlockIcon, CloseIcon, FlagIcon } from "@/components/cafe-icons";
+import { AddFriendIcon, BlockIcon, CheckIcon, CloseIcon, FlagIcon, SpeakerIcon, SpeakerOffIcon } from "@/components/cafe-icons";
 import { Sheet } from "@/components/sheet";
 import { useT } from "@/lib/i18n";
-import { blockUser, removeFriend, reportUser, useSocial } from "@/lib/social-context";
+import { blockUser, removeFriend, reportUser, sendFriendRequest, useSocial } from "@/lib/social-context";
+import { useVoice } from "@/lib/voice-context";
 import { PersonAvatar } from "./person-avatar";
 
 const REASONS = ["spam", "insult", "cheat", "other"] as const;
@@ -18,16 +19,26 @@ type Props = {
   onClose: () => void;
   /** Après un blocage (la conversation disparaît, on peut quitter la page). */
   onBlocked?: () => void;
+  /** Ouvrir directement le signalement (d'un message précis, par exemple). */
+  initialMode?: "menu" | "report";
+  messageId?: string;
+  /** À la table : proposer aussi « Ajouter en ami » et « Couper son micro pour moi ». */
+  atTable?: boolean;
 };
 
 /**
  * Le menu d'une personne : retirer des amis, bloquer, signaler.
  * Accessible partout où l'on croise quelqu'un (liste d'amis, conversation).
  */
-export function PersonActions({ id, name, isFriend, onClose, onBlocked }: Props) {
+export function PersonActions({ id, name, isFriend, onClose, onBlocked, initialMode = "menu", messageId, atTable = false }: Props) {
   const t = useT();
-  const { refresh, presenceOf } = useSocial();
-  const [mode, setMode] = useState<"menu" | "remove" | "block" | "report" | "done">("menu");
+  const { refresh, presenceOf, friends } = useSocial();
+  const { silenced, setSilenced, peers } = useVoice();
+  const [mode, setMode] = useState<"menu" | "remove" | "block" | "report" | "done">(initialMode);
+  const pending = friends.some((f) => f.id === id && f.status === "pending");
+  const [asked, setAsked] = useState(false);
+  const inVoice = peers.some((p) => p.identity === id);
+  const muted = silenced.has(id);
   const [done, setDone] = useState<MessageKey>("social.reported");
   const [reason, setReason] = useState<Reason>("spam");
   const [details, setDetails] = useState("");
@@ -58,6 +69,29 @@ export function PersonActions({ id, name, isFriend, onClose, onBlocked }: Props)
 
       {mode === "menu" && (
         <div className="flex flex-col">
+          {atTable && !isFriend && (
+            <button
+              type="button"
+              className={`${row} text-gold-light`}
+              disabled={pending || asked}
+              onClick={() => {
+                setAsked(true);
+                void sendFriendRequest(name).then(refresh);
+              }}
+            >
+              {pending || asked ? <CheckIcon className="size-5" /> : <AddFriendIcon className="size-5" />}
+              {t(pending || asked ? "social.add.sentShort" : "social.addFriend")}
+            </button>
+          )}
+          {atTable && inVoice && (
+            <button type="button" className={row} onClick={() => setSilenced(id, !muted)}>
+              {muted ? <SpeakerIcon className="size-5 text-cafe-muted" /> : <SpeakerOffIcon className="size-5 text-cafe-muted" />}
+              <span className="flex flex-col">
+                {t(muted ? "social.unsilence" : "social.silence")}
+                <span className="text-xs font-normal text-cafe-muted">{t("social.silenceHint")}</span>
+              </span>
+            </button>
+          )}
           {isFriend && (
             <button type="button" className={row} onClick={() => setMode("remove")}>
               <CloseIcon className="size-5 text-cafe-muted" />
@@ -104,10 +138,10 @@ export function PersonActions({ id, name, isFriend, onClose, onBlocked }: Props)
           onSubmit={(e) => {
             e.preventDefault();
             const text = `${reason}${details.trim() ? `: ${details.trim()}` : ""}`;
-            void run(() => reportUser(id, text), "social.reported");
+            void run(() => reportUser(id, text, messageId), "social.reported");
           }}
         >
-          <p className="font-semibold">{t("social.reportTitle", { name })}</p>
+          <p className="font-semibold">{t(messageId ? "social.reportMessageTitle" : "social.reportTitle", { name })}</p>
           <div className="grid grid-cols-2 gap-2">
             {REASONS.map((r) => (
               <button

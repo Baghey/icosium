@@ -5,16 +5,18 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/app-shell";
-import { AddFriendIcon, ChatIcon, CheckIcon, CloseIcon, MoreIcon } from "@/components/cafe-icons";
+import { AddFriendIcon, ChatIcon, CheckIcon, CloseIcon, GroupIcon, MoreIcon } from "@/components/cafe-icons";
+import { GroupAvatar, NewGroupSheet } from "@/components/social/groups";
 import { PersonActions } from "@/components/social/person-actions";
 import { PersonAvatar } from "@/components/social/person-avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n, useT } from "@/lib/i18n";
-import { presenceKey, shortTime } from "@/lib/social-format";
+import { lastPreview, presenceKey, shortTime } from "@/lib/social-format";
 import {
   type Conversation,
   type Friend,
   type FriendRequestResult,
+  conversationName,
   openConversation,
   removeFriend,
   respondFriendRequest,
@@ -112,15 +114,40 @@ function Empty({ text, action }: { text: MessageKey; action?: { label: MessageKe
 }
 
 function Messages({ conversations, onFind }: { conversations: Conversation[]; onFind: () => void }) {
-  if (conversations.length === 0) return <Empty text="social.noMessages" action={{ label: "home.findFriends", onClick: onFind }} />;
+  const t = useT();
+  const { friends } = useSocial();
+  const [newGroup, setNewGroup] = useState(false);
+  const hasFriends = friends.some((f) => f.status === "accepted");
   return (
-    <ul className="cafe-card flex flex-col divide-y divide-gold/10 overflow-hidden">
-      {conversations.map((c) => (
-        <li key={c.id}>
-          <ConversationRow c={c} />
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-3">
+      {hasFriends && (
+        <button
+          type="button"
+          onClick={() => setNewGroup(true)}
+          className="cafe-card flex min-h-touch items-center gap-3 px-4 py-2.5 text-start transition-colors duration-150 active:bg-white/5"
+        >
+          <span className="flex size-10 items-center justify-center rounded-full border border-gold/50 bg-gold/10 text-gold-light">
+            <GroupIcon className="size-5" />
+          </span>
+          <span className="flex-1 font-semibold">{t("social.group.new")}</span>
+          <span className="text-xl text-gold-light" aria-hidden="true">
+            +
+          </span>
+        </button>
+      )}
+      {conversations.length === 0 ? (
+        <Empty text="social.noMessages" action={{ label: "home.findFriends", onClick: onFind }} />
+      ) : (
+        <ul className="cafe-card flex flex-col divide-y divide-gold/10 overflow-hidden">
+          {conversations.map((c) => (
+            <li key={c.id}>
+              <ConversationRow c={c} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {newGroup && <NewGroupSheet onClose={() => setNewGroup(false)} />}
+    </div>
   );
 }
 
@@ -128,19 +155,20 @@ function ConversationRow({ c }: { c: Conversation }) {
   const { t, locale } = useI18n();
   const { user } = useAuth();
   const { presenceOf } = useSocial();
-  const mine = c.lastSender === user?.id;
-  const preview = c.lastKind === "invite" ? t("social.invitePreview") : (c.lastBody ?? "");
+  const mine = c.lastSender === user?.id && c.lastKind !== "call";
+  const preview = lastPreview(c, t);
+  const prefix = mine ? t("social.youPrefix") : c.kind === "group" && c.lastSenderName && (c.lastKind === "text" || c.lastKind === "voice") ? `${c.lastSenderName} : ` : "";
   return (
     <Link href={`/friends/${c.id}`} className="flex min-h-18 items-center gap-3 px-4 py-3 transition-colors duration-150 active:bg-white/5">
-      <PersonAvatar id={c.otherId} size={50} presence={presenceOf(c.otherId)} />
+      {c.kind === "group" ? <GroupAvatar members={c.members} size={50} /> : c.otherId && <PersonAvatar id={c.otherId} size={50} presence={presenceOf(c.otherId)} />}
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="flex items-baseline justify-between gap-2">
-          <span className={`truncate ${c.unread ? "font-bold text-ink" : "font-semibold"}`}>{c.otherUsername}</span>
-          {c.lastBody !== null && <span className={`shrink-0 text-xs ${c.unread ? "text-gold-light" : "text-ink-muted"}`}>{shortTime(c.lastAt, locale, t)}</span>}
+          <span className={`truncate ${c.unread ? "font-bold text-ink" : "font-semibold"}`}>{conversationName(c)}</span>
+          {c.lastKind !== null && <span className={`shrink-0 text-xs ${c.unread ? "text-gold-light" : "text-ink-muted"}`}>{shortTime(c.lastAt, locale, t)}</span>}
         </span>
         <span className="flex items-center justify-between gap-2">
           <span className={`truncate text-sm ${c.unread ? "text-ink" : "text-ink-muted"}`}>
-            {mine ? t("social.youPrefix") : ""}
+            {prefix}
             {preview}
           </span>
           {c.unread > 0 && (

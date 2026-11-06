@@ -9,6 +9,8 @@ import { type CallResult, type SeatInfo, seatKey } from "@/lib/domino-client";
 import { SoundToggle } from "./sound-toggle";
 import { AddFriendIcon, BotIcon, Emblem } from "@/components/cafe-icons";
 import { InviteFriends } from "@/components/social/invite-friends";
+import { PersonActions } from "@/components/social/person-actions";
+import { useSocial } from "@/lib/social-context";
 import { tableAvatars } from "./player-badge";
 
 type Props = {
@@ -26,6 +28,8 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
   const [copied, setCopied] = useState(false);
   const [botsBusy, setBotsBusy] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [person, setPerson] = useState<{ id: string; name: string } | null>(null);
+  const { friends } = useSocial();
   const players = options.players;
   const avatars = tableAvatars(seats.map((s) => ({ key: seatKey(s), botName: s.userId ? null : s.username })));
 
@@ -113,8 +117,21 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
           {positions.map(({ seat, cls }) => {
             const who = seats.find((s) => s.seat === seat);
             const partner = players === 4 && seat === (mySeat + 2) % 4;
+            const other = who?.userId && seat !== mySeat ? { id: who.userId, name: who.username } : null;
             return (
-              <div key={seat} className={`absolute flex flex-col items-center gap-1 ${cls}`}>
+              <div
+                key={seat}
+                className={`absolute flex flex-col items-center gap-1 ${cls}`}
+                {...(other
+                  ? {
+                      role: "button",
+                      tabIndex: 0,
+                      "aria-label": t("domino.playerMenu", { name: other.name }),
+                      onClick: () => setPerson(other),
+                      onKeyDown: (e: React.KeyboardEvent) => (e.key === "Enter" || e.key === " ") && setPerson(other),
+                    }
+                  : {})}
+              >
                 <span
                   key={who ? seatKey(who) : "free"}
                   className={`flex size-14 items-center justify-center overflow-hidden rounded-full border-2 text-lg font-semibold ${
@@ -134,6 +151,15 @@ export function WaitingRoom({ code, options, seats, mySeat, isHost, addBots }: P
         </div>
       </div>
 
+      {person && (
+        <PersonActions
+          id={person.id}
+          name={person.name}
+          isFriend={friends.some((f) => f.id === person.id && f.status === "accepted")}
+          atTable
+          onClose={() => setPerson(null)}
+        />
+      )}
       <p className="mb-1 px-6 text-center text-sm text-cafe-text/90">{t("domino.waitingHint")}</p>
       <p className="mb-3 text-center text-sm text-cafe-muted">
         {players === 4 ? t("play.players4") : t("play.players2")} · {options.targetScore} ·{" "}
