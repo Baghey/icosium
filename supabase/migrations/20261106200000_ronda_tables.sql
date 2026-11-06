@@ -203,3 +203,80 @@ set search_path = ''
 as $$
   select array['domino', 'ludo', 'ronda']::text[];
 $$;
+
+-- ---------- Invitations ----------
+-- Une invitation garde maintenant son jeu (domino, Ludo ou Ronda) : avant, le serveur la notait
+-- toujours « domino », et le bouton Rejoindre d'une table de Ludo menait au domino.
+-- Même fonction qu'à l'étape 4, seule la ligne « game » change.
+create or replace function public.send_message(p_conversation uuid, p_body text, p_kind text default 'text', p_meta jsonb default null)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := (select auth.uid());
+  conv_kind text;
+  msg uuid;
+  clean text := trim(coalesce(p_body, ''));
+  clean_meta jsonb;
+  voice_path text;
+begin
+  if me is null then raise exception 'not_signed_in'; end if;
+  if not exists (select 1 from public.conversation_members where conversation_id = p_conversation and user_id = me) then
+    raise exception 'not_member';
+  end if;
+  select kind into conv_kind from public.conversations where id = p_conversation;
+  if p_kind not in ('text', 'invite', 'voice') then raise exception 'invalid_kind'; end if;
+  if p_kind = 'text' and (char_length(clean) = 0 or char_length(clean) > 1000) then raise exception 'invalid_body'; end if;
+
+  if p_kind = 'invite' then
+    if p_meta is null or coalesce(p_meta ->> 'code', '') !~ '^[A-Z]{4}$' then raise exception 'invalid_invite'; end if;
+    clean_meta := jsonb_build_object(
+      'game', case when p_meta ->> 'game' in ('domino', 'ludo', 'ronda') then p_meta ->> 'game' else 'domino' end,
+      'code', p_meta ->> 'code',
+      'players', least(4, greatest(2, coalesce((p_meta ->> 'players')::int, 4))),
+      'free', least(3, greatest(0, coalesce((p_meta ->> 'free')::int, 0))));
+  elsif p_kind = 'voice' then
+    voice_path := coalesce(p_meta ->> 'path', '');
+    -- Le fichier doit être dans le dossier de cette conversation, à mon nom, et exister.
+    if voice_path !~ ('^' || p_conversation::text || '/' || me::text || '/[0-9a-f-]{36}\.(webm|ogg|m4a|mp4|aac|mp3)$')
+       or not exists (select 1 from storage.objects o where o.bucket_id = 'voice-notes' and o.name = voice_path) then
+      raise exception 'invalid_voice';
+    end if;
+    clean_meta := jsonb_build_object(
+      'path', voice_path,
+      'duration', round(least(60, greatest(0.5, coalesce((p_meta ->> 'duration')::numeric, 1))), 1),
+      'peaks', coalesce((
+        select jsonb_agg(least(100, greatest(0, round(v::numeric)))::int order by ord)
+          from jsonb_array_elements_text(case when jsonb_typeof(p_meta -> 'peaks') = 'array' then p_meta -> 'peaks' else '[]'::jsonb end)
+               with ordinality as a(v, ord)
+         where ord <= 48 and v ~ '^[0-9]+(\.[0-9]+)?$'
+      ), '[]'::jsonb));
+  end if;
+
+  -- À deux : personne de bloqué dans la conversation. En groupe, un blocage ne coupe pas tout le
+  -- groupe : la RLS cache seulement les messages de la personne bloquée à celui qui l'a bloquée.
+  if conv_kind = 'direct' and exists (
+    select 1 from public.conversation_members m
+     where m.conversation_id = p_conversation and m.user_id <> me and private.is_blocked_between(me, m.user_id)
+  ) then
+    raise exception 'blocked';
+  end if;
+  -- Anti-spam : 20 messages par minute au plus.
+  if (select count(*) from public.messages where sender_id = me and created_at > now() - interval '1 minute') >= 20 then
+    raise exception 'rate_limited';
+  end if;
+
+  insert into public.messages (conversation_id, sender_id, kind, body, meta)
+    values (p_conversation, me, p_kind, case when p_kind = 'text' then clean else '' end, clean_meta)
+    returning id into msg;
+  update public.conversations set last_message_at = now() where id = p_conversation;
+  update public.conversation_members set last_read_at = now() where conversation_id = p_conversation and user_id = me;
+  -- Si j'écris dans une demande reçue, je l'accepte.
+  update public.conversation_members set state = 'active' where conversation_id = p_conversation and user_id = me and state = 'request';
+  return msg;
+end;
+$$;
+revoke all on function public.send_message(uuid, text, text, jsonb) from public, anon;
+grant execute on function public.send_message(uuid, text, text, jsonb) to authenticated;

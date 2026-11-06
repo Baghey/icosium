@@ -166,7 +166,12 @@
     "ludoTeams": "2 vs 2",
     "pawnsToWin": "Pawns home to win",
     "ludoFirstTime": "New to Ludo? Learn in 2 minutes, on your own.",
-    "soloLudo": "Ludo alone against bots"
+    "soloLudo": "Ludo alone against bots",
+    "gameRonda": "Ronda",
+    "rondaPlayers4": "2 vs 2",
+    "rondaTarget": "Points to win",
+    "rondaFirstTime": "New to Ronda? Learn in 2 minutes, on your own.",
+    "soloRonda": "Ronda alone against bots"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -403,7 +408,8 @@
       "left": "{name} left the group"
     },
     "addFriend": "Add friend",
-    "inviteCardLudo": "Ludo table"
+    "inviteCardLudo": "Ludo table",
+    "inviteCardRonda": "Ronda table"
   },
   "call": {
     "title": "ICOSIUM call",
@@ -579,6 +585,151 @@
     "learnLudo": "Learn Ludo",
     "yourTable": "Your table",
     "visibleTo": "Visible to: {who}",
-    "friendHost": "Your friends play here"
+    "friendHost": "Your friends play here",
+    "taglineRonda": "The café card game: 2 players, or 2 vs 2.",
+    "learnRonda": "Learn Ronda"
+  },
+  "ronda": {
+    "name": "Ronda",
+    "loading": "Shuffling the cards…",
+    "table": "Ronda table",
+    "you": "You",
+    "partner": "Partner",
+    "freeSeat": "Free seat",
+    "leave": "Leave the table",
+    "turnOf": "{name}'s turn",
+    "yourTurnChip": "Your turn",
+    "gameOver": "Game over",
+    "us": "Us",
+    "them": "Them",
+    "toWin": "to {n}",
+    "deck": "Deck · {n}",
+    "pile": "{n} cards",
+    "cards": "{n} cards",
+    "card": "{card}",
+    "playCard": "Play {card}",
+    "round": "Round {n}",
+    "dealOf": "Deal {n} of {total}",
+    "announce": {
+      "ronda": "Ronda!",
+      "tringa": "Tringa!",
+      "hint": "A pair or three of a kind? Call it before your first card.",
+      "done": "Called: {kind}",
+      "ronda1": "1 point",
+      "tringa5": "5 points"
+    },
+    "shout": {
+      "caida1": "One!",
+      "caida5": "Five!",
+      "caida10": "Ten!",
+      "missa": "Missa!",
+      "ronda": "Ronda!",
+      "tringa": "Tringa!"
+    },
+    "status": {
+      "yourTurn": "Your turn: tap a card",
+      "confirm": "Tap the card again to play it",
+      "takes": "It takes {n} card(s)",
+      "lays": "It stays on the table",
+      "theirTurn": "{name} is thinking…",
+      "dealing": "Dealing the cards…"
+    },
+    "result": {
+      "title": "Calls",
+      "best": "{name}: {kind} of {value}",
+      "beaten": "{name}: {kind} of {value}, beaten",
+      "tie": "{name}: {kind} of {value}, tie",
+      "bluff": "{name}: {kind}… it was a bluff!",
+      "forgot": "{name} forgot to call their {kind}",
+      "points": "{team} +{n}"
+    },
+    "roundEnd": {
+      "title": "End of the round",
+      "cards": "{team}: {n} cards",
+      "points": "+{n}",
+      "rule": "1 point per card over 20",
+      "sweep": "The table cards go to {team}"
+    },
+    "rank": {
+      "A": "Ace",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "J": "Jack",
+      "Q": "Queen",
+      "K": "King"
+    },
+    "end": {
+      "youWin": "You won!",
+      "youWinSolo": "You won!",
+      "theyWin": "{name} wins the game",
+      "theyWinTeam": "{a} and {b} win the game",
+      "lost": "Lost this time. Rematch?",
+      "score": "{us} to {them}",
+      "newTable": "New table",
+      "home": "Back to the café"
+    },
+    "rules": {
+      "title": "Ronda rules",
+      "open": "Rules",
+      "r1": "40 cards: Ace to 7, then Jack, Queen, King (the Jack follows the 7). Suits don't matter.",
+      "r2": "4 face-up cards on the table at the start of the round, then 3 cards each at every deal.",
+      "r3": "Your card takes the card of the same value on the table, plus every card that follows (5, 6, 7…). Otherwise it stays on the table.",
+      "r4": "Caïda: you take the card your opponent just played = 1 point. With 4 players, the next player can take it all back with the 3rd matching card (5 points), then the 4th (10 points).",
+      "r5": "Missa: you clear the table = 1 point (except with the very last card of the round).",
+      "r6": "Before your first card of each deal, call your pair (Ronda, 1 point) or three of a kind (Tringa, 5 points). The best call takes all. A forgotten call or a bluff that's found out: the points go to the opponent.",
+      "r7": "End of round: the table cards go to the last player who took. 1 point per card collected over 20.",
+      "r8": "You win as soon as you reach {n} points, even in the middle of a round.",
+      "close": "Close"
+    },
+    "waiting": {
+      "hint": "The game starts as soon as every seat is taken.",
+      "fillBots": "Fill with bots",
+      "fillBotsHint": "Only if you want: empty seats go to bots.",
+      "teams": "2 vs 2, partners face to face",
+      "target": "{n} points to win"
+    },
+    "error": {
+      "not_your_turn": "It's not your turn.",
+      "not_in_hand": "That card is no longer in your hand.",
+      "too_late": "Too late: you call before your first card.",
+      "already_announced": "You already called.",
+      "conflict": "The table moved on. Try again.",
+      "unknown": "Small network hiccup. Try again."
+    },
+    "learn": {
+      "button": "Learn to play",
+      "title": "Learn Ronda",
+      "skip": "Skip",
+      "next": "Next",
+      "again": "Start again",
+      "openTable": "Open a table",
+      "doneTitle": "You know how to play!",
+      "doneText": "At a real table you play 2 players or 2 vs 2, to 41 points (or 25). The rules stay under the « ? » button.",
+      "coach": "Yasmine",
+      "opponentPlays": "Yasmine is playing…",
+      "step": {
+        "intro": "This is the table: 4 face-up cards. At the bottom, your hand: 3 cards. Only values count, not suits.",
+        "sequence": "Yasmine played a 6. On the table, 5, 6 and 7 follow each other. Tap your 5 (twice to play it).",
+        "sequenceDone": "Your 5 took the 5… and the whole run: 6 and 7! A card takes the same value, plus the ones that follow.",
+        "caida": "Yasmine just played a Queen. Take it with your Queen: that's a caïda!",
+        "caidaDone": "One! Taking the card your opponent just played = 1 point. And the King that followed came along.",
+        "missa": "With your 2 you take the 2 and the 3 after it. The table will be empty: that's a missa!",
+        "missaDone": "Missa! Clearing the table = 1 more point.",
+        "announce": "New deal. You have two Jacks: a pair is a ronda! Call it before your first card.",
+        "announceDone": "Well called. Now play your 6.",
+        "settle": "At the end of the deal, calls are checked: your ronda is worth 1 point. Careful: a forgotten call, or a bluff, gives the points to the opponent. Three of a kind (tringa) is worth 5.",
+        "end": "At the end of the round, everyone counts their cards: 1 point per card over 20. The first to 41 points wins, even mid-round."
+      },
+      "wrong": {
+        "thatCard": "Not that one: tap the glowing card.",
+        "announceFirst": "First, tap « Ronda! » to call your pair.",
+        "wait": "Wait: it's Yasmine's turn.",
+        "notNow": "No need to call here."
+      }
+    }
   }
 }

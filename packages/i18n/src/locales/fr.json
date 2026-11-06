@@ -166,7 +166,12 @@
     "ludoTeams": "2 contre 2",
     "pawnsToWin": "Pions à rentrer pour gagner",
     "ludoFirstTime": "Nouveau au Ludo ? Apprends en 2 minutes, tout seul.",
-    "soloLudo": "Ludo seul contre des bots"
+    "soloLudo": "Ludo seul contre des bots",
+    "gameRonda": "Ronda",
+    "rondaPlayers4": "2 contre 2",
+    "rondaTarget": "Points pour gagner",
+    "rondaFirstTime": "Nouveau à la Ronda ? Apprends en 2 minutes, tout seul.",
+    "soloRonda": "Ronda seul contre des bots"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -403,7 +408,8 @@
       "left": "{name} a quitté le groupe"
     },
     "addFriend": "Ajouter en ami",
-    "inviteCardLudo": "Table de Ludo"
+    "inviteCardLudo": "Table de Ludo",
+    "inviteCardRonda": "Table de Ronda"
   },
   "call": {
     "title": "Appel ICOSIUM",
@@ -579,6 +585,151 @@
     "learnLudo": "Apprendre le Ludo",
     "yourTable": "Ta table",
     "visibleTo": "Visible : {who}",
-    "friendHost": "Tes amis jouent ici"
+    "friendHost": "Tes amis jouent ici",
+    "taglineRonda": "Le jeu de cartes du café : à 2, ou 2 contre 2.",
+    "learnRonda": "Apprendre la Ronda"
+  },
+  "ronda": {
+    "name": "Ronda",
+    "loading": "On mélange les cartes…",
+    "table": "Table de Ronda",
+    "you": "Toi",
+    "partner": "Partenaire",
+    "freeSeat": "Chaise libre",
+    "leave": "Quitter la table",
+    "turnOf": "Tour de {name}",
+    "yourTurnChip": "À toi",
+    "gameOver": "Partie terminée",
+    "us": "Nous",
+    "them": "Eux",
+    "toWin": "en {n}",
+    "deck": "Pioche · {n}",
+    "pile": "{n} cartes",
+    "cards": "{n} cartes",
+    "card": "{card}",
+    "playCard": "Jouer {card}",
+    "round": "Manche {n}",
+    "dealOf": "Donne {n} sur {total}",
+    "announce": {
+      "ronda": "Ronda !",
+      "tringa": "Tringa !",
+      "hint": "Une paire ou un brelan ? Annonce-le avant ta première carte.",
+      "done": "Annoncé : {kind}",
+      "ronda1": "1 point",
+      "tringa5": "5 points"
+    },
+    "shout": {
+      "caida1": "Wahed !",
+      "caida5": "Khamsa !",
+      "caida10": "Achra !",
+      "missa": "Missa !",
+      "ronda": "Ronda !",
+      "tringa": "Tringa !"
+    },
+    "status": {
+      "yourTurn": "À toi : touche une carte",
+      "confirm": "Touche encore la carte pour la poser",
+      "takes": "Elle prend {n} carte(s)",
+      "lays": "Elle reste sur la table",
+      "theirTurn": "{name} réfléchit…",
+      "dealing": "On donne les cartes…"
+    },
+    "result": {
+      "title": "Les annonces",
+      "best": "{name} : {kind} de {value}",
+      "beaten": "{name} : {kind} de {value}, battue",
+      "tie": "{name} : {kind} de {value}, égalité",
+      "bluff": "{name} : {kind}… c'était du bluff !",
+      "forgot": "{name} a oublié d'annoncer sa {kind}",
+      "points": "{team} +{n}"
+    },
+    "roundEnd": {
+      "title": "Fin de la manche",
+      "cards": "{team} : {n} cartes",
+      "points": "+{n}",
+      "rule": "1 point par carte au-delà de 20",
+      "sweep": "Les cartes de la table vont à {team}"
+    },
+    "rank": {
+      "A": "As",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "J": "Valet",
+      "Q": "Dame",
+      "K": "Roi"
+    },
+    "end": {
+      "youWin": "Vous avez gagné !",
+      "youWinSolo": "Tu as gagné !",
+      "theyWin": "{name} gagne la partie",
+      "theyWinTeam": "{a} et {b} gagnent la partie",
+      "lost": "Perdu cette fois. La revanche ?",
+      "score": "{us} à {them}",
+      "newTable": "Nouvelle table",
+      "home": "Retour au café"
+    },
+    "rules": {
+      "title": "Règles de la Ronda",
+      "open": "Règles",
+      "r1": "40 cartes : As à 7, puis Valet, Dame, Roi (le Valet suit le 7). Les couleurs ne comptent pas.",
+      "r2": "4 cartes visibles sur la table au début de la manche, puis 3 cartes à chacun à chaque donne.",
+      "r3": "Ta carte prend la carte de même valeur sur la table, plus toutes celles qui suivent (5, 6, 7…). Sinon elle reste sur la table.",
+      "r4": "Caïda : tu prends la carte que l'adversaire vient de poser = 1 point. À 4, le joueur suivant peut tout reprendre avec la 3e carte identique (5 points), puis la 4e (10 points).",
+      "r5": "Missa : tu vides la table = 1 point (sauf avec la toute dernière carte de la manche).",
+      "r6": "Avant ta première carte de chaque donne, annonce ta paire (Ronda, 1 point) ou ton brelan (Tringa, 5 points). La meilleure annonce gagne tout. Annonce oubliée ou bluff découvert : les points vont à l'adversaire.",
+      "r7": "Fin de manche : les cartes de la table vont au dernier qui a pris. 1 point par carte ramassée au-delà de 20.",
+      "r8": "On gagne dès qu'on atteint {n} points, même en pleine manche.",
+      "close": "Fermer"
+    },
+    "waiting": {
+      "hint": "La partie commence dès que toutes les chaises sont prises.",
+      "fillBots": "Compléter avec des bots",
+      "fillBotsHint": "Seulement si tu veux : les chaises libres sont données à des bots.",
+      "teams": "2 contre 2, partenaires face à face",
+      "target": "{n} points pour gagner"
+    },
+    "error": {
+      "not_your_turn": "Ce n'est pas ton tour.",
+      "not_in_hand": "Cette carte n'est plus dans ta main.",
+      "too_late": "Trop tard : on annonce avant sa première carte.",
+      "already_announced": "Tu as déjà annoncé.",
+      "conflict": "La table a avancé. Réessaie.",
+      "unknown": "Petit souci de réseau. Réessaie."
+    },
+    "learn": {
+      "button": "Apprendre à jouer",
+      "title": "Apprendre la Ronda",
+      "skip": "Passer",
+      "next": "Suivant",
+      "again": "Recommencer",
+      "openTable": "Ouvrir une table",
+      "doneTitle": "Tu sais jouer !",
+      "doneText": "À une vraie table, on joue à 2 ou à 2 contre 2, en 41 points (ou 25). Les règles restent sous le bouton « ? ».",
+      "coach": "Yasmine",
+      "opponentPlays": "Yasmine joue…",
+      "step": {
+        "intro": "Voici la table : 4 cartes visibles. En bas, ta main : 3 cartes. Seules les valeurs comptent, pas les couleurs.",
+        "sequence": "Yasmine a posé un 6. Sur la table, 5, 6 et 7 se suivent. Touche ton 5 (deux fois pour le poser).",
+        "sequenceDone": "Ton 5 a pris le 5… et toute la suite : 6 et 7 ! Une carte prend la même valeur, plus celles qui suivent.",
+        "caida": "Yasmine vient de poser une Dame. Prends-la avec ta Dame : c'est une caïda !",
+        "caidaDone": "Wahed ! Prendre la carte que l'adversaire vient de poser = 1 point. Et le Roi qui suivait est venu avec.",
+        "missa": "Avec ton 2, tu prends le 2 et le 3 qui suit. La table sera vide : c'est une missa !",
+        "missaDone": "Missa ! Vider la table = 1 point de plus.",
+        "announce": "Nouvelle donne. Tu as deux Valets : une paire, c'est une ronda ! Annonce-la avant ta première carte.",
+        "announceDone": "Bien annoncé. Pose maintenant ton 6.",
+        "settle": "À la fin de la donne, on vérifie : ta ronda vaut 1 point. Attention : une annonce oubliée, ou un bluff, donne les points à l'adversaire. Un brelan (tringa) vaut 5.",
+        "end": "En fin de manche, chacun compte ses cartes : 1 point par carte au-delà de 20. Le premier à 41 points gagne, même en pleine manche."
+      },
+      "wrong": {
+        "thatCard": "Pas celle-là : touche la carte qui brille.",
+        "announceFirst": "D'abord, touche « Ronda ! » pour annoncer ta paire.",
+        "wait": "Attends : c'est au tour de Yasmine.",
+        "notNow": "Pas besoin d'annoncer ici."
+      }
+    }
   }
 }

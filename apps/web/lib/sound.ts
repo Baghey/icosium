@@ -310,3 +310,63 @@ export function playRing(soft = false): void {
     }
   });
 }
+
+/* ---------- Cartes (Ronda) : papier cartonné sur le feutre, synthétisé (rien à télécharger) ---------- */
+
+/** Un souffle de bruit filtré : la base de tous les sons de carte. */
+function paper(ac: AudioContext, at: number, dur: number, freq: number, q: number, level: number) {
+  const n = Math.max(1, Math.floor(ac.sampleRate * dur));
+  const buf = ac.createBuffer(1, n, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.2);
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const bp = ac.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = freq;
+  bp.Q.value = q;
+  const gain = ac.createGain();
+  gain.gain.value = level;
+  src.connect(bp).connect(gain).connect(out(ac));
+  src.start(at);
+}
+
+/** Une carte posée sur le feutre : un « flap » sec et mat. */
+export function playCardFlick(): void {
+  try {
+    navigator.vibrate?.(10);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  const t = ac.currentTime + 0.004;
+  const v = 0.92 + Math.random() * 0.16;
+  paper(ac, t, 0.05, 2400 * v, 0.9, 1.4);
+  paper(ac, t + 0.012, 0.07, 520 * v, 1.2, 1.1);
+}
+
+/** On ramasse des cartes : un glissement rapide sur le feutre, un peu plus long si on en prend beaucoup. */
+export function playCardSweep(cards = 2): void {
+  try {
+    navigator.vibrate?.([12, 30, 16]);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  const t = ac.currentTime + 0.004;
+  const n = Math.min(6, Math.max(2, cards));
+  for (let i = 0; i < n; i++) paper(ac, t + i * 0.035, 0.09, 1500 + i * 180, 0.7, 0.9 - i * 0.08);
+}
+
+/** Le paquet qu'on mélange et qu'on donne : une rafale de petites cartes. */
+export function playCardShuffle(): void {
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  const t = ac.currentTime + 0.004;
+  for (let i = 0; i < 16; i++) paper(ac, t + i * 0.028 + Math.random() * 0.008, 0.025, 3000 + Math.random() * 900, 1.4, 0.55);
+}
