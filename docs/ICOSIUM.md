@@ -315,7 +315,7 @@ du jeu (comme « Mafia »).
 - Nombre de loups proposé : 1 loup pour 6 joueurs, 2 de 7 à 9, 3 de 10 à 12 (modifiable).
 - Le jeu se joue au micro, pas au chat écrit (choix du propriétaire, 6 novembre 2026).
 - Le jour, tour de parole : le serveur ouvre le micro d'un seul joueur à la fois, dans l'ordre du
-  cercle, avec un temps limité (45 s par défaut) ; le joueur peut « passer la parole » au suivant
+  cercle, avec un temps limité (30 s par défaut) ; le joueur peut « passer la parole » au suivant
   plus tôt. La nuit, seuls les loups parlent, entre eux. Les morts écoutent sans parler. Ces droits sont donnés par le serveur dans le jeton LiveKit.
 - Chaque joueur ne peut lire que son propre rôle (table privée, RLS stricte) ; les loups se
   voient entre eux.

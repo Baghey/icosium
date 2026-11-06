@@ -27,7 +27,7 @@ leurs cartes, leurs dessins ni leurs noms de rôles inventés.
    côté client) :
    - le jour, on parle à tour de rôle (choix du propriétaire, 6 novembre 2026) : le serveur
      donne la parole à un seul joueur à la fois, dans l'ordre du cercle ; seul son micro est
-     ouvert, les autres écoutent ; il a un temps limité (45 s par défaut, réglable : 30, 45,
+     ouvert, les autres écoutent ; il a un temps limité (30 s par défaut, réglable : 30, 45,
      60 s) et un gros bouton « Je passe la parole » pour donner la main au suivant plus tôt ;
      quand le temps est écoulé, le serveur passe la parole tout seul ;
    - après un tour complet, le vote ; le joueur accusé peut avoir 20 s pour se défendre avant
