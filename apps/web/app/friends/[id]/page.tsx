@@ -361,7 +361,7 @@ function Bubble({ m, mine, first, last, onRetry }: { m: Message; mine: boolean; 
             <DominoIcon className="size-6" />
           </span>
           <span className="flex flex-col">
-            <span className="text-gilded font-bold">{t("social.inviteCard")}</span>
+            <span className="text-gilded font-bold">{t(m.meta.game === "ludo" ? "social.inviteCardLudo" : "social.inviteCard")}</span>
             <span className="font-mono text-lg font-bold tracking-[0.3em] text-cafe-text" dir="ltr">
               {m.meta.code}
             </span>
@@ -369,7 +369,7 @@ function Bubble({ m, mine, first, last, onRetry }: { m: Message; mine: boolean; 
         </div>
         <div className="flex items-center justify-between gap-2 bg-cafe-1/95 px-3 py-2">
           <span className="text-xs text-cafe-muted">{t("social.inviteSeats", { free: m.meta.free })}</span>
-          <Link href={`/play/${m.meta.code}`} className="gold-button flex min-h-9 items-center rounded-full px-4 text-sm font-bold">
+          <Link href={`/${m.meta.game === "ludo" ? "ludo" : "play"}/${m.meta.code}`} className="gold-button flex min-h-9 items-center rounded-full px-4 text-sm font-bold">
             {t("social.inviteJoin")}
           </Link>
         </div>

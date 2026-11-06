@@ -154,7 +154,17 @@
     },
     "solo": "Jouer seul contre des bots",
     "soloHint": "Tu joues tout de suite, les autres chaises sont prises par des bots.",
-    "soloStarting": "On installe les bots…"
+    "soloStarting": "On installe les bots…",
+    "game": "Jeu",
+    "gameDomino": "Domino",
+    "gameLudo": "Ludo",
+    "ludoSubtitle": "Tchekchayka : le jeu de dé de tout le monde, de 2 à 4.",
+    "players3": "3 joueurs",
+    "ludoPlayers4": "4 joueurs",
+    "ludoTeams": "2 contre 2",
+    "pawnsToWin": "Pions à rentrer pour gagner",
+    "ludoFirstTime": "Nouveau au Ludo ? Apprends en 2 minutes, tout seul.",
+    "soloLudo": "Ludo seul contre des bots"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -324,6 +334,113 @@
     "newMessages": "{n} non lu(s)",
     "youPrefix": "Toi : ",
     "invitePreview": "🁫 Invitation à une table",
-    "guestNotice": "Les invités peuvent écrire à leurs amis. Crée un compte pour garder tes amis."
+    "guestNotice": "Les invités peuvent écrire à leurs amis. Crée un compte pour garder tes amis.",
+    "inviteCardLudo": "Table de Ludo"
+  },
+  "ludo": {
+    "name": "Tchekchayka",
+    "loading": "On installe le plateau…",
+    "board": "Plateau de Ludo",
+    "pawn": "Pion {n} : avancer",
+    "you": "Toi",
+    "partner": "Partenaire",
+    "freeSeat": "Chaise libre",
+    "leave": "Quitter la table",
+    "turnOf": "Tour de {name}",
+    "yourTurnChip": "À toi",
+    "roll": "Lancer",
+    "rollLabel": "Lancer le dé",
+    "finished": "{n} sur {total} pions rentrés",
+    "status": {
+      "yourRoll": "À toi : touche le dé",
+      "yourMove": "Tu as fait {n} : touche un pion qui brille",
+      "forPartner": "Tu as fini : tu joues les pions de ton partenaire",
+      "theirRoll": "{name} lance le dé…",
+      "theirMove": "{name} a fait {n} et choisit un pion"
+    },
+    "bubble": {
+      "six": "6 : rejoue !",
+      "capture": "Mangé ! Rejoue",
+      "threeSixes": "Trois 6 : tour perdu",
+      "noMove": "Aucun pion ne peut bouger",
+      "done": "Pions rentrés !",
+      "auto": "Joué à sa place"
+    },
+    "end": {
+      "youWin": "Tu as gagné !",
+      "teamWin": "Ton équipe a gagné !",
+      "theyWin": "{name} gagne la partie",
+      "theyWinTeam": "{a} et {b} gagnent la partie",
+      "lost": "Perdu cette fois. La revanche ?",
+      "newTable": "Nouvelle table",
+      "home": "Retour au café"
+    },
+    "rules": {
+      "title": "Règles du Tchekchayka",
+      "open": "Règles",
+      "r1": "Chacun a 4 pions. Le but : les amener au centre, par le couloir de ta couleur.",
+      "r2": "Un pion sort de la maison seulement avec un 6.",
+      "r3": "Un 6 fait rejouer. Mais trois 6 de suite : le tour est perdu.",
+      "r4": "Tomber sur un pion adverse le renvoie à sa maison, et tu rejoues.",
+      "r5": "Sur une case étoilée (et sur les cases de départ), personne n'est mangé.",
+      "r6": "Deux pions d'une même couleur ne bloquent pas le passage.",
+      "r7": "Il faut le chiffre exact pour entrer au centre.",
+      "r8": "On gagne en rentrant {n} pion(s). À 2 contre 2, les deux partenaires doivent y arriver ; celui qui a fini joue pour l'autre.",
+      "close": "Fermer"
+    },
+    "waiting": {
+      "hint": "La partie commence dès que toutes les chaises sont prises.",
+      "shareText": "Viens jouer au Ludo avec moi sur ICOSIUM ! Code de la table : {code}",
+      "fillBots": "Compléter avec des bots",
+      "fillBotsHint": "Seulement si tu veux : les chaises libres sont données à des bots.",
+      "pawnsToWin": "{n} pion(s) pour gagner",
+      "teams": "2 contre 2"
+    },
+    "error": {
+      "not_your_turn": "Ce n'est pas ton tour.",
+      "must_roll": "Lance d'abord le dé.",
+      "must_move": "Choisis d'abord un pion.",
+      "illegal_move": "Ce pion ne peut pas bouger.",
+      "conflict": "La table a avancé. Réessaie.",
+      "unknown": "Petit souci de réseau. Réessaie."
+    },
+    "learn": {
+      "button": "Apprendre à jouer",
+      "buttonHint": "2 minutes, tout seul, sans se tromper",
+      "title": "Apprendre le Tchekchayka",
+      "skip": "Passer",
+      "next": "Suivant",
+      "again": "Recommencer",
+      "openTable": "Ouvrir une table",
+      "doneTitle": "Tu sais jouer !",
+      "doneText": "À une vraie table, le Patron choisit combien de pions il faut rentrer (1 à 4), et on peut jouer à 2 contre 2. Les règles restent sous le bouton « Règles ».",
+      "coach": "Yasmine",
+      "opponentPlays": "Yasmine joue…",
+      "step": {
+        "intro": "Voici ton camp : les pions jaunes, en bas à gauche. Le but : les amener au centre avant les autres.",
+        "roll1": "C'est à toi. Touche le dé pour le lancer.",
+        "needSix": "4 : aucun pion ne sort. Il faut un 6 pour sortir de la maison. Regarde Yasmine jouer.",
+        "roll6": "À toi ! Lance le dé.",
+        "exit": "Un 6 ! Touche un de tes pions pour le sortir de la maison.",
+        "rollAgain": "Un 6 fait rejouer. Lance encore !",
+        "capture": "Ton pion peut tomber pile sur le pion rouge. Touche-le pour le manger !",
+        "captured": "Mangé ! Le pion rouge retourne à sa maison, et tu rejoues. Lance !",
+        "star": "Avance ton pion sur la case étoilée.",
+        "starInfo": "Sur une case étoilée, personne n'est mangé : vous partagez la case. Les cases de départ sont sûres aussi.",
+        "threeSixes": "Un 6 fait rejouer… mais trois 6 de suite, et ton tour est perdu !",
+        "later": "Un peu plus tard… Ton pion est dans son couloir, tout près du centre.",
+        "rollTooMuch": "Lance le dé.",
+        "exact": "5, c'est trop : il fallait 3 tout juste. Pour entrer au centre, il faut le chiffre exact.",
+        "rollExact": "Lance encore.",
+        "finish": "3 ! Touche ton pion pour le rentrer au centre."
+      },
+      "wrong": {
+        "rollFirst": "Touche d'abord le dé.",
+        "pawnFirst": "Touche d'abord un pion qui brille.",
+        "cannotMove": "Ce pion ne peut pas bouger avec ce chiffre.",
+        "needSix": "Ce pion est à la maison : il lui faut un 6 pour sortir.",
+        "wait": "Attends : c'est au tour de Yasmine."
+      }
+    }
   }
 }

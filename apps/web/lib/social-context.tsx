@@ -25,7 +25,7 @@ export type Conversation = {
 };
 
 /** Où est quelqu'un en ce moment (présence en temps réel, jamais enregistrée). */
-export type Presence = { status: "online" | "table" | "voice"; game?: "domino" };
+export type Presence = { status: "online" | "table" | "voice"; game?: "domino" | "ludo" };
 
 type SocialValue = {
   ready: boolean;
@@ -133,6 +133,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   // Présence : je dis où je suis (en ligne, à une table, en vocal) ; je vois où sont les autres.
   const mine = useMemo<Presence>(() => {
     if (/^\/play\/[A-Za-z]{4}$/.test(pathname ?? "")) return { status: "table", game: "domino" };
+    if (/^\/ludo\/[A-Za-z]{4}$/.test(pathname ?? "")) return { status: "table", game: "ludo" };
     if (voice.status === "connected" || voice.status === "reconnecting") return { status: "voice" };
     return { status: "online" };
   }, [pathname, voice.status]);
@@ -226,7 +227,7 @@ export async function openConversation(other: string): Promise<string | null> {
   return error ? null : ((data as string | null) ?? null);
 }
 
-export type InviteMeta = { game: "domino"; code: string; players: number; free: number };
+export type InviteMeta = { game: "domino" | "ludo"; code: string; players: number; free: number };
 
 export async function sendMessage(conversation: string, body: string, invite?: InviteMeta): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const { data, error } = await supabase().rpc("send_message", {

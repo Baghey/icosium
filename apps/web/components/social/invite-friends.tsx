@@ -10,7 +10,7 @@ import { openConversation, sendMessage, useSocial } from "@/lib/social-context";
 import { PersonAvatar } from "./person-avatar";
 
 /** Depuis la table d'attente : envoyer le code de la table à des amis, en un geste. */
-export function InviteFriends({ code, players, free, onClose }: { code: string; players: number; free: number; onClose: () => void }) {
+export function InviteFriends({ code, players, free, onClose, game = "domino" }: { code: string; players: number; free: number; onClose: () => void; game?: "domino" | "ludo" }) {
   const t = useT();
   const { friends, presenceOf } = useSocial();
   const [state, setState] = useState<Record<string, "busy" | "done" | "error">>({});
@@ -21,7 +21,7 @@ export function InviteFriends({ code, players, free, onClose }: { code: string; 
   async function invite(id: string) {
     setState((s) => ({ ...s, [id]: "busy" }));
     const conv = await openConversation(id);
-    const res = conv ? await sendMessage(conv, "", { game: "domino", code, players, free }) : null;
+    const res = conv ? await sendMessage(conv, "", { game, code, players, free }) : null;
     setState((s) => ({ ...s, [id]: res?.ok ? "done" : "error" }));
   }
 

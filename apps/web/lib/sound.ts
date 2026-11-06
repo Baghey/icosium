@@ -231,3 +231,49 @@ export function playShuffle(): void {
   loadSamples(ac);
   playSample(ac, "shuffle", 0.7, 1);
 }
+
+/* ---------- Ludo : mêmes vrais sons de pierre, joués autrement ---------- */
+
+/** Le dé qui roule sur le plateau : trois ou quatre petits chocs de plus en plus faibles. */
+export function playDiceRoll(): void {
+  try {
+    navigator.vibrate?.([8, 60, 8, 70, 10]);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  loadSamples(ac);
+  const hits = [0, 0.09, 0.2, 0.34, 0.47];
+  hits.forEach((at, i) => {
+    const level = 0.5 * Math.pow(0.72, i);
+    const rate = 1.45 + Math.random() * 0.3;
+    window.setTimeout(() => {
+      if (!playSample(ac, "clack", level, rate)) strike(ac, ac.currentTime + 0.003, STONE, 3 * level, 1.3);
+    }, at * 1000);
+  });
+}
+
+/** Un pion qui avance d'une case : un petit « tok » léger. */
+export function playHop(): void {
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  loadSamples(ac);
+  if (!playSample(ac, "clack", 0.18, 1.9 + Math.random() * 0.15)) strike(ac, ac.currentTime + 0.003, STONE, 1.2, 1.5);
+}
+
+/** Un pion mangé : un claquement franc. */
+export function playCapture(): void {
+  try {
+    navigator.vibrate?.([20, 40, 30]);
+  } catch {
+    // pas de vibration sur cet appareil
+  }
+  if (!isSoundOn()) return;
+  const ac = audio();
+  if (!ac) return;
+  loadSamples(ac);
+  if (!playSample(ac, "slam", 0.7, 1.15)) strike(ac, ac.currentTime + 0.003, [...STONE, ...TABLE], 6, 0.9);
+}
