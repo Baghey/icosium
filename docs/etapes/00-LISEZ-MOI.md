@@ -1,4 +1,4 @@
-# Les 10 étapes d'ICOSIUM pour Claude Code
+# Les étapes d'ICOSIUM pour Claude Code
 
 Avant la première étape, place dans ton dépôt GitHub :
 
@@ -13,7 +13,7 @@ vraiment chez toi.
 | --- | --- | --- |
 | 01 | Fondations | Te connecter et parler à 4 dans une salle vocale |
 | 02 | Domino double-six | Jouer une partie complète à 4, en vocal |
-| 03 | Lobby anti-bots | Inviter par WhatsApp, attendre à table, choisir les bots |
+| 03 | Lobby | Voir les tables ouvertes, inviter par WhatsApp, s'asseoir chez un ami |
 | 04 | Amis et messagerie | Écrire, envoyer un vocal, inviter depuis le chat |
 | 05 | Ronda | Jouer jusqu'à 41 points avec annonces et caïdas |
 | 06 | Dama | Jouer une partie complète de dames espagnoles |
@@ -33,6 +33,12 @@ MVP ; l'ordre peut changer si le propriétaire le décide.
 | 14 | Loup-Garou | Jouer à 6 en vocal, la nuit réservée aux loups |
 | 15 | Vingt-et-un (blackjack) | Jouer contre la banque avec des jetons fictifs |
 | 16 | Dzaïr (achat de quartiers) | Jouer à 4 jusqu'à la faillite, quartiers d'Algérie |
+
+Tout à la fin, décidé le 6 novembre 2026 par le propriétaire :
+
+| Étape | Contenu | Tu dois pouvoir |
+| --- | --- | --- |
+| 17 | Anti-bots | Bots proposés après 3 minutes, un humain prend la place d'un bot |
 
 Conseils :
 

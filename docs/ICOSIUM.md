@@ -31,7 +31,8 @@ n'arrivent que si le Patron coche lui-même le bouton.
 
 Pendant l'attente, le vocal est déjà ouvert : le vrai produit, c'est ce moment où trois
 personnes discutent en attendant la quatrième. Si personne ne vient après quelques minutes,
-l'app propose le bouton bots, sans jamais l'activer seule.
+l'app propose le bouton bots, sans jamais l'activer seule. (Cette proposition automatique est
+prévue à la toute fin du plan, étape 17 ; le lobby lui-même est l'étape 3.)
 
 ## Catalogue de jeux par vagues
 
