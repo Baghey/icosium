@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { AddFriendIcon, BotIcon, ChatIcon, Emblem } from "@/components/cafe-icons";
 import { DominoTile } from "@/components/domino/tile";
+import { GroupAvatar } from "@/components/social/groups";
 import { PersonAvatar } from "@/components/social/person-avatar";
 import { useAuth } from "@/lib/auth-context";
 import { callDomino } from "@/lib/domino-client";
 import { useI18n } from "@/lib/i18n";
-import { presenceKey, shortTime } from "@/lib/social-format";
-import { useSocial } from "@/lib/social-context";
+import { lastPreview, presenceKey, shortTime } from "@/lib/social-format";
+import { conversationName, useSocial } from "@/lib/social-context";
 import { DEFAULT_DOMINO_OPTIONS } from "@icosium/shared";
 
 type Status = { accounts: boolean; voice: boolean } | null;
@@ -152,12 +153,10 @@ function Home() {
               {recent.map((c) => (
                 <li key={c.id}>
                   <Link href={`/friends/${c.id}`} className="flex min-h-16 items-center gap-3 px-4 py-2.5 active:bg-white/5">
-                    <PersonAvatar id={c.otherId} size={40} presence={presenceOf(c.otherId)} />
+                    {c.kind === "group" ? <GroupAvatar members={c.members} size={40} /> : c.otherId && <PersonAvatar id={c.otherId} size={40} presence={presenceOf(c.otherId)} />}
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <span className={`truncate text-sm ${c.unread ? "font-bold" : "font-semibold"}`}>{c.otherUsername}</span>
-                      <span className={`truncate text-xs ${c.unread ? "text-ink" : "text-ink-muted"}`}>
-                        {c.lastKind === "invite" ? t("social.invitePreview") : c.lastBody}
-                      </span>
+                      <span className={`truncate text-sm ${c.unread ? "font-bold" : "font-semibold"}`}>{conversationName(c)}</span>
+                      <span className={`truncate text-xs ${c.unread ? "text-ink" : "text-ink-muted"}`}>{lastPreview(c, t)}</span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1">
                       <span className="text-[10px] text-ink-muted">{shortTime(c.lastAt, locale, t)}</span>

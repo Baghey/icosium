@@ -15,3 +15,29 @@ export function shortTime(iso: string, locale: string, t: (k: MessageKey) => str
   if (days === 1) return t("social.yesterday");
   return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
+
+/** Aperçu du dernier message d'une conversation, dans la liste. */
+export function lastPreview(
+  c: { lastKind: string | null; lastBody: string | null; lastMeta: Record<string, unknown> | null },
+  t: (k: MessageKey, v?: Record<string, string | number>) => string,
+): string {
+  switch (c.lastKind) {
+    case "invite":
+      return t("social.invitePreview");
+    case "voice":
+      return t("social.voicePreview");
+    case "result":
+      return t("social.resultPreview");
+    case "call":
+      return c.lastMeta?.status === "ended" ? t("social.callPreview") : t("social.missedCallPreview");
+    case "system": {
+      const m = c.lastMeta ?? {};
+      const name = String(m.actorName ?? "");
+      if (m.event === "created") return t("social.system.created", { name, title: String(m.title ?? "") });
+      if (m.event === "added") return t("social.system.added", { name, names: ((m.names as string[] | undefined) ?? []).join(", ") });
+      return t("social.system.left", { name });
+    }
+    default:
+      return c.lastBody ?? "";
+  }
+}

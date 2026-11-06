@@ -235,7 +235,8 @@
     "viewAll": "See the whole table",
     "viewFollow": "Follow the play up close",
     "roundClosedYou": "You close the round!",
-    "youPass": "Nothing to play: you pass"
+    "youPass": "Nothing to play: you pass",
+    "playerMenu": "Options for {name}"
   },
   "social": {
     "title": "Friends",

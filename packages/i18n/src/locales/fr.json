@@ -235,7 +235,8 @@
     "viewAll": "Voir toute la table",
     "viewFollow": "Suivre le jeu de près",
     "roundClosedYou": "Tu fermes la manche !",
-    "youPass": "Rien à jouer : tu passes ton tour"
+    "youPass": "Rien à jouer : tu passes ton tour",
+    "playerMenu": "Options pour {name}"
   },
   "social": {
     "title": "Amis",

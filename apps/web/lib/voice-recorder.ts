@@ -5,6 +5,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /** Un message vocal enregistré, prêt à partir (ou à repartir si le réseau a coupé). */
 export type VoiceNote = { blob: Blob; duration: number; peaks: number[]; fileId: string; url: string };
 
+type Session = {
+  stream: MediaStream | null;
+  recorder: MediaRecorder | null;
+  ctx: AudioContext | null;
+  chunks: Blob[];
+  levels: number[];
+  startedAt: number;
+  timer: number | undefined;
+  send: boolean;
+  released: boolean;
+};
+
 export type RecorderState = "idle" | "starting" | "recording";
 export type RecorderError = "micDenied" | "unsupported" | "tooShort" | null;
 
@@ -47,17 +59,7 @@ export function useVoiceRecorder(onDone: (note: VoiceNote) => void) {
   const [error, setError] = useState<RecorderError>(null);
   const [elapsed, setElapsed] = useState(0);
   const [live, setLive] = useState<number[]>([]);
-  const session = useRef<{
-    stream: MediaStream | null;
-    recorder: MediaRecorder | null;
-    ctx: AudioContext | null;
-    chunks: Blob[];
-    levels: number[];
-    startedAt: number;
-    timer: number | undefined;
-    send: boolean;
-    released: boolean;
-  } | null>(null);
+  const session = useRef<Session | null>(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
@@ -96,9 +98,7 @@ export function useVoiceRecorder(onDone: (note: VoiceNote) => void) {
       setError("unsupported");
       return;
     }
-    const s = { stream: null, recorder: null, ctx: null, chunks: [], levels: [], startedAt: 0, timer: undefined, send: false, released: false } as NonNullable<
-      typeof session.current
-    >;
+    const s: Session = { stream: null, recorder: null, ctx: null, chunks: [], levels: [], startedAt: 0, timer: undefined, send: false, released: false };
     session.current = s;
     setState("starting");
     try {
@@ -109,7 +109,7 @@ export function useVoiceRecorder(onDone: (note: VoiceNote) => void) {
       setError("micDenied");
       return;
     }
-    if (s.released || session.current !== s) {
+    if (s.released || (session.current as Session | null) !== s) {
       // Le doigt s'est levé pendant la demande d'autorisation : la prochaine fois sera la bonne.
       s.stream.getTracks().forEach((tr) => tr.stop());
       if (session.current === s) session.current = null;
