@@ -30,8 +30,13 @@ Objectif : troisième jeu, à 2 joueurs, avec les règles « normales comme les 
    qui ne livre pas de pièce.
 7. La Dama apparaît dans le choix du jeu à la création d'une table.
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - tous les tests passent ;
 - deux personnes jouent une partie complète avec promotion et prises en chaîne ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

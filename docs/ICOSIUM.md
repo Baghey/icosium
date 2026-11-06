@@ -43,17 +43,24 @@ et trop de jeux dispersent les joueurs.
 | 1 (MVP) | Domino algérien double-six | 2 ou 4 | Le jeu emblème, celui qui fait venir |
 | 1 (MVP) | Ronda | 2 ou 4 | Le jeu de cartes du café algérien, parties courtes |
 | 1 (MVP) | Dama | 2 | Simple à coder, très connu |
+| 2 | Ludo « Tchekchayka » (étape 11) | 2 à 4 | Règles validées, tout le monde connaît |
+| 2 | Échecs (étape 12) | 2 | Bibliothèques matures, public fidèle |
+| 2 | Yiwen (étape 13) | 2 à 8 | Cartes de couleurs, rapide et bruyant ; notre version à nous |
+| 2 | Loup-Garou (étape 14) | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
+| 2 | Vingt-et-un, blackjack (étape 15) | 1 à 6 | Court, contre la banque, jetons fictifs seulement |
+| 2 | Dzaïr, achat de quartiers (étape 16) | 2 à 6 | Notre jeu façon Monopoly, quartiers d'Algérie |
 | 2 | Chkobba | 2 ou 4 | Proche de la Scopa italienne, du code existe déjà |
-| 2 | Loup-Garou | 6 à 12 | Le jeu 100 % vocal, parfait pour les Cercles |
-| 2 | Échecs | 2 | Bibliothèques matures, public fidèle |
 | 3 | Rami | 2 à 4 | Très joué en famille |
 | 3 | Belote / Coinche | 4 | Jouée en équipes de deux |
-| 3 | Monopoly (version maison) | 2 à 6 | Long et complexe : à faire une fois la base stable |
 | 3 | Pictionary (dessin) | 3 à 10 | Rires garantis en vocal |
 | 4 | Backgammon (Tawla) | 2 | Connu au Maghreb et au Moyen-Orient |
 | 4 | Codenames-like (mots en darija) | 4 à 8 | Jeu d'équipe, mots locaux |
 | 4 | Quiz culturel algérien | 2 à 8 | Football, cuisine, wilayas, cinéma |
 | 4 | Puissance 4, Bataille navale | 2 | Faciles, pour les mini-pauses |
+
+Ajout du 6 novembre 2026 : le propriétaire a demandé les échecs, le Loup-Garou, le blackjack et
+un jeu de cartes de couleurs comme le jeu le plus connu du genre. Le Ludo « Tchekchayka »
+(règles validées le 5 novembre) rejoint la même vague.
 
 - **Ronda** : jeu de cartes (40 cartes) où l'on capture les cartes de même valeur sur la table ;
   les « ronda » (paires en main) et « tringa » (brelans) rapportent des points.
@@ -65,7 +72,8 @@ et trop de jeux dispersent les joueurs.
 **Monopoly : attention au nom.** Monopoly est une marque de Hasbro. Faire notre propre version
 (nom, plateau, cartes) avec des quartiers algériens (Bab El Oued, Hydra, Sidi El Houari…) et
 une monnaie fictive. Les mécaniques d'achat et de loyer ne sont pas protégées, le nom et le
-visuel le sont.
+visuel le sont. Notre version s'appelle « Dzaïr » : voir « Règles de Dzaïr » et
+l'étape 16.
 
 ## Règles du domino algérien (double-six)
 
@@ -226,6 +234,182 @@ joueurs avant de coder.
 
 Autres jeux connus au Maghreb à explorer : Sota, Basra, Tawla (backgammon).
 
+## Règles du Ludo (Tchekchayka)
+
+Validées par le propriétaire le 5 novembre 2026. Disposition des joueurs aux quatre coins, en 2D,
+d'après la maquette `/mnt/project-files/apercus-ludo/maquette-ludo.html`.
+
+- 2 à 4 joueurs, 4 pions chacun ; 2 contre 2 possible, partenaires face à face.
+- Un pion sort de la maison seulement avec un 6. Un 6 fait rejouer ; trois 6 de suite, le tour
+  est perdu.
+- Tomber sur un pion adverse le renvoie à sa maison, et on rejoue. Les cases étoilées sont sûres.
+- Deux pions de même couleur sur une case ne bloquent rien (pas de mur).
+- Il faut le chiffre exact pour entrer au centre.
+- Le créateur choisit combien de pions il faut rentrer pour gagner (4 par défaut).
+- Le dé est tiré par le serveur.
+
+## Règles des échecs
+
+Règles internationales (FIDE) : roque, prise en passant, promotion, mat, pat, nulles (triple
+répétition, 50 coups, matériel insuffisant, accord), abandon.
+
+| Réglage | Options | Par défaut |
+| --- | --- | --- |
+| Pendule | 3 min + 2 s · 5 min · 10 min · 15 min + 10 s · sans pendule | 10 min |
+| Couleur | Au hasard · Le créateur choisit | Au hasard |
+| Bot | Non · 3 niveaux, écrit par nous | Non |
+
+Licences : chess.js (BSD-2) et react-chessboard (MIT) sont permis ; chessground et Stockfish sont
+en GPL, donc interdits dans l'app. Les pièces sont dessinées maison.
+
+## Règles de Yiwen
+
+Notre jeu de cartes de couleurs : même famille que le jeu le plus connu du genre, mais avec notre
+nom, notre paquet et nos dessins. Le nom, le logo et le visuel de ce jeu sont des marques
+protégées : ne jamais les utiliser. Le nom « Yiwen » (« un » en tamazight) a été choisi par le
+propriétaire le 6 novembre 2026.
+
+Proposition détaillée, maquettes et questions encore ouvertes :
+`/mnt/project-files/apercus-cartes/regles-cartes.md`.
+
+- 2 à 8 joueurs, 7 cartes chacun ; on retourne une carte chiffre pour commencer.
+- Paquet de 104 cartes, 4 familles aux motifs algériens : Chems (soleil, ambre doré), Nakhla
+  (palmier, vert jade), Najma (étoile de zellige, bleu faïence), Qaws (arcade de la Casbah, terre
+  cuite).
+
+| Carte | Effet | Nombre | Points |
+| --- | --- | --- | --- |
+| 1 à 9 | Aucun | 2 de chaque par famille (72) | Sa valeur |
+| Passe | Le suivant passe son tour | 2 par famille (8) | 20 |
+| Sens inverse | Le sens du jeu change (à 2 joueurs, on rejoue) | 2 par famille (8) | 20 |
+| +2 | Le suivant pioche 2 cartes et passe son tour | 2 par famille (8) | 20 |
+| Joker | On choisit la famille | 4 | 50 |
+| Joker +4 | On choisit la famille, le suivant pioche 4 et passe | 4 | 50 |
+
+- On pose une carte de même famille, de même chiffre ou de même symbole ; les jokers se posent sur
+  tout ; sinon on pioche.
+- Avec une seule carte en main, on appuie sur « Dernière ! ».
+- Le premier qui vide sa main gagne la manche.
+
+> Noms des cartes en français simple : le propriétaire a refusé les noms en darija le
+> 6 novembre 2026. Les autres réglages (cumul des +2 et +4, oubli de l'annonce, pioche, partie
+> aux points) attendent ses réponses aux questions de `regles-cartes.md`.
+
+## Règles du Loup-Garou
+
+6 à 12 joueurs humains, jamais de bot. Le serveur est le meneur de jeu. Le nom « Les Loups-garous
+de Thiercelieux » est une marque : on garde seulement le mot « loup-garou » et le principe libre
+du jeu (comme « Mafia »).
+
+| Rôle | Pouvoir |
+| --- | --- |
+| Villageois | Aucun, vote le jour |
+| Loup | La nuit, choisit une victime avec les autres loups |
+| Voyante | Chaque nuit, découvre le rôle d'un joueur |
+| Sorcière | Une potion pour sauver la victime, une pour tuer, une seule fois chacune |
+| Chasseur | En mourant, élimine un joueur de son choix |
+
+- La nuit : loups, puis Voyante, puis Sorcière. Le jour : on découvre qui est mort, chacun parle à
+  son tour au micro, puis on vote. Égalité au vote : personne n'est éliminé.
+- Le village gagne quand tous les loups sont morts ; les loups gagnent quand ils sont aussi
+  nombreux que les autres.
+- Nombre de loups proposé : 1 loup pour 6 joueurs, 2 de 7 à 9, 3 de 10 à 12 (modifiable).
+- Le jeu se joue au micro, pas au chat écrit (choix du propriétaire, 6 novembre 2026).
+- Le jour, tour de parole : le serveur ouvre le micro d'un seul joueur à la fois, dans l'ordre du
+  cercle, avec un temps limité (30 s par défaut) ; le joueur peut « passer la parole » au suivant
+  plus tôt. La nuit, seuls les loups parlent, entre eux. Les morts écoutent sans parler. Ces droits sont donnés par le serveur dans le jeton LiveKit.
+- Chaque joueur ne peut lire que son propre rôle (table privée, RLS stricte) ; les loups se
+  voient entre eux.
+
+## Règles du Vingt-et-un (blackjack)
+
+**Jetons fictifs seulement, aucun argent réel.** Les jetons s'appellent des « Louz » (amandes).
+Ils ne s'achètent pas, ne se vendent pas,
+ne s'échangent pas entre joueurs et ne valent rien hors du jeu. Chaque joueur a 1 000 Louz, et
+revient à 1 000 chaque jour s'il en a moins. Pas de classement des jetons, pas de mot « casino ».
+
+- 1 à 6 joueurs contre la banque, tenue par le serveur (ce n'est pas un bot qui prend une place).
+- Sabot de 4 jeux de 52 cartes, remélangé quand il en reste moins d'un quart.
+- As = 1 ou 11, figures = 10. Blackjack (21 en deux cartes) payé 3 pour 2 ; victoire simple
+  payée 1 pour 1 ; égalité, la mise est rendue.
+- Actions : tirer, rester, doubler sur les deux premières cartes, séparer une paire une fois.
+  Pas d'assurance par défaut.
+- La banque tire jusqu'à 16 et reste à 17.
+- Réglages du créateur : mise minimale et maximale, nombre de jeux dans le sabot.
+- Le sabot et la carte cachée de la banque restent sur le serveur.
+
+> Ces règles sont le standard le plus courant ; à valider par le propriétaire.
+
+## Règles de Dzaïr (jeu d'achat de quartiers)
+
+Ajouté le 6 novembre 2026 à la demande du propriétaire. Notre jeu de la même famille que le
+célèbre jeu d'achat de propriétés, avec notre nom, notre plateau et notre argent. Le nom, le logo,
+le plateau, les rues, les personnages et les cartes du jeu connu sont protégés : ne jamais les
+utiliser. Nom choisi par le propriétaire : « Dzaïr » (l'Algérie, ou Alger, en darija).
+
+- 2 à 6 joueurs, dinars fictifs propres à la partie (aucun lien avec les Louz, rien à acheter).
+- Deux dés tirés par le serveur ; un double fait rejouer ; trois doubles : commissariat.
+- 40 cases. Les quartiers sont groupés par ville ; posséder toute la ville double les loyers et
+  permet de construire des maisons puis une villa.
+
+| Ville (du moins cher au plus cher) | Quartiers proposés |
+| --- | --- |
+| Tamanrasset | Centre, Assekrem |
+| Ghardaïa | Beni Isguen, El Atteuf, Melika |
+| Béjaïa | Yemma Gouraya, Aokas, Tichy |
+| Tizi Ouzou | Haute ville, Azazga, Tigzirt |
+| Sétif | Aïn Fouara, El Eulma, Aïn Arnat |
+| Constantine | Sidi M'Cid, Souika, Bab El Kantara |
+| Oran | Sidi El Houari, Front de mer, Santa Cruz |
+| Alger | Bab El Oued, La Casbah, Hydra |
+
+- Autres cases : départ, 4 transports (gare, tramway, téléphérique, port), 2 services (eau,
+  électricité), cartes « Mektoub » (chance), impôts, commissariat, « Kahwa » (pause au café).
+- Faillite : le joueur sort. Le dernier joueur qui reste gagne.
+
+**Choix du propriétaire (6 novembre 2026)**
+- Nom : **Dzaïr**.
+- Durée : le créateur de la table choisit : partie complète jusqu'à la faillite, ou 60 minutes et
+  le plus riche gagne (argent + valeur des quartiers et des maisons).
+- Un quartier refusé part aux enchères entre tous les joueurs.
+- Les joueurs peuvent s'échanger des quartiers, de l'argent et des cartes « sortie du
+  commissariat ».
+
+**Règles classiques retenues (le propriétaire a demandé les règles habituelles)**
+- Case « Kahwa » : simple pause, rien à gagner (la cagnotte au centre est une règle maison, pas
+  la règle officielle).
+- Construction égale : posséder toute la ville ; une maison de plus sur un quartier seulement si
+  chaque autre quartier de la ville en a au moins autant ; 4 maisons puis une villa ; on vend
+  aussi de façon égale. Stock limité : 32 maisons et 12 villas pour la partie.
+- Pas de construction sur une ville dont un quartier est hypothéqué ; pas de loyer sur un quartier
+  hypothéqué ; lever l'hypothèque coûte son montant plus 10 %.
+- Départ : on touche une prime à chaque passage.
+- Commissariat : on y va par la case « Va au commissariat », une carte, ou trois doubles. Pour
+  sortir : payer l'amende, une carte de sortie, ou faire un double (3 essais, puis on paie). En
+  prison, on touche quand même ses loyers.
+- Faillite envers un joueur : il reçoit tout ce qui reste ; envers la banque : les quartiers sont
+  remis aux enchères.
+
+## Apprendre à jouer (tous les jeux sauf le domino)
+
+Demandé par le propriétaire le 6 novembre 2026. Chaque jeu, sauf le domino que tout le monde
+connaît, a un bouton « Apprendre à jouer » : sur la fiche du jeu, à la table d'attente, et proposé
+automatiquement la première fois qu'on ouvre ce jeu.
+
+- On apprend en jouant : une petite partie guidée, sur le vrai plateau du jeu, avec une donne
+  préparée à l'avance. Une bulle explique une seule chose à la fois et montre la pièce ou la carte
+  à toucher (cercle doré qui pulse) ; le reste de l'écran est un peu assombri.
+- On ne peut pas se tromper : un coup interdit est refusé avec une phrase qui explique pourquoi.
+- Les adversaires sont des personnages scénarisés, pas des bots de table : la règle « pas de
+  bots » ne change pas.
+- 5 à 8 étapes par jeu, 2 à 3 minutes en tout. Bouton « Passer » toujours visible, et on peut
+  reprendre plus tard là où on s'est arrêté.
+- À la fin : « Tu sais jouer ! » et un gros bouton « Ouvrir une table ».
+- La partie guidée tourne sur le téléphone seulement (aucune table créée, rien envoyé au
+  serveur), mais elle utilise les mêmes règles de `packages/shared` que le vrai jeu.
+- Tous les textes passent par `packages/i18n` (français et anglais).
+- Un résumé des règles reste lisible à tout moment pendant une vraie partie (bouton « ? »).
+
 ## UI/UX : simple, solide, jolie
 
 Une règle : chaque écran a une seule action principale, atteignable avec le pouce. Le reste est
@@ -290,6 +474,9 @@ Aucune ne doit gêner le jeu ni avantager un joueur.
 | Âge minimum | 16 ans | Date de naissance à l'inscription, signalement et blocage visibles partout |
 | Langue | Anglais au lancement | Textes dans des fichiers de traduction dès le début |
 | Cartes de la Ronda | Jeu français | 40 cartes : As à 7, Valet, Dame, Roi |
+| Nouveaux jeux (6 novembre) | Ludo, échecs, Yiwen, Loup-Garou, Vingt-et-un, Dzaïr en vague 2 | Étapes 11 à 16, après le MVP |
+| Jeu de cartes de couleurs | Notre version, nommée « Yiwen » | Aucun nom, logo ni visuel de la marque connue |
+| Blackjack | Jetons fictifs seulement, les « Louz » | Rien à acheter, rien à gagner, retour quotidien à 1 000 Louz |
 
 À confirmer : anglais seul au lancement, c'est voulu ? Le public est surtout algérien ; ajouter
 le français coûte peu si les textes sont dans des fichiers de traduction. L'arabe demande une

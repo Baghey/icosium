@@ -33,9 +33,14 @@ Objectif : deuxième jeu, branché sur le même lobby, la même table qui attend
    possible, sinon il pose sa plus petite carte.
 7. La Ronda apparaît dans le choix du jeu à la création d'une table.
 
+Apprendre à jouer (demande du propriétaire, 6 novembre 2026) : un bouton « Apprendre à jouer »
+sur la fiche du jeu et à la table d'attente ouvre une partie guidée, pas à pas, jouée seul sur le
+téléphone. Voir la section « Apprendre à jouer » de docs/ICOSIUM.md.
+
 C'est terminé quand :
 
 - tous les tests passent ;
 - une partie à 4 en équipes se joue jusqu'à 41 points, en vocal ;
 - les annonces, les caïdas et la missa comptent juste ;
+- la partie guidée se termine sans aide extérieure, par quelqu'un qui ne connaît pas le jeu ;
 - docs/PROGRESS.md est à jour et tu m'expliques comment tester.

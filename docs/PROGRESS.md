@@ -1,5 +1,36 @@
 # Journal d'avancement d'ICOSIUM
 
+## Plan : nouveaux jeux en vague 2 (6 novembre 2026)
+
+Demande du propriétaire : ajouter les échecs, le Loup-Garou, le blackjack et un jeu de cartes de
+couleurs « comme Uno ». Aucun jeu n'est codé ici : c'est le plan.
+
+Ce qui est fait :
+- `docs/ICOSIUM.md` : catalogue mis à jour (vague 2) et règles écrites pour le Ludo
+  « Tchekchayka » (règles déjà validées), les échecs, Yiwen, le Loup-Garou et le Vingt-et-un.
+- Jeu façon Monopoly : nom **Dzaïr** et règles choisis par le propriétaire le 6 novembre
+  (durée au choix, enchères, échanges) ; règles classiques pour le reste.
+- « Apprendre à jouer » : une partie guidée et interactive pour chaque jeu sauf le domino
+  (demande du propriétaire), ajoutée à chaque fiche d'étape concernée.
+- Six nouvelles fiches d'étape, après le MVP : `ETAPE-11-ludo`, `ETAPE-12-echecs`,
+  `ETAPE-13-yiwen`, `ETAPE-14-loup-garou`, `ETAPE-15-vingt-et-un`, `ETAPE-16-dzair` (jeu d'achat de quartiers façon Monopoly, sans
+  rien reprendre de la marque), et le tableau de
+  `docs/etapes/00-LISEZ-MOI.md`.
+- Jeu de cartes de couleurs : notre version s'appelle « Yiwen », avec nos familles (Chems,
+  Nakhla, Najma, Qaws), des cartes spéciales aux noms simples (Passe, Sens inverse, +2, Joker,
+  Joker +4) et l'annonce « Dernière ! ». Aucun nom, logo ni visuel de la marque connue. Détails
+  et maquettes : `/mnt/project-files/apercus-cartes/`.
+- Blackjack (« Vingt-et-un ») : jetons fictifs seulement (les « Louz »), rien à acheter ni à gagner.
+
+Refusé par le propriétaire le 6 novembre : les noms de cartes en darija, le thème « Ghouls »
+pour le Loup-Garou, et les jeux Kharbga, Sig et Tawla plus tôt.
+
+À valider par le propriétaire :
+- les règles du Vingt-et-un (banque qui reste à 17, blackjack payé 3 pour 2) ;
+- pour les échecs : utiliser chess.js (BSD-2) ou écrire notre propre moteur ;
+- les questions encore ouvertes de Yiwen (`regles-cartes.md`) ;
+- l'ordre des étapes 11 à 16.
+
 ## Domino : table « carton de rue » (5 novembre 2026, soir)
 
 D'après la vidéo TikTok du propriétaire (domino du quartier, dehors, le soir).
