@@ -154,7 +154,17 @@
     },
     "solo": "Play alone against bots",
     "soloHint": "Start right away, bots take the other seats.",
-    "soloStarting": "Seating the bots…"
+    "soloStarting": "Seating the bots…",
+    "game": "Game",
+    "gameDomino": "Dominoes",
+    "gameLudo": "Ludo",
+    "ludoSubtitle": "Our Ludo: the dice game everyone knows, for 2 to 4.",
+    "players3": "3 players",
+    "ludoPlayers4": "4 players",
+    "ludoTeams": "2 vs 2",
+    "pawnsToWin": "Pawns home to win",
+    "ludoFirstTime": "New to Ludo? Learn in 2 minutes, on your own.",
+    "soloLudo": "Ludo alone against bots"
   },
   "domino": {
     "waitingTitle": "Table {code}",
@@ -390,7 +400,8 @@
       "added": "{name} added {names}",
       "left": "{name} left the group"
     },
-    "addFriend": "Add friend"
+    "addFriend": "Add friend",
+    "inviteCardLudo": "Ludo table"
   },
   "call": {
     "title": "ICOSIUM call",
@@ -410,5 +421,112 @@
       "rate_limited": "Too many calls, wait a little.",
       "error": "The call couldn't start. Try again."
     }
+  },
+  "ludo": {
+    "name": "Tchekchayka",
+    "loading": "Setting up the board…",
+    "board": "Ludo board",
+    "pawn": "Pawn {n}: move",
+    "you": "You",
+    "partner": "Partner",
+    "freeSeat": "Free seat",
+    "leave": "Leave the table",
+    "turnOf": "{name}'s turn",
+    "yourTurnChip": "Your turn",
+    "roll": "Roll",
+    "rollLabel": "Roll the die",
+    "finished": "{n} of {total} pawns home",
+    "status": {
+      "yourRoll": "Your turn: tap the die",
+      "yourMove": "You rolled {n}: tap a glowing pawn",
+      "forPartner": "You're done: you now move your partner's pawns",
+      "theirRoll": "{name} is rolling…",
+      "theirMove": "{name} rolled {n} and is choosing a pawn"
+    },
+    "bubble": {
+      "six": "6: roll again!",
+      "capture": "Captured! Roll again",
+      "threeSixes": "Three 6s: turn lost",
+      "noMove": "No pawn can move",
+      "done": "Pawns home!",
+      "auto": "Played for them"
+    },
+    "end": {
+      "youWin": "You won!",
+      "teamWin": "Your team won!",
+      "theyWin": "{name} wins the game",
+      "theyWinTeam": "{a} and {b} win the game",
+      "lost": "Lost this time. Rematch?",
+      "newTable": "New table",
+      "home": "Back to the café"
+    },
+    "rules": {
+      "title": "Tchekchayka rules",
+      "open": "Rules",
+      "r1": "Everyone has 4 pawns. The goal: bring them to the centre, through the lane of your colour.",
+      "r2": "A pawn leaves home only with a 6.",
+      "r3": "A 6 lets you roll again. But three 6s in a row: you lose your turn.",
+      "r4": "Landing on an opponent's pawn sends it home, and you roll again.",
+      "r5": "On a star square (and on the start squares), nobody can be captured.",
+      "r6": "Two pawns of the same colour don't block the way.",
+      "r7": "You need the exact number to enter the centre.",
+      "r8": "You win by bringing {n} pawn(s) home. In 2 vs 2, both partners must make it; whoever finishes plays for the other.",
+      "close": "Close"
+    },
+    "waiting": {
+      "hint": "The game starts as soon as every seat is taken.",
+      "shareText": "Come and play Ludo with me on ICOSIUM! Table code: {code}",
+      "fillBots": "Fill with bots",
+      "fillBotsHint": "Only if you want: free seats go to bots.",
+      "pawnsToWin": "{n} pawn(s) to win",
+      "teams": "2 vs 2"
+    },
+    "error": {
+      "not_your_turn": "It's not your turn.",
+      "must_roll": "Roll the die first.",
+      "must_move": "Pick a pawn first.",
+      "illegal_move": "That pawn can't move.",
+      "conflict": "The table moved on. Try again.",
+      "unknown": "Small network hiccup. Try again."
+    },
+    "learn": {
+      "button": "Learn to play",
+      "buttonHint": "2 minutes, on your own, no way to get it wrong",
+      "title": "Learn Tchekchayka",
+      "skip": "Skip",
+      "next": "Next",
+      "again": "Start over",
+      "openTable": "Open a table",
+      "doneTitle": "You know how to play!",
+      "doneText": "At a real table, the host chooses how many pawns must get home (1 to 4), and you can play 2 vs 2. The rules stay under the “Rules” button.",
+      "coach": "Yasmine",
+      "opponentPlays": "Yasmine is playing…",
+      "step": {
+        "intro": "This is your camp: the yellow pawns, bottom left. The goal: bring them to the centre before the others.",
+        "roll1": "Your turn. Tap the die to roll it.",
+        "needSix": "4: no pawn can leave. You need a 6 to leave home. Watch Yasmine play.",
+        "roll6": "Your turn! Roll the die.",
+        "exit": "A 6! Tap one of your pawns to bring it out.",
+        "rollAgain": "A 6 lets you roll again. Roll!",
+        "capture": "Your pawn can land right on the red pawn. Tap it to capture!",
+        "captured": "Captured! The red pawn goes back home, and you roll again. Roll!",
+        "star": "Move your pawn onto the star square.",
+        "starInfo": "On a star square nobody gets captured: you share the square. Start squares are safe too.",
+        "threeSixes": "A 6 lets you roll again… but three 6s in a row and you lose your turn!",
+        "later": "A bit later… Your pawn is in its lane, close to the centre.",
+        "rollTooMuch": "Roll the die.",
+        "exact": "5 is too much: you needed exactly 3. To enter the centre you need the exact number.",
+        "rollExact": "Roll again.",
+        "finish": "3! Tap your pawn to bring it home."
+      },
+      "wrong": {
+        "rollFirst": "Tap the die first.",
+        "pawnFirst": "Tap a glowing pawn first.",
+        "cannotMove": "That pawn can't move with this number.",
+        "needSix": "That pawn is at home: it needs a 6 to come out.",
+        "wait": "Wait: it's Yasmine's turn."
+      }
+    },
+    "gameOver": "Game over"
   }
 }

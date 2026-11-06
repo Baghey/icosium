@@ -382,3 +382,29 @@ Reste / limites connues :
 - Pas de notification quand l'app est fermée : on n'entend l'appel que si ICOSIUM est ouvert (notifications push à
   prévoir avec l'étape 9).
 - Pas d'appel de groupe (seulement à deux).
+
+## Étape 11 — Ludo « Tchekchayka » (6 novembre 2026)
+
+Ce qui marche (en ligne sur le site depuis le 6 novembre) :
+- Règles en TypeScript pur (`packages/shared/src/ludo`) : sortie sur 6, un 6 fait rejouer, trois 6 = tour perdu,
+  manger renvoie à la maison et fait rejouer, cases étoilées et cases de départ sûres, pas de mur, chiffre exact
+  pour le centre, victoire avec 1 à 4 pions (choix du Patron), 2 à 4 joueurs, 2 contre 2 (celui qui a fini joue
+  les pions de son partenaire), bot simple (manger > sortir > sauver le pion en danger). 30 tests + 500 parties au hasard.
+- Serveur : fonction Edge `ludo` (le dé est tiré par le serveur, chrono par action, coup automatique quand le temps
+  est fini, bots seulement si le Patron les demande). Migration `20261106050000_ludo_tables.sql` (additive : tables
+  `ludo_*`, RLS, temps réel ; ne touche pas au domino). 12 tests du serveur, dont une partie à 4 et une à 2 contre 2.
+- Écran 2D d'après la maquette validée : plateau en zellige aux 4 couleurs vives, pions en laiton à tête émaillée,
+  ta couleur toujours en bas à gauche, joueurs aux 4 coins (avatar, chrono en anneau, badge micro, dé), gros micro
+  et gros dé en bas. Le dé roule, le pion saute de case en case, le pion mangé rentre chez lui (sons et vibrations),
+  tout respecte « moins d'animations ». Mode paysage. Bouton « Règles » à tout moment.
+- Page Jouer : choix Domino / Ludo, réglages du Ludo, « Ludo seul contre des bots ». Rejoindre par code marche pour
+  les deux jeux. Invitations d'amis vers une table de Ludo.
+- « Apprendre à jouer » (`/ludo/learn`) : partie guidée de 2 minutes, sur le téléphone seulement, dés préparés,
+  cercle doré sur ce qu'il faut toucher, erreurs expliquées, « Passer » et reprise là où on s'était arrêté.
+- Page de développement `/dev/ludo` (partie locale contre des bots, pour vérifier l'écran).
+
+Base et serveur : migration appliquée et fonction `ludo` déployée sur Supabase le 6 novembre.
+Reste : test réel à plusieurs téléphones
+(partie à 4 et à 2 contre 2 en vocal). Petites phrases rapides (« Saha ! ») de la maquette : pas encore faites.
+Problème connu : impossible de lancer Supabase en local dans ce conteneur (téléchargement des images bloqué) ;
+le serveur est testé avec un stockage en mémoire, l'écran avec la partie locale.

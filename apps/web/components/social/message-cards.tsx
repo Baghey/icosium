@@ -29,7 +29,7 @@ export function InviteCard({ meta, corners }: { meta: InviteMeta; corners: strin
           <DominoIcon className="size-6" />
         </span>
         <span className="flex flex-col">
-          <span className="text-gilded font-bold">{t("social.inviteCard")}</span>
+          <span className="text-gilded font-bold">{t(meta.game === "ludo" ? "social.inviteCardLudo" : "social.inviteCard")}</span>
           <span className="font-mono text-lg font-bold tracking-[0.3em] text-cafe-text" dir="ltr">
             {meta.code}
           </span>
@@ -37,7 +37,7 @@ export function InviteCard({ meta, corners }: { meta: InviteMeta; corners: strin
       </div>
       <div className="flex items-center justify-between gap-2 bg-cafe-1/95 px-3 py-2">
         <span className="text-xs text-cafe-muted">{t("social.inviteSeats", { free: meta.free })}</span>
-        <Link href={`/play/${meta.code}`} className="gold-button flex min-h-touch items-center rounded-full px-5 text-sm font-bold">
+        <Link href={`/${meta.game === "ludo" ? "ludo" : "play"}/${meta.code}`} className="gold-button flex min-h-touch items-center rounded-full px-5 text-sm font-bold">
           {t("social.inviteJoin")}
         </Link>
       </div>

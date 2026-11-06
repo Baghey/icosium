@@ -1,12 +1,15 @@
 "use client";
 
-import { DEFAULT_DOMINO_OPTIONS, type DominoOptions } from "@icosium/shared";
+import { DEFAULT_DOMINO_OPTIONS, DEFAULT_LUDO_OPTIONS, type DominoOptions, type LudoOptions } from "@icosium/shared";
 import type { MessageKey } from "@icosium/i18n";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DominoTile } from "@/components/domino/tile";
 import { callDomino } from "@/lib/domino-client";
+import { callLudo } from "@/lib/ludo-client";
+import { DieFace } from "@/components/ludo/die";
 import { preloadSounds } from "@/lib/sound";
 import { BotIcon } from "@/components/cafe-icons";
 import { useT } from "@/lib/i18n";
@@ -57,9 +60,29 @@ function Segmented<V extends string | number>({ label, value, choices, onChange 
   );
 }
 
+type Game = "domino" | "ludo";
+const LEARNED_KEY = "icosium.ludo.learn";
+
 function Play() {
   const t = useT();
   const router = useRouter();
+  const [game, setGame] = useState<Game>("domino");
+  const [ludo, setLudo] = useState<LudoOptions>(DEFAULT_LUDO_OPTIONS);
+  const [newToLudo, setNewToLudo] = useState(false);
+  const setL = <K extends keyof LudoOptions>(k: K, v: LudoOptions[K]) => setLudo((o) => ({ ...o, [k]: v }));
+  // Le jeu choisi revient dans l'adresse (/play?game=ludo), et on propose la partie guidée la première fois.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("game") === "ludo") setGame("ludo");
+    try {
+      setNewToLudo(window.localStorage.getItem(LEARNED_KEY) !== "done");
+    } catch {
+      setNewToLudo(false);
+    }
+  }, []);
+  function pickGame(g: Game) {
+    setGame(g);
+    window.history.replaceState(null, "", g === "ludo" ? "/play?game=ludo" : "/play");
+  }
   const [options, setOptions] = useState<DominoOptions>(DEFAULT_DOMINO_OPTIONS);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<"create" | "solo" | "join" | null>(null);
@@ -72,8 +95,8 @@ function Play() {
     preloadSounds();
     setBusy(solo ? "solo" : "create");
     setError(null);
-    const res = await callDomino({ op: "create", options, solo });
-    if (res.ok) router.push(`/play/${res.data.code as string}`);
+    const res = game === "ludo" ? await callLudo({ op: "create", options: ludo, solo }) : await callDomino({ op: "create", options, solo });
+    if (res.ok) router.push(`/${game === "ludo" ? "ludo" : "play"}/${res.data.code as string}`);
     else {
       setBusy(null);
       setError({ where: "create", key: errorKey(res.error) });
@@ -90,8 +113,14 @@ function Play() {
     }
     setBusy("join");
     setError(null);
-    const res = await callDomino({ op: "join", code: clean });
-    if (res.ok) router.push(`/play/${clean}`);
+    // Un code ne sert qu'à une table : on regarde au domino, puis au Ludo.
+    let res = await callDomino({ op: "join", code: clean });
+    let path = "play";
+    if (!res.ok && res.error === "table_not_found") {
+      res = await callLudo({ op: "join", code: clean });
+      path = "ludo";
+    }
+    if (res.ok) router.push(`/${path}/${clean}`);
     else {
       setBusy(null);
       setError({ where: "join", key: errorKey(res.error) });
@@ -101,15 +130,45 @@ function Play() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center gap-4">
-        <div className="flex -rotate-12 gap-1 drop-shadow-md" dir="ltr" aria-hidden="true">
-          <DominoTile a={6} b={6} orientation="vertical" size={22} />
-          <DominoTile a={6} b={3} orientation="vertical" size={22} />
-        </div>
+        {game === "ludo" ? (
+          <div className="flex -rotate-12 gap-1 drop-shadow-md" aria-hidden="true">
+            <DieFace value={6} size={40} />
+            <DieFace value={5} size={40} />
+          </div>
+        ) : (
+          <div className="flex -rotate-12 gap-1 drop-shadow-md" dir="ltr" aria-hidden="true">
+            <DominoTile a={6} b={6} orientation="vertical" size={22} />
+            <DominoTile a={6} b={3} orientation="vertical" size={22} />
+          </div>
+        )}
         <div>
-          <h1 className="text-gilded text-3xl font-bold">{t("play.title")}</h1>
-          <p className="text-ink-muted">{t("play.subtitle")}</p>
+          <h1 className="text-gilded text-3xl font-bold">{game === "ludo" ? t("ludo.name") : t("play.title")}</h1>
+          <p className="text-ink-muted">{game === "ludo" ? t("play.ludoSubtitle") : t("play.subtitle")}</p>
         </div>
       </header>
+
+      <Segmented
+        label={t("play.game")}
+        value={game}
+        onChange={pickGame}
+        choices={[
+          { value: "domino", label: t("play.gameDomino") },
+          { value: "ludo", label: t("play.gameLudo") },
+        ]}
+      />
+
+      {game === "ludo" && (
+        <Link
+          href="/ludo/learn"
+          className={`cafe-card flex min-h-16 items-center gap-3 px-4 py-3 text-start transition-transform duration-150 active:scale-[0.98] ${newToLudo ? "!border-gold/70 shadow-[0_0_22px_rgb(216_167_72/0.3)]" : ""}`}
+        >
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-black/40 text-xl font-bold text-gold-light">?</span>
+          <span className="flex flex-col">
+            <span className="text-gilded font-bold">{t("ludo.learn.button")}</span>
+            <span className="text-sm text-cafe-muted">{newToLudo ? t("play.ludoFirstTime") : t("ludo.learn.buttonHint")}</span>
+          </span>
+        </Link>
+      )}
 
       <button
         type="button"
@@ -121,7 +180,7 @@ function Play() {
           <BotIcon className="size-7" />
         </span>
         <span className="flex flex-col">
-          <span className="text-gilded text-lg font-bold">{busy === "solo" ? t("play.soloStarting") : t("play.solo")}</span>
+          <span className="text-gilded text-lg font-bold">{busy === "solo" ? t("play.soloStarting") : game === "ludo" ? t("play.soloLudo") : t("play.solo")}</span>
           <span className="text-sm text-cafe-muted">{t("play.soloHint")}</span>
         </span>
       </button>
@@ -166,6 +225,38 @@ function Play() {
           <h2 className="font-semibold">{t("play.create")}</h2>
           <p className="text-sm text-ink-muted">{t("play.createHint")}</p>
         </div>
+        {game === "ludo" ? (
+          <>
+            <Segmented
+              label={t("play.players")}
+              value={ludo.players === 4 && ludo.teams ? 5 : ludo.players}
+              onChange={(v) => setLudo((o) => ({ ...o, players: v === 5 ? 4 : (v as 2 | 3 | 4), teams: v === 5 }))}
+              choices={[
+                { value: 2, label: t("play.players2") },
+                { value: 3, label: t("play.players3") },
+                { value: 4, label: t("play.ludoPlayers4") },
+                { value: 5, label: t("play.ludoTeams") },
+              ]}
+            />
+            <Segmented
+              label={t("play.pawnsToWin")}
+              value={ludo.pawnsToWin}
+              onChange={(v) => setL("pawnsToWin", v)}
+              choices={([1, 2, 3, 4] as const).map((n) => ({ value: n, label: String(n) }))}
+            />
+            <Segmented
+              label={t("play.turnTime")}
+              value={ludo.turnSeconds}
+              onChange={(v) => setL("turnSeconds", v)}
+              choices={[
+                { value: 15, label: t("play.seconds", { n: 15 }) },
+                { value: 30, label: t("play.seconds", { n: 30 }) },
+                { value: 0, label: t("play.unlimited") },
+              ]}
+            />
+          </>
+        ) : (
+          <>
         <Segmented
           label={t("play.players")}
           value={options.players}
@@ -209,6 +300,8 @@ function Play() {
             { value: "all", label: t("play.scoringAll") },
           ]}
         />
+          </>
+        )}
         {error?.where === "create" && (
           <p role="alert" className="text-sm text-danger">
             {t(error.key)}
