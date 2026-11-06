@@ -149,5 +149,5 @@ export function useLudoTable(code: string) {
   }, [act, refreshSeats]);
 
   const mySeat = state.seats.find((s) => s.userId === userId)?.seat ?? null;
-  return { ...state, mySeat, roll, move, tick, addBots };
+  return { ...state, mySeat, roll, move, tick, addBots, refreshSeats };
 }

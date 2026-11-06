@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { AddFriendIcon, BotIcon, ChatIcon, Emblem } from "@/components/cafe-icons";
 import { DominoTile } from "@/components/domino/tile";
+import { TableCard } from "@/components/lobby/table-card";
 import { GroupAvatar } from "@/components/social/groups";
 import { PersonAvatar } from "@/components/social/person-avatar";
 import { useAuth } from "@/lib/auth-context";
 import { callDomino } from "@/lib/domino-client";
+import { useLobby } from "@/lib/lobby";
 import { useI18n } from "@/lib/i18n";
 import { lastPreview, presenceKey, shortTime } from "@/lib/social-format";
 import { conversationName, useSocial } from "@/lib/social-context";
@@ -32,6 +34,9 @@ function Home() {
   const { friends, conversations, presenceOf } = useSocial();
   const [status, setStatus] = useState<Status>(null);
   const [solo, setSolo] = useState(false);
+  const { tables } = useLobby();
+  const mine = (tables ?? []).filter((x) => x.mine);
+  const friendIds = useMemo(() => new Set(friends.filter((f) => f.status === "accepted").map((f) => f.id)), [friends]);
 
   useEffect(() => {
     fetch("/api/status", { cache: "no-store" })
@@ -94,6 +99,16 @@ function Home() {
           <span className="gold-button relative mt-3 flex min-h-touch w-fit items-center rounded-full px-6 font-bold">{t("home.playDomino")}</span>
         </div>
       </Link>
+
+      {/* Les tables où je suis assis : y revenir en un geste. */}
+      {mine.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="section-title">{t("lobby.mine")}</h2>
+          {mine.map((x, i) => (
+            <TableCard key={`${x.game}-${x.id}`} table={x} friendIds={friendIds} meId={user?.id ?? null} index={i} />
+          ))}
+        </section>
+      )}
 
       <div className="animate-rise grid grid-cols-2 gap-3" style={{ animationDelay: "120ms" }}>
         <button

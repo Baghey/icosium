@@ -192,5 +192,5 @@ export function useDominoTable(code: string) {
   );
 
   const mySeat = state.seats.find((s) => s.userId === userId)?.seat ?? null;
-  return { ...state, mySeat, play, tick, nextRound, addBots, declare };
+  return { ...state, mySeat, play, tick, nextRound, addBots, declare, refreshSeats };
 }

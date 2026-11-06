@@ -74,6 +74,8 @@ function Sandbox() {
     return (
       <LudoWaitingRoom
         code="KQZT"
+        tableId="dev"
+        hostId="dev-host"
         options={cfg.options}
         seats={seats.slice(0, 2).map((x, i) => (i === 0 ? x : { ...x, isBot: false, userId: "u1", username: "Yasmine" }))}
         mySeat={cfg.me}

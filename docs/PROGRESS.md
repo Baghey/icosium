@@ -408,3 +408,34 @@ Reste : test réel à plusieurs téléphones
 (partie à 4 et à 2 contre 2 en vocal). Petites phrases rapides (« Saha ! ») de la maquette : pas encore faites.
 Problème connu : impossible de lancer Supabase en local dans ce conteneur (téléchargement des images bloqué) ;
 le serveur est testé avec un stockage en mémoire, l'écran avec la partie locale.
+
+## Étape 3 — Le lobby (6 novembre 2026)
+
+Décision du propriétaire : l'anti-bots part à la toute fin du plan (nouvelle étape 17,
+`docs/etapes/ETAPE-17-anti-bots.md`) ; l'étape 3 ne fait que le lobby (`docs/etapes/ETAPE-03-lobby.md`).
+
+Ce qui est fait (sur la branche, pas encore en ligne) :
+- **Onglet Jouer = le lobby** : « Ouvrir une table » en grand, « Seul contre des bots », « J'ai un code »,
+  **Tes tables** (pour revenir à une partie), **Tables ouvertes** filtrables par jeu, celles où un ami est
+  assis en premier. Chaque table est dessinée en miniature (feutre ou plateau de Ludo) avec ses chaises.
+  La liste se relit toute seule (12 s, retour sur l'app, retour du réseau).
+- **Nouvelle table** : choix du jeu en grandes cartes, règles, et **qui voit la table** : tout le café,
+  mes amis (par défaut : les amis des joueurs assis), ou sur invitation. « Seul contre des bots » est
+  toujours invisible.
+- **Table qui attend** (domino et Ludo) : bouton **WhatsApp** avec message prêt (jeu, places libres, lien),
+  Partager, Inviter un ami ; le Patron a une couronne, peut changer « Visible : … » et **retirer quelqu'un**
+  (toucher son avatar) : la personne ne peut plus revenir, même par le lien. « Quitter la table » libère
+  vraiment la chaise ; si le Patron part, la table passe au joueur assis depuis le plus longtemps.
+- **Accueil** : « Tes tables » apparaît quand on est assis quelque part.
+- Prêt pour les futurs jeux : la liste des jeux est dans `apps/web/lib/games.ts` (front) et
+  `private.lobby_games()` (base). Un nouveau jeu suit le schéma `<jeu>_tables / _seats / _states`.
+
+Base et serveur :
+- Migration `20261106190000_lobby.sql` (additive) : colonnes `visibility` et `kicked`, fonctions `lobby()`,
+  `set_table_visibility`, `kick_from_table`, `leave_table`, déclencheur qui refuse une personne retirée.
+  Testée sur un Postgres 16 local (amis, blocage, visibilité, retrait, départ du Patron, fermeture).
+- Fonctions `domino` et `ludo` : la création reçoit la visibilité ; « kicked » renvoyé proprement.
+  6 nouveaux tests. Les fonctions doivent être redéployées après la migration.
+- Page de développement `/dev/lobby` (exemples, sans base).
+
+Reste / plus tard : compte à rebours de 5 s avant le départ, spectateurs ; test réel à plusieurs téléphones.

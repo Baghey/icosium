@@ -40,6 +40,10 @@
   --walnut: #4e2c14;
   --walnut-light: #93602f;
   --mic-on: #1fb860;
+  /* Bouton « envoyer par WhatsApp » : un vert profond, accordé au feutre. */
+  --wa: #25a35a;
+  --wa-dark: #11703a;
+  --wa-light: #7fe0a6;
 
   /* Ludo « Tchekchayka » : couleurs vives validées par le propriétaire (6 novembre 2026). */
   --ludo-red: #e8412c;
@@ -81,6 +85,9 @@
   --color-gold-dark: var(--gold-dark);
   --color-felt: var(--felt);
   --color-mic-on: var(--mic-on);
+  --color-wa: var(--wa);
+  --color-wa-dark: var(--wa-dark);
+  --color-wa-light: var(--wa-light);
   --color-ludo-red: var(--ludo-red);
   --color-ludo-green: var(--ludo-green);
   --color-ludo-yellow: var(--ludo-yellow);
