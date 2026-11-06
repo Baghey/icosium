@@ -118,6 +118,8 @@ c'est important : de jolis assets, des animations ». À chaque étape :
 - À la fin de chaque étape :
   1. Explique en français simple ce qui a été fait et comment le tester, commande par commande.
   2. Mets à jour `docs/PROGRESS.md` : date, ce qui marche, ce qui reste, problèmes connus.
-  3. Vérifie toi-même que tout démarre et que les tests passent avant de dire que c'est fini.
+  3. Vérifie toi-même que tout démarre et que les tests passent avant de dire que c'est fini :
+     `pnpm verify` (typecheck, tests, build), la même commande que la CI GitHub.
+- Skills installés (Supabase, React, design, tests navigateur) : voir `.claude/rules/skills.md`.
 - Si une consigne est floue ou entre en conflit avec ce fichier, pose la question au lieu de
   deviner.

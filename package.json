@@ -10,6 +10,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "sync:functions": "node scripts/sync-functions.mjs"
+    "sync:functions": "node scripts/sync-functions.mjs",
+    "verify": "pnpm typecheck && pnpm test && pnpm build"
   }
 }
