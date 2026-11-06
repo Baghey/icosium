@@ -66,12 +66,12 @@ const store: DominoStore = {
     const total = headers.get("content-range")?.split("/")[1];
     return total && total !== "*" ? Number(total) : 0;
   },
-  async insertTable(row) {
+  async insertTable(row, visibility) {
     try {
       const { data } = await rest<TableDb[]>(`domino_tables?select=${TABLE_COLUMNS}`, {
         method: "POST",
         prefer: "return=representation",
-        body: JSON.stringify({ code: row.code, host_id: row.hostId, options: row.options, bot_allowed: row.options.botAllowed }),
+        body: JSON.stringify({ code: row.code, host_id: row.hostId, options: row.options, bot_allowed: row.options.botAllowed, visibility }),
       });
       return data[0] ? toTable(data[0]) : null;
     } catch (err) {
@@ -109,6 +109,7 @@ const store: DominoStore = {
       return true;
     } catch (err) {
       if (isUniqueViolation(err)) return false;
+      if (err instanceof DbError && err.message === "kicked") return "kicked"; // refusé par la base (le Patron l'a retiré)
       throw err;
     }
   },

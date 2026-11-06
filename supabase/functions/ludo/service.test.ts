@@ -158,3 +158,28 @@ describe("pendant la partie", () => {
     expect((s.winners![0]! % 2) === (s.winners![1]! % 2)).toBe(true);
   });
 });
+
+describe("lobby : visibilité et personnes retirées", () => {
+  it("une table est visible des amis par défaut, et le Patron peut choisir", async () => {
+    const { deps, store } = setup();
+    const a = await handle(deps, "u0", { op: "create", options: {} });
+    const b = await handle(deps, "u1", { op: "create", options: {}, visibility: "public" });
+    const c = await handle(deps, "u2", { op: "create", options: {}, visibility: "nimporte" });
+    expect(store.tables.get(a.body.tableId as string)?.visibility).toBe("friends");
+    expect(store.tables.get(b.body.tableId as string)?.visibility).toBe("public");
+    expect(store.tables.get(c.body.tableId as string)?.visibility).toBe("friends");
+  });
+  it("une partie seul contre des bots n'apparaît jamais dans le lobby", async () => {
+    const { deps, store } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: {}, solo: true, visibility: "public" });
+    expect(store.tables.get(r.body.tableId as string)?.visibility).toBe("private");
+  });
+  it("une personne retirée par le Patron ne peut pas se rasseoir, même par le lien", async () => {
+    const { deps, store } = setup();
+    const r = await handle(deps, "u0", { op: "create", options: { players: 4 } });
+    store.tables.get(r.body.tableId as string)?.kicked.push("u9");
+    const j = await handle(deps, "u9", { op: "join", code: r.body.code });
+    expect(j).toEqual({ status: 403, body: { ok: false, error: "kicked" } });
+    expect((await handle(deps, "u1", { op: "join", code: r.body.code })).status).toBe(200);
+  });
+});

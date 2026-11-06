@@ -12,7 +12,7 @@ import {
   ludoPublicView,
   parseLudoOptions,
 } from "../_shared/ludo/index.ts";
-import type { LudoStore, SeatRow, StoredView, TableRow, TableStatus } from "./store.ts";
+import type { LudoStore, SeatRow, Visibility, StoredView, TableRow, TableStatus } from "./store.ts";
 
 export type ServiceResult = { status: number; body: Record<string, unknown> };
 
@@ -73,14 +73,19 @@ async function fillWithBots(deps: Deps, table: TableRow): Promise<void> {
  * Crée une table avec les réglages du Patron. `solo` : il joue seul, les autres chaises sont
  * données à des bots (c'est lui qui le demande, donc les bots sont autorisés).
  */
-export async function createTable(deps: Deps, userId: string, rawOptions: unknown, solo = false): Promise<ServiceResult> {
+/** Visibilité demandée à la création ; « amis » par défaut (le café est entre amis). */
+export function parseVisibility(input: unknown): Visibility {
+  return input === "public" || input === "private" ? input : "friends";
+}
+
+export async function createTable(deps: Deps, userId: string, rawOptions: unknown, solo = false, visibility: Visibility = "friends"): Promise<ServiceResult> {
   const since = new Date(deps.now() - TABLE_CREATE_WINDOW_MS);
   if ((await deps.store.countTablesSince(userId, since)) >= TABLE_CREATE_LIMIT) return fail(429, "rate_limited");
   const options = { ...parseLudoOptions(rawOptions), ...(solo ? { botAllowed: true } : {}) };
   for (let attempt = 0; attempt < 8; attempt++) {
     const code = makeCode(deps.rng);
     if (await deps.store.codeUsedElsewhere(code)) continue;
-    const table = await deps.store.insertTable({ code, hostId: userId, options });
+    const table = await deps.store.insertTable({ code, hostId: userId, options }, solo ? "private" : visibility);
     if (!table) continue;
     const username = await deps.store.username(userId);
     await deps.store.insertSeat(table.id, { seat: 0, userId, username });
@@ -105,7 +110,9 @@ export async function joinTable(deps: Deps, userId: string, rawCode: unknown): P
   const free = Array.from({ length: players }, (_, i) => i).find((i) => !seats.some((s) => s.seat === i));
   if (free === undefined) return fail(409, "table_full");
   const username = await deps.store.username(userId);
-  if (!(await deps.store.insertSeat(table.id, { seat: free, userId, username }))) return fail(409, "seat_taken");
+  const seated = await deps.store.insertSeat(table.id, { seat: free, userId, username });
+  if (seated === "kicked") return fail(403, "kicked");
+  if (!seated) return fail(409, "seat_taken");
 
   seats = await deps.store.seats(table.id);
   if (seats.length === players) await startGame(deps, table, seats);
@@ -175,7 +182,7 @@ export async function tick(deps: Deps, userId: string, input: { tableId?: unknow
 export async function handle(deps: Deps, userId: string, body: Record<string, unknown>): Promise<ServiceResult> {
   switch (body.op) {
     case "create":
-      return createTable(deps, userId, body.options, body.solo === true);
+      return createTable(deps, userId, body.options, body.solo === true, parseVisibility(body.visibility));
     case "join":
       return joinTable(deps, userId, body.code);
     case "bots":

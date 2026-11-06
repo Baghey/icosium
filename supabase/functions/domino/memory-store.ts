@@ -1,9 +1,9 @@
 import type { DominoState } from "../_shared/domino/index.ts";
-import type { DominoStore, SeatRow, StoredView, TableRow, TableStatus } from "./store.ts";
+import type { DominoStore, SeatRow, Visibility, StoredView, TableRow, TableStatus } from "./store.ts";
 
 /** Stockage en mémoire pour les tests : se comporte comme les tables Supabase. */
 export class MemoryStore implements DominoStore {
-  tables = new Map<string, TableRow & { createdAt: number }>();
+  tables = new Map<string, TableRow & { createdAt: number; visibility: Visibility; kicked: string[] }>();
   seatRows = new Map<string, SeatRow[]>();
   games = new Map<string, { version: number; state: DominoState }>();
   views = new Map<string, { version: number; view: StoredView }>();
@@ -19,9 +19,9 @@ export class MemoryStore implements DominoStore {
   async countTablesSince(hostId: string, since: Date) {
     return [...this.tables.values()].filter((t) => t.hostId === hostId && t.createdAt >= since.getTime()).length;
   }
-  async insertTable(row: Omit<TableRow, "id" | "status">) {
+  async insertTable(row: Omit<TableRow, "id" | "status">, visibility: Visibility) {
     if ([...this.tables.values()].some((t) => t.code === row.code)) return null;
-    const table = { ...row, id: `t${++this.seq}`, status: "waiting" as TableStatus, createdAt: this.now() };
+    const table = { ...row, id: `t${++this.seq}`, status: "waiting" as TableStatus, createdAt: this.now(), visibility, kicked: [] as string[] };
     this.tables.set(table.id, table);
     this.seatRows.set(table.id, []);
     return table;
@@ -36,6 +36,7 @@ export class MemoryStore implements DominoStore {
     return [...(this.seatRows.get(tableId) ?? [])].sort((a, b) => a.seat - b.seat);
   }
   async insertSeat(tableId: string, seat: SeatRow) {
+    if (seat.userId && this.tables.get(tableId)?.kicked.includes(seat.userId)) return "kicked" as const;
     const rows = this.seatRows.get(tableId) ?? [];
     if (rows.some((r) => r.seat === seat.seat || (seat.userId !== null && r.userId === seat.userId))) return false;
     rows.push(seat);
